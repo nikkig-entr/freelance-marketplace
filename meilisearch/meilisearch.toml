@@ -1,0 +1,42 @@
+# Meilisearch Configuration
+# https://www.meilisearch.com/docs/learn/configuration/instance_options
+
+# HTTP server configuration
+http_addr = "0.0.0.0:7700"
+
+# Master key for API authentication (required in production)
+# Set via MEILI_MASTER_KEY env var in production
+# master_key = "masterKey"
+
+# Disable analytics
+no_analytics = true
+
+# Database configuration
+db_path = "/meili_data/data.dump"
+
+# Maximum index size (in bytes)
+max_index_size = 10737418240 # 10GB
+
+# Maximum document size (in bytes)
+max_document_size = 1048576 # 1MB
+
+# Pagination limits
+max_total_hits = 1000
+
+# Search configuration
+search_cutoff_ms = 200
+
+# Indexing configuration
+indexing_max_memory = 1073741824 # 1GB
+indexing_max_threads = 4
+
+# Dump configuration
+schedule_snapshot = true
+snapshot_interval_sec = 1800 # 30 minutes
+
+# Task queue configuration
+task_queue_max_size = 10000
+
+# Log configuration
+log_level = "INFO"
+log_format = "json"

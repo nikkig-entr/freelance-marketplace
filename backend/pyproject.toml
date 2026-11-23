@@ -1,0 +1,110 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freelance-marketplace"
+version = "0.1.0"
+description = "Freelance Marketplace API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "sqlalchemy>=2.0.25",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+    "pydantic-extra-types>=2.4.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "redis>=5.0.1",
+    "celery>=5.3.6",
+    "stripe>=7.8.0",
+    "httpx>=0.26.0",
+    "openai>=1.12.0",
+    "anthropic>=0.18.0",
+    "python-telegram-bot>=20.7",
+    "aio-pika>=9.4.0",
+    "structlog>=24.1.0",
+    "python-dotenv>=1.0.0",
+    "email-validator>=2.1.0",
+    "sqladmin>=0.17.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.26.0",
+    "faker>=20.1.0",
+    "ruff>=0.1.14",
+    "mypy>=1.7.1",
+    "pre-commit>=3.6.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "T20", "PIE", "PT", "RSE", "RET", "TRY", "FLY", "NPY", "ARG", "PTH", "PD", "PGH", "PL", "FURB"]
+ignore = ["E501", "B008", "C901", "ARG001", "ARG002"]
+fixable = ["F", "I", "N", "E", "W", "UP", "B", "C4", "SIM", "T20", "PIE", "PT", "RSE", "RET", "TRY", "FLY", "NPY", "ARG", "PTH", "PD", "PGH", "PL", "FURB"]
+unfixable = []
+extend-exclude = [".venv", "venv", "alembic", "migrations", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "dist", "build"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+ignore_missing_imports = true
+exclude = ["alembic", "venv", ".venv", "__pycache__", ".pytest_cache", ".mypy_cache", "tests"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --strict-config"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["tests/*", "alembic/*", "venv/*", ".venv/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.alembic]
+script_location = "alembic"
+prepend_sys_path = "."
+version_path_separator = "os"
