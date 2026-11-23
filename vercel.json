@@ -4,11 +4,7 @@
   "installCommand": "npm install",
   "framework": "vite",
   "regions": ["iad1"],
-  "functions": {
-    "src/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
+  "outputDirectory": "dist",
   "headers": [
     {
       "source": "/(.*)",
