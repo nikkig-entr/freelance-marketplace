@@ -1,10 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "cd frontend && npm install",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "devCommand": "cd frontend && npm run dev",
   "framework": "vite",
   "regions": ["iad1"],
-  "outputDirectory": "dist",
   "headers": [
     {
       "source": "/(.*)",
