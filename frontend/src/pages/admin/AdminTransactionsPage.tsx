@@ -248,7 +248,10 @@ export function AdminTransactionsPage() {
                     </td>
                     <td className="py-4 pr-4">
                       <div className="flex items-center gap-2">
-                        <TRANSACTION_TYPE_ICONS[transaction.type] className="w-4 h-4 text-secondary-400" />
+                        {(() => {
+                          const Icon = TRANSACTION_TYPE_ICONS[transaction.type];
+                          return <Icon className="w-4 h-4 text-secondary-400" />;
+                        })()}
                         <Badge variant={getTypeBadgeVariant(transaction.type)} size="sm">
                           {TRANSACTION_TYPE_LABELS[transaction.type]}
                         </Badge>
