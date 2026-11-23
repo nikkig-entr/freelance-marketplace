@@ -19,6 +19,7 @@ import {
   PencilIcon,
   ShareIcon,
   FlagIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -591,7 +592,7 @@ export function ProjectDetailPage() {
                   value={bidForm.delivery_days}
                   onChange={(e) => setBidForm({ ...bidForm, delivery_days: e.target.value })}
                   required
-                </input>
+                />
               </div>
               <div>
                 <label htmlFor="bid-cover" className="label">Cover Letter</label>
