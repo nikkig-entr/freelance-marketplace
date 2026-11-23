@@ -15,6 +15,11 @@ class Base(DeclarativeBase):
 # Configure engine based on database type
 database_url = settings.DATABASE_URL
 is_sqlite = database_url.startswith("sqlite")
+is_serverless = settings.IS_SERVERLESS
+
+if is_sqlite and is_serverless:
+    # Use in-memory SQLite for serverless to avoid filesystem issues
+    database_url = "sqlite+aiosqlite:///:memory:"
 
 if is_sqlite:
     engine = create_async_engine(

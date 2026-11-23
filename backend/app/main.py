@@ -29,18 +29,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Startup
     logger.info("Starting up Freelance Marketplace API...")
     await init_db()
-    await manager.start_listener()
-    await init_meilisearch()
-    logger.info("Database initialized, WebSocket manager started, Meilisearch index ready")
+
+    # Skip WebSocket and Meilisearch in serverless (Vercel) environment
+    if not settings.IS_SERVERLESS:
+        await manager.start_listener()
+        await init_meilisearch()
+        logger.info("WebSocket manager started, Meilisearch index ready")
+    else:
+        logger.info("Running in serverless mode - WebSocket and Meilisearch disabled")
+
+    logger.info("Database initialized")
 
     yield
 
     # Shutdown
     logger.info("Shutting down Freelance Marketplace API...")
-    await manager.shutdown()
-    await close_redis()
+    if not settings.IS_SERVERLESS:
+        await manager.shutdown()
+        await close_redis()
+        await close_meilisearch()
     await close_db()
-    await close_meilisearch()
     logger.info("Cleanup complete")
 
 
@@ -55,13 +63,13 @@ app = FastAPI(
 )
 
 # Security middleware
-if not settings.DEBUG:
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
+if not settings.DEBUG and not settings.IS_SERVERLESS:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

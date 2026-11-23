@@ -5,6 +5,9 @@ from pydantic import AnyHttpUrl, EmailStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic_core import Url
 
+import os
+import json
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -18,6 +21,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "Freelance Marketplace"
     DEBUG: bool = False
     API_V1_STR: str = "/api/v1"
+
+    # Vercel serverless detection
+    IS_SERVERLESS: bool = os.environ.get("VERCEL") == "1"
 
     # Database
     DATABASE_URL: str
@@ -34,10 +40,10 @@ class Settings(BaseSettings):
     BCRYPT_ROUNDS: int = 12
 
     # URLs
-    FRONTEND_URL: AnyHttpUrl = "http://localhost:5173"
-    BACKEND_URL: AnyHttpUrl = "http://localhost:8000"
-    CORS_ORIGINS: list[AnyHttpUrl] = ["http://localhost:5173"]
-    ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1"]
+    FRONTEND_URL: str = "http://localhost:5173"
+    BACKEND_URL: str = "http://localhost:8000"
+    CORS_ORIGINS: str = "http://localhost:5173"
+    ALLOWED_HOSTS: str = "localhost,127.0.0.1"
 
     # Stripe
     STRIPE_SECRET_KEY: str | None = None
@@ -118,14 +124,41 @@ class Settings(BaseSettings):
     # Week settings
     WEEK_START_MONDAY: bool = True
 
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
-        if isinstance(v, str):
-            if v.startswith("["):
-                return v
-            return [url.strip() for url in v.split(",")]
-        return v
+    @property
+    def cors_origins(self) -> list[str]:
+        """Parse CORS_ORIGINS string into a list."""
+        v = self.CORS_ORIGINS
+        if isinstance(v, list):
+            return [str(url).strip() for url in v if url]
+        if not isinstance(v, str) or not v.strip():
+            return ["http://localhost:5173"]
+        v = v.strip()
+        if v.startswith("["):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(url).strip() for url in parsed if url]
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return [url.strip() for url in v.split(",") if url.strip()]
+
+    @property
+    def allowed_hosts(self) -> list[str]:
+        """Parse ALLOWED_HOSTS string into a list."""
+        v = self.ALLOWED_HOSTS
+        if isinstance(v, list):
+            return [str(h).strip() for h in v if h]
+        if not isinstance(v, str) or not v.strip():
+            return ["localhost", "127.0.0.1"]
+        v = v.strip()
+        if v.startswith("["):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(h).strip() for h in parsed if h]
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return [h.strip() for h in v.split(",") if h.strip()]
 
     def get_bid_limit(self, plan: str) -> int:
         """Get bid limit for a plan."""

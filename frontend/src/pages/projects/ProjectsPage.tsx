@@ -6,12 +6,12 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ArrowUpDownIcon,
-  BriefcaseIcon,
   ClockIcon,
   CurrencyDollarIcon,
   MapPinIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 
 interface ProjectFilters {
   search?: string;
@@ -298,7 +298,7 @@ export function ProjectsPage() {
               </div>
             ) : projects.length === 0 ? (
               <div className="text-center py-16">
-                <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900">No projects found</h3>
                 <p className="mt-1 text-gray-500">Try adjusting your search or filters</p>
                 <button onClick={clearFilters} className="mt-4 btn-secondary">

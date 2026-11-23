@@ -15,8 +15,8 @@ import {
   ArrowRightIcon,
   ShareIcon,
   FlagIcon,
-  BriefcaseIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -214,7 +214,7 @@ export function ProjectDetailPage() {
                   <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-secondary-50">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
-                        <BriefcaseIcon className="w-5 h-5 text-secondary-400" />
+                        <Briefcase className="w-5 h-5 text-secondary-400" />
                       </div>
                       <div>
                         <p className="font-medium text-secondary-900">{attachment.name}</p>
@@ -298,7 +298,7 @@ export function ProjectDetailPage() {
               {project.started_at && (
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                    <BriefcaseIcon className="w-5 h-5 text-primary-600" />
+                    <Briefcase className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
                     <p className="font-medium text-secondary-900">Work Started</p>

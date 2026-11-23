@@ -19,7 +19,7 @@ import { BalancePage } from './pages/balance/BalancePage';
 import { WithdrawalPage } from './pages/balance/WithdrawalPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
-import { BillingPage } from './pages/billing/BillingPage';
+import { BillingPage } from './pages/BillingPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { AdminProjectsPage } from './pages/admin/AdminProjectsPage';

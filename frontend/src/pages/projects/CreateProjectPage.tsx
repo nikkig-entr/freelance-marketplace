@@ -3,7 +3,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { api } from '../../services/api';
 import { Category } from '../../types';
-import { BriefcaseIcon, ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CreateProjectForm {
@@ -117,7 +118,7 @@ export function CreateProjectPage() {
           {/* Basic Info */}
           <div className="card p-6 space-y-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <BriefcaseIcon className="w-5 h-5 text-primary-600" />
+              <Briefcase className="w-5 h-5 text-primary-600" />
               Project Details
             </h2>
 

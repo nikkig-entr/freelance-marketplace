@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { MagnifyingGlassIcon, FunnelIcon, ArrowRightIcon, PlusIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, ArrowRightIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { Card, CardGrid, CardTitle } from '@/components/ui/Card';
@@ -149,7 +150,7 @@ export function ProjectsPage() {
         ) : data?.items.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
-              <BriefcaseIcon className="w-8 h-8 text-secondary-400" />
+              <Briefcase className="w-8 h-8 text-secondary-400" />
             </div>
             <h3 className="text-lg font-medium text-secondary-900 mb-1">No projects found</h3>
             <p className="text-secondary-600 mb-4">

@@ -4,7 +4,6 @@ import { useWebSocket } from '../contexts/WebSocketContext';
 import { useState, useEffect } from 'react';
 import {
   HomeIcon,
-  BriefcaseIcon,
   ChatBubbleLeftRightIcon,
   CurrencyDollarIcon,
   Cog6ToothIcon,
@@ -21,6 +20,7 @@ import {
   ArrowPathIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 
 export function Layout() {
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -48,9 +48,9 @@ export function Layout() {
   };
 
   const navigation = [
-    { name: 'Projects', href: '/projects', icon: BriefcaseIcon, roles: ['client', 'freelancer', 'admin'] },
+    { name: 'Projects', href: '/projects', icon: Briefcase, roles: ['client', 'freelancer', 'admin'] },
     { name: 'My Projects', href: '/projects/my', icon: DocumentTextIcon, roles: ['client', 'admin'] },
-    { name: 'My Bids', href: '/my/bids', icon: BriefcaseIcon, roles: ['freelancer'] },
+    { name: 'My Bids', href: '/my/bids', icon: Briefcase, roles: ['freelancer'] },
     { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, roles: ['client', 'freelancer', 'admin'] },
     { name: 'Balance', href: '/balance', icon: CurrencyDollarIcon, roles: ['freelancer', 'admin'] },
     { name: 'Billing', href: '/billing', icon: CurrencyDollarIcon, roles: ['client', 'freelancer', 'admin'] },
@@ -60,7 +60,7 @@ export function Layout() {
   const adminNavigation = [
     { name: 'Dashboard', href: '/admin', icon: HomeIcon },
     { name: 'Users', href: '/admin/users', icon: UserCircleIcon },
-    { name: 'Projects', href: '/admin/projects', icon: BriefcaseIcon },
+    { name: 'Projects', href: '/admin/projects', icon: Briefcase },
     { name: 'Withdrawals', href: '/admin/withdrawals', icon: CurrencyDollarIcon },
     { name: 'Transactions', href: '/admin/transactions', icon: DocumentTextIcon },
   ];
@@ -87,7 +87,7 @@ export function Layout() {
             <div className="flex items-center gap-8">
               <Link to="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <BriefcaseIcon className="w-5 h-5 text-white" />
+                  <Briefcase className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-gray-900">FreelanceHub</span>
               </Link>

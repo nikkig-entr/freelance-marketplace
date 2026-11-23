@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
-import { MagnifyingGlassIcon, BriefcaseIcon, UserGroupIcon, ArrowRightIcon, CheckIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, UserGroupIcon, ArrowRightIcon, CheckIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 
 const categories = [
-  { name: 'Web Development', count: '12,400+', icon: BriefcaseIcon, color: 'bg-blue-100 text-blue-600', bgImage: '/media/projects/projects-code-thumb.webp' },
+  { name: 'Web Development', count: '12,400+', icon: Briefcase, color: 'bg-blue-100 text-blue-600', bgImage: '/media/projects/projects-code-thumb.webp' },
   { name: 'Design & Creative', count: '8,200+', icon: UserGroupIcon, color: 'bg-purple-100 text-purple-600', bgImage: '/media/projects/projects-design-thumb.webp' },
-  { name: 'Mobile Development', count: '5,600+', icon: BriefcaseIcon, color: 'bg-green-100 text-green-600', bgImage: '/media/projects/projects-code-thumb.webp' },
+  { name: 'Mobile Development', count: '5,600+', icon: Briefcase, color: 'bg-green-100 text-green-600', bgImage: '/media/projects/projects-code-thumb.webp' },
   { name: 'Writing & Content', count: '4,100+', icon: UserGroupIcon, color: 'bg-orange-100 text-orange-600', bgImage: '/media/projects/projects-design-thumb.webp' },
-  { name: 'Data Science & AI', count: '3,800+', icon: BriefcaseIcon, color: 'bg-pink-100 text-pink-600', bgImage: '/media/projects/projects-code-thumb.webp' },
+  { name: 'Data Science & AI', count: '3,800+', icon: Briefcase, color: 'bg-pink-100 text-pink-600', bgImage: '/media/projects/projects-code-thumb.webp' },
   { name: 'Marketing & SEO', count: '2,900+', icon: UserGroupIcon, color: 'bg-indigo-100 text-indigo-600', bgImage: '/media/projects/projects-design-thumb.webp' },
 ];
 

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, CheckIcon, ShieldCheckIcon, SparklesIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 
@@ -155,7 +156,7 @@ export function CTASection() {
                       <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center">
-                            <BriefcaseIcon className="w-4 h-4 text-primary-400" />
+                            <Briefcase className="w-4 h-4 text-primary-400" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-white">{activity.project}</p>

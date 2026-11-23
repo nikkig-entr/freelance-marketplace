@@ -8,7 +8,6 @@ import {
   MagnifyingGlassIcon,
   BellIcon,
   HomeIcon,
-  BriefcaseIcon,
   ChatBubbleLeftRightIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
@@ -17,13 +16,14 @@ import {
   SparklesIcon,
   CrownIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { UserMenu } from '@/components/ui/Dropdown';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['freelancer', 'client', 'admin'] },
-  { name: 'Projects', href: '/projects', icon: BriefcaseIcon, roles: ['freelancer', 'client', 'admin'] },
+  { name: 'Projects', href: '/projects', icon: Briefcase, roles: ['freelancer', 'client', 'admin'] },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon, roles: ['freelancer', 'client', 'admin'], badge: 3 },
   { name: 'Balance', href: '/balance', icon: CurrencyDollarIcon, roles: ['freelancer', 'client', 'admin'] },
 ];

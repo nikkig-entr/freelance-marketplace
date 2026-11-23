@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import {
   UsersIcon,
-  BriefcaseIcon,
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   ArrowTrendingUpIcon,
@@ -11,6 +10,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardTitle, CardGrid } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -22,12 +22,12 @@ import { useAuth } from '@/context/AuthContext';
 const statCards = [
   { key: 'total', label: 'Total Users', icon: UsersIcon, color: 'primary' },
   { key: 'active', label: 'Active Users', icon: CheckCircleIcon, color: 'success' },
-  { key: 'freelancers', label: 'Freelancers', icon: BriefcaseIcon, color: 'warning' },
+  { key: 'freelancers', label: 'Freelancers', icon: Briefcase, color: 'warning' },
   { key: 'clients', label: 'Clients', icon: UsersIcon, color: 'secondary' },
 ];
 
 const projectStatCards = [
-  { key: 'total', label: 'Total Projects', icon: BriefcaseIcon, color: 'primary' },
+  { key: 'total', label: 'Total Projects', icon: Briefcase, color: 'primary' },
   { key: 'open', label: 'Open', icon: ClockIcon, color: 'warning' },
   { key: 'in_progress', label: 'In Progress', icon: ChatBubbleLeftRightIcon, color: 'primary' },
   { key: 'completed', label: 'Completed', icon: CheckCircleIcon, color: 'success' },
@@ -200,7 +200,7 @@ export function AdminDashboardPage() {
         </Button>
         <Button asChild variant="outline" className="h-full flex flex-col items-center gap-2 p-6">
           <Link to="/admin/projects">
-            <BriefcaseIcon className="w-8 h-8 text-secondary-500" />
+            <Briefcase className="w-8 h-8 text-secondary-500" />
             <span className="font-medium text-secondary-900">Manage Projects</span>
           </Link>
         </Button>

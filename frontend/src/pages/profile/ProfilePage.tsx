@@ -6,7 +6,6 @@ import { User, Project, Review, UserRole, UserPlan, formatCurrency, formatDate, 
 import {
   ArrowLeftIcon,
   StarIcon,
-  BriefcaseIcon,
   CheckCircleIcon,
   MapPinIcon,
   GlobeAltIcon,
@@ -15,6 +14,7 @@ import {
   ChatBubbleLeftRightIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function ProfilePage() {
@@ -110,7 +110,7 @@ export function ProfilePage() {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: UserCircleIcon },
-    { id: 'portfolio', label: 'Portfolio', icon: BriefcaseIcon },
+    { id: 'portfolio', label: 'Portfolio', icon: Briefcase },
     { id: 'reviews', label: 'Reviews', icon: StarIcon },
   ];
 
@@ -300,7 +300,7 @@ export function ProfilePage() {
               <div>
                 {projects.length === 0 ? (
                   <div className="text-center py-12">
-                    <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900">No portfolio projects yet</h3>
                     <p className="mt-1 text-gray-500">Completed projects will appear here</p>
                   </div>

@@ -2,7 +2,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { clsx } from 'clsx';
 import {
   HomeIcon,
-  BriefcaseIcon,
   ChatBubbleLeftRightIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
@@ -14,12 +13,13 @@ import {
   DocumentTextIcon,
   BanknotesIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/Badge';
 
 const userNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Projects', href: '/projects', icon: BriefcaseIcon },
+  { name: 'Projects', href: '/projects', icon: Briefcase },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon, badge: 3 },
   { name: 'Balance', href: '/balance', icon: CurrencyDollarIcon },
 ];

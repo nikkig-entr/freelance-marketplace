@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { BriefcaseIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -51,7 +52,7 @@ export function ResetPasswordPage() {
         <div className="max-w-md w-full text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <BriefcaseIcon className="w-6 h-6 text-white" />
+              <Briefcase className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
           </Link>
@@ -76,7 +77,7 @@ export function ResetPasswordPage() {
         <div className="max-w-md w-full text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <BriefcaseIcon className="w-6 h-6 text-white" />
+              <Briefcase className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
           </Link>
@@ -101,7 +102,7 @@ export function ResetPasswordPage() {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <BriefcaseIcon className="w-6 h-6 text-white" />
+              <Briefcase className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
           </Link>

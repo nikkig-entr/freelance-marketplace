@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  BriefcaseIcon,
   ChatBubbleLeftRightIcon,
   CurrencyDollarIcon,
   ClockIcon,
@@ -12,6 +11,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardGrid, CardTitle } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -287,7 +287,7 @@ export function DashboardPage() {
         <StatCard
           title="Active Projects"
           value={isClient ? displayProjects.length : displayBids.filter((b: any) => b.status === 'accepted').length}
-          icon={BriefcaseIcon}
+          icon={Briefcase}
           color="primary"
           href="/projects"
         />
@@ -342,7 +342,7 @@ export function DashboardPage() {
             ) : (
               <Card className="text-center py-12">
                 <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
-                  {isClient ? <BriefcaseIcon className="w-8 h-8 text-secondary-400" /> : <MagnifyingGlassIcon className="w-8 h-8 text-secondary-400" />}
+                  {isClient ? <Briefcase className="w-8 h-8 text-secondary-400" /> : <MagnifyingGlassIcon className="w-8 h-8 text-secondary-400" />}
                 </div>
                 <h3 className="text-lg font-medium text-secondary-900 mb-1">
                   {isClient ? 'No projects yet' : 'No matching projects'}

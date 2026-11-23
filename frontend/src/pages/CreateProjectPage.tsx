@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeftIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -142,7 +143,7 @@ export function CreateProjectPage() {
           </Button>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
-              <BriefcaseIcon className="w-6 h-6 text-primary-600" />
+              <Briefcase className="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <h1 className="text-2xl font-heading font-bold text-secondary-900">Create New Project</h1>
@@ -302,7 +303,7 @@ export function CreateProjectPage() {
             Cancel
           </Button>
           <Button type="submit" loading={isSubmitting || isPending} size="lg">
-            <BriefcaseIcon className="w-5 h-5 mr-2" />
+            <Briefcase className="w-5 h-5 mr-2" />
             Create Project
           </Button>
         </div>

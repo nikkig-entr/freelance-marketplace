@@ -7,7 +7,6 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
-  BriefcaseIcon,
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   ClockIcon,
@@ -15,6 +14,7 @@ import {
   XCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -194,7 +194,7 @@ export function AdminProjectsPage() {
           <ListLoader count={10} />
         ) : data?.items.length === 0 ? (
           <div className="text-center py-12">
-            <BriefcaseIcon className="w-16 h-16 mx-auto mb-4 text-secondary-300" />
+            <Briefcase className="w-16 h-16 mx-auto mb-4 text-secondary-300" />
             <h3 className="text-lg font-medium text-secondary-900 mb-1">No projects found</h3>
             <p className="text-secondary-600 mb-4">
               {hasActiveFilters ? 'Try adjusting your filters' : 'No projects yet'}
