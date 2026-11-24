@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { CheckIcon, XMarkIcon, SparklesIcon, ShieldCheckIcon, BoltIcon, CpuChipIcon, UserGroupIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -219,6 +221,3 @@ export function PricingSection() {
     </section>
   );
 }
-
-import { Link } from 'react-router-dom';
-import { useState } from 'react';

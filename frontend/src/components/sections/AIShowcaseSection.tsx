@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { SparklesIcon, DocumentTextIcon, ArrowRightIcon, CheckCircleIcon, CpuChipIcon, MagnifyingGlassIcon, DocumentIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { Code, Zap, Users, Shield, FileText, Search, Brain, Wand2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
