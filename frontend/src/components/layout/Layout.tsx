@@ -5,7 +5,7 @@ import { clsx } from 'clsx';
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-secondary-50 flex flex-col">
+    <div className="min-h-screen bg-obsidian flex flex-col">
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
@@ -21,7 +21,7 @@ export function Layout() {
 
 export function SimpleLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-obsidian">
       <Header />
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {children}
@@ -32,10 +32,21 @@ export function SimpleLayout({ children }: { children: React.ReactNode }) {
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-secondary-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-obsidian flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {children}
       </div>
+    </div>
+  );
+}
+
+export function PublicLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-obsidian flex flex-col">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
     </div>
   );
 }

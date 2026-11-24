@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -27,20 +27,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-obsidian disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantStyles = {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-      secondary: 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200 focus:ring-secondary-500',
-      outline: 'border-2 border-secondary-300 text-secondary-700 hover:bg-secondary-50 focus:ring-secondary-500',
-      danger: 'bg-danger-500 text-white hover:bg-danger-600 focus:ring-danger-500',
-      ghost: 'text-secondary-600 hover:bg-secondary-100 focus:ring-secondary-500',
+      primary: 'bg-amber text-obsidian hover:bg-amber-400 focus:ring-amber/50 shadow-lg shadow-amber/25 hover:shadow-amber-glow',
+      secondary: 'bg-white/[0.05] text-cream border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.2] focus:ring-white/20',
+      outline: 'border-2 border-white/[0.15] text-cream hover:bg-white/[0.05] hover:border-amber/50 focus:ring-amber/30',
+      danger: 'bg-danger-500 text-white hover:bg-danger-600 focus:ring-danger-500/50',
+      ghost: 'text-muted hover:text-cream hover:bg-white/[0.03] focus:ring-white/10',
     };
 
     const sizeStyles = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2.5 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'px-3 py-2 text-sm',
+      md: 'px-5 py-3 text-base',
+      lg: 'px-7 py-4 text-lg',
+      xl: 'px-10 py-5 text-xl',
     };
 
     const widthStyles = fullWidth ? 'w-full' : '';

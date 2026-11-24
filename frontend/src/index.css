@@ -4,94 +4,236 @@
 
 @layer base {
   :root {
-    --color-primary: #0ea5e9;
-    --color-primary-hover: #0284c7;
+    --color-primary: #E59A4B;
+    --color-primary-hover: #D4852E;
+    --color-background: #090C10;
+    --color-surface: #11151B;
+    --color-border: #1E242C;
   }
 
   html {
-    @apply antialiased;
+    @apply antialiased scroll-smooth;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-obsidian text-cream font-sans min-h-screen;
   }
 
   * {
-    @apply border-gray-200;
+    @apply border-obsidian-200;
+  }
+
+  ::selection {
+    @apply bg-amber/30 text-cream;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-obsidian;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-obsidian-200 rounded-full hover:bg-amber/50 transition-colors;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-amber/50;
   }
 }
 
 @layer components {
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl transition-all duration-300;
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:border-amber/50 hover:bg-white/[0.05] hover:shadow-glass-hover;
+  }
+
+  .glass-panel {
+    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] rounded-3xl;
+  }
+
+  /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-obsidian disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply btn bg-amber text-obsidian hover:bg-amber-400 focus:ring-amber/50 shadow-lg shadow-amber/25;
+  }
+
+  .btn-primary:hover {
+    @apply shadow-amber-glow;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-primary-500;
+    @apply btn bg-white/[0.05] text-cream border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.2] focus:ring-white/20;
   }
 
-  .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  .btn-outline {
+    @apply btn border-2 border-white/[0.15] text-cream hover:bg-white/[0.05] hover:border-amber/50 focus:ring-amber/30;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-500;
+    @apply btn text-muted hover:text-cream hover:bg-white/[0.03] focus:ring-white/10;
   }
 
+  .btn-sm {
+    @apply px-3 py-2 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-7 py-4 text-lg;
+  }
+
+  .btn-xl {
+    @apply px-10 py-5 text-xl;
+  }
+
+  /* Inputs */
   .input {
-    @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-cream placeholder-muted/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-amber/50 focus:bg-white/[0.05];
   }
 
   .input-error {
-    @apply border-red-500 focus:ring-red-500;
+    @apply border-danger-500 focus:ring-danger-500/30 focus:border-danger-500;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1.5;
+    @apply block text-sm font-medium text-cream/80 mb-2;
   }
 
-  .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200;
-  }
-
-  .card-hover {
-    @apply card hover:shadow-lg hover:border-primary-200 cursor-pointer;
-  }
-
+  /* Badges */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium;
   }
 
   .badge-primary {
-    @apply badge bg-primary-100 text-primary-800;
+    @apply badge bg-amber/10 text-amber border border-amber/20;
   }
 
   .badge-success {
-    @apply badge bg-green-100 text-green-800;
+    @apply badge bg-teal/10 text-teal border border-teal/20;
   }
 
   .badge-warning {
-    @apply badge bg-yellow-100 text-yellow-800;
+    @apply badge bg-amber/10 text-amber border border-amber/20;
   }
 
   .badge-danger {
-    @apply badge bg-red-100 text-red-800;
+    @apply badge bg-danger-500/10 text-danger-500 border border-danger-500/20;
   }
 
-  .badge-gray {
-    @apply badge bg-gray-100 text-gray-800;
+  .badge-secondary {
+    @apply badge bg-white/[0.05] text-muted border border-white/[0.1];
   }
 
+  .badge-outline {
+    @apply badge bg-transparent text-cream border border-white/[0.15];
+  }
+
+  /* Links */
   .link {
-    @apply text-primary-600 hover:text-primary-700 underline-offset-2 hover:underline transition-colors;
+    @apply text-amber hover:text-amber-400 underline-offset-2 hover:underline transition-colors;
+  }
+
+  /* Typography */
+  .text-gradient {
+    @apply bg-gradient-to-r from-cream via-amber to-teal bg-clip-text text-transparent;
+  }
+
+  .text-gradient-amber {
+    @apply bg-gradient-to-r from-amber to-amber-400 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-teal {
+    @apply bg-gradient-to-r from-teal to-teal-400 bg-clip-text text-transparent;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-20 sm:py-28 lg:py-32 xl:py-36;
+  }
+
+  .section-sm {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 }
 
 @layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-in-delay-1 {
+    animation: fadeIn 0.5s ease-out 0.1s forwards;
+    opacity: 0;
+  }
+
+  .animate-in-delay-2 {
+    animation: fadeIn 0.5s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+
+  .animate-in-delay-3 {
+    animation: fadeIn 0.5s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+
+  .animate-in-delay-4 {
+    animation: fadeIn 0.5s ease-out 0.4s forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .animate-slide-up-delay-1 {
+    animation: slideUp 0.6s ease-out 0.1s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-slide-up-delay-2 {
+    animation: slideUp 0.6s ease-out 0.2s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-slide-up-delay-3 {
+    animation: slideUp 0.6s ease-out 0.3s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -101,22 +243,31 @@
     display: none;
   }
 
-  .text-balance {
-    text-wrap: balance;
+  /* Glassmorphism utilities */
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
   }
 
-  .animate-in {
-    animation: fadeIn 0.3s ease-out forwards;
+  .glass-strong {
+    @apply bg-white/[0.05] backdrop-blur-2xl border border-white/[0.12];
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .glass-subtle {
+    @apply bg-white/[0.015] backdrop-blur-lg border border-white/[0.04];
+  }
+
+  /* Gradient borders */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(#090C10, #090C10) padding-box,
+                linear-gradient(135deg, #E59A4B, #2DD4BF) border-box;
+    border: 1px solid transparent;
+  }
+
+  .gradient-border-amber {
+    position: relative;
+    background: linear-gradient(#090C10, #090C10) padding-box,
+                linear-gradient(135deg, #E59A4B, #E59A4B) border-box;
+    border: 1px solid transparent;
   }
 }

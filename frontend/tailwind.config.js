@@ -4,9 +4,73 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        // Dark Mode Editorial Palette
+        obsidian: {
+          DEFAULT: '#090C10',
+          50: '#1A1F26',
+          100: '#151A20',
+          200: '#11151B',
+          300: '#0D1116',
+          400: '#090C10',
+          500: '#070A0D',
+        },
+        amber: {
+          DEFAULT: '#E59A4B',
+          50: '#FDF6ED',
+          100: '#F9E8D1',
+          200: '#F2D4A3',
+          300: '#E9B86C',
+          400: '#E59A4B',
+          500: '#D4852E',
+          600: '#B86E25',
+          700: '#92551E',
+          800: '#73441B',
+          900: '#5C3919',
+        },
+        teal: {
+          DEFAULT: '#2DD4BF',
+          50: '#F0FDFA',
+          100: '#CCFBF1',
+          200: '#99F6E4',
+          300: '#5EEAD4',
+          400: '#2DD4BF',
+          500: '#14B8A6',
+          600: '#0D9488',
+          700: '#0F766E',
+          800: '#115E59',
+          900: '#134E4A',
+        },
+        cream: {
+          DEFAULT: '#F5F2EB',
+          50: '#FEFDFB',
+          100: '#FDFBF7',
+          200: '#FAF7ED',
+          300: '#F5F2EB',
+          400: '#E8E3D8',
+          500: '#D4CFC3',
+          600: '#B8B2A4',
+          700: '#969082',
+          800: '#757064',
+          900: '#5E5950',
+        },
+        muted: {
+          DEFAULT: '#9CA3AF',
+          50: '#F3F4F6',
+          100: '#E5E7EB',
+          200: '#D1D5DB',
+          300: '#9CA3AF',
+          400: '#6B7280',
+          500: '#4B5563',
+          600: '#374151',
+          700: '#1F2937',
+          800: '#111827',
+          900: '#030712',
+        },
+        // Legacy support (to be phased out)
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -52,12 +116,16 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         heading: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       animation: {
-        'fade-in': 'fadeIn 0.3s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'slide-up': 'slideUp 0.5s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
-        'pulse-soft': 'pulseSoft 2s infinite',
+        'pulse-soft': 'pulseSoft 3s infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite',
+        'shimmer': 'shimmer 2s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -65,7 +133,7 @@ export default {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         slideDown: {
@@ -74,13 +142,36 @@ export default {
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.7' },
+          '50%': { opacity: '0.6' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        glow: {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(229, 154, 75, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(229, 154, 75, 0.5)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glass-hover': '0 12px 40px 0 rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(229, 154, 75, 0.3)',
+        'amber-glow': '0 0 30px rgba(229, 154, 75, 0.4)',
+        'teal-glow': '0 0 30px rgba(45, 212, 191, 0.4)',
+      },
+      backdropBlur: {
+        'xs': '2px',
+        'xl': '24px',
+        '2xl': '40px',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'mesh-gradient': 'linear-gradient(135deg, #090C10 0%, #1A1F26 50%, #0D1116 100%)',
       },
     },
   },

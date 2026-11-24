@@ -16,16 +16,17 @@ import {
   SparklesIcon,
   CrownIcon,
 } from '@heroicons/react/24/outline';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, Zap, Cpu, Layers } from 'lucide-react';
 import { UserMenu } from '@/components/ui/Dropdown';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
+import React from 'react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, roles: ['freelancer', 'client', 'admin'] },
   { name: 'Projects', href: '/projects', icon: Briefcase, roles: ['freelancer', 'client', 'admin'] },
-  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon, roles: ['freelancer', 'client', 'admin'], badge: 3 },
-  { name: 'Balance', href: '/balance', icon: CurrencyDollarIcon, roles: ['freelancer', 'client', 'admin'] },
+  { name: 'Talent', href: '/talent', icon: UserCircleIcon, roles: ['freelancer', 'client', 'admin'] },
+  { name: 'AI Tools', href: '/ai-tools', icon: Cpu, roles: ['freelancer', 'client', 'admin'] },
+  { name: 'Pricing', href: '/pricing', icon: Layers, roles: ['freelancer', 'client', 'admin'] },
 ];
 
 export function Header() {
@@ -46,16 +47,16 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-secondary-200">
+    <header className="sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-18 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2" aria-label="Freelance Marketplace Home">
-              <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
-                <SparklesIcon className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center gap-2" aria-label="FreelanceHub Home">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber to-amber-400 flex items-center justify-center">
+                <SparklesIcon className="w-5 h-5 text-obsidian" />
               </div>
-              <span className="font-heading font-bold text-xl text-secondary-900 hidden sm:block">
+              <span className="font-heading font-bold text-xl text-cream hidden sm:block">
                 FreelanceHub
               </span>
             </Link>
@@ -71,10 +72,10 @@ export function Header() {
                       key={item.name}
                       to={item.href}
                       className={clsx(
-                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                        'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                         isActive
-                          ? 'bg-primary-50 text-primary-700'
-                          : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-50'
+                          ? 'bg-white/[0.05] text-amber border border-amber/20'
+                          : 'text-muted hover:text-cream hover:bg-white/[0.03]'
                       )}
                       aria-current={isActive ? 'page' : undefined}
                     >
@@ -90,14 +91,14 @@ export function Header() {
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Search */}
             <div className="hidden lg:block relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+              <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted/50" />
               <input
                 type="search"
                 placeholder="Search projects, skills..."
-                className="w-64 pl-10 pr-4 py-2 rounded-lg border border-secondary-200 bg-secondary-50 text-sm text-secondary-900 placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:bg-white transition-colors"
+                className="w-72 pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-cream placeholder-muted/50 focus:outline-none focus:ring-2 focus:ring-amber/30 focus:border-amber/50 focus:bg-white/[0.05] transition-all duration-200"
                 aria-label="Search"
               />
             </div>
@@ -105,17 +106,17 @@ export function Header() {
             {/* Notifications */}
             <button
               type="button"
-              className="relative p-2 rounded-lg text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors"
+              className="p-2.5 rounded-xl text-muted hover:text-cream hover:bg-white/[0.03] transition-colors"
               aria-label="Notifications"
             >
               <BellIcon className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-danger-500 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-amber rounded-full" />
             </button>
 
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="md:hidden p-2 rounded-lg text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors"
+              className="md:hidden p-2.5 rounded-xl text-muted hover:text-cream hover:bg-white/[0.03] transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
@@ -143,10 +144,10 @@ export function Header() {
             {!isAuthenticated && (
               <div className="hidden sm:flex items-center gap-2">
                 <Link to="/login" className="btn btn-ghost btn-sm">
-                  Log in
+                  Log In
                 </Link>
                 <Link to="/register" className="btn btn-primary btn-sm">
-                  Sign Up
+                  Get Started
                 </Link>
               </div>
             )}
@@ -164,14 +165,14 @@ export function Header() {
           leaveFrom="opacity-100 transform translate-y-0"
           leaveTo="opacity-0 transform -translate-y-2"
         >
-          <div id="mobile-menu" className="md:hidden border-t border-secondary-200 bg-white animate-slide-down">
+          <div id="mobile-menu" className="md:hidden border-t border-white/[0.06] bg-obsidian/95 backdrop-blur-2xl animate-slide-down">
             <div className="px-4 py-4 space-y-2">
               <div className="flex items-center gap-3 px-3 py-2">
-                <MagnifyingGlassIcon className="w-5 h-5 text-secondary-400" />
+                <MagnifyingGlassIcon className="w-5 h-5 text-muted/50" />
                 <input
                   type="search"
                   placeholder="Search projects, skills..."
-                  className="flex-1 py-2 rounded-lg border border-secondary-200 bg-secondary-50 text-sm"
+                  className="flex-1 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-cream placeholder-muted/50"
                 />
               </div>
               {navigation
@@ -182,10 +183,10 @@ export function Header() {
                     to={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={clsx(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium transition-colors',
+                      'flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors',
                       location.pathname === item.href
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-secondary-600 hover:bg-secondary-50'
+                        ? 'bg-white/[0.05] text-amber border border-amber/20'
+                        : 'text-muted hover:text-cream hover:bg-white/[0.03]'
                     )}
                   >
                     <item.icon className="w-5 h-5" />
@@ -193,30 +194,30 @@ export function Header() {
                   </NavLink>
                 ))}
               {!isAuthenticated && (
-                <div className="pt-4 space-y-2 border-t border-secondary-200">
+                <div className="pt-4 space-y-2 border-t border-white/[0.06]">
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="btn btn-secondary btn-lg w-full">
-                    Log in
+                    Log In
                   </Link>
                   <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="btn btn-primary btn-lg w-full">
-                    Sign Up
+                    Get Started
                   </Link>
                 </div>
               )}
               {isAuthenticated && user && (
-                <div className="pt-4 border-t border-secondary-200">
-                  <div className="flex items-center gap-3 px-3 py-2">
-                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                <div className="pt-4 border-t border-white/[0.06]">
+                  <div className="flex items-center gap-3 px-3 py-3">
+                    <div className="w-11 h-11 rounded-full bg-white/[0.05] flex items-center justify-center">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <span className="text-primary-700 font-medium">
+                        <span className="text-amber font-medium">
                           {user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-secondary-900">{user.full_name || user.email.split('@')[0]}</p>
-                      <p className="text-sm text-secondary-500 capitalize">{user.plan} Plan</p>
+                      <p className="font-medium text-cream">{user.full_name || user.email.split('@')[0]}</p>
+                      <p className="text-sm text-muted capitalize">{user.plan} Plan</p>
                     </div>
                   </div>
                   <div className="mt-4 space-y-1">
@@ -231,8 +232,8 @@ export function Header() {
                             else setMobileMenuOpen(false);
                           }}
                           className={clsx(
-                            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium transition-colors',
-                            item.danger ? 'text-danger-600 hover:bg-danger-50' : 'text-secondary-700 hover:bg-secondary-50'
+                            'w-full flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors',
+                            item.danger ? 'text-danger-500 hover:bg-danger-500/10' : 'text-muted hover:text-cream hover:bg-white/[0.03]'
                           )}
                         >
                           <item.icon className="w-5 h-5" />
@@ -249,5 +250,3 @@ export function Header() {
     </header>
   );
 }
-
-import React from 'react';

@@ -18,18 +18,18 @@ export function Badge({
   dotColor,
 }: BadgeProps) {
   const variantClasses = {
-    primary: 'bg-primary-100 text-primary-800',
-    success: 'bg-success-50 text-success-700',
-    warning: 'bg-warning-50 text-warning-700',
-    danger: 'bg-danger-50 text-danger-700',
-    secondary: 'bg-secondary-100 text-secondary-700',
-    outline: 'bg-transparent border border-secondary-300 text-secondary-700',
+    primary: 'bg-amber/10 text-amber border border-amber/20',
+    success: 'bg-teal/10 text-teal border border-teal/20',
+    warning: 'bg-amber/10 text-amber border border-amber/20',
+    danger: 'bg-danger-500/10 text-danger-500 border border-danger-500/20',
+    secondary: 'bg-white/[0.05] text-muted border border-white/[0.1]',
+    outline: 'bg-transparent text-cream border border-white/[0.15]',
   };
 
   const sizeClasses = {
     sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-sm',
-    lg: 'px-3 py-1 text-base',
+    md: 'px-3 py-1 text-sm',
+    lg: 'px-4 py-1.5 text-base',
   };
 
   return (

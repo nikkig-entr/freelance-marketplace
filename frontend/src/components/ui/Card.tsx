@@ -7,6 +7,7 @@ interface CardProps {
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   bordered?: boolean;
+  variant?: 'default' | 'glass' | 'strong' | 'subtle';
 }
 
 const paddingClasses = {
@@ -16,13 +17,27 @@ const paddingClasses = {
   lg: 'p-8',
 };
 
-export function Card({ children, className, hover = false, padding = 'md', bordered = true }: CardProps) {
+const variantClasses = {
+  default: 'bg-white/[0.03] backdrop-blur-xl border border-white/[0.08]',
+  glass: 'bg-white/[0.03] backdrop-blur-xl border border-white/[0.08]',
+  strong: 'bg-white/[0.05] backdrop-blur-2xl border border-white/[0.12]',
+  subtle: 'bg-white/[0.015] backdrop-blur-lg border border-white/[0.04]',
+};
+
+export function Card({
+  children,
+  className,
+  hover = false,
+  padding = 'md',
+  bordered = true,
+  variant = 'glass',
+}: CardProps) {
   return (
     <div
       className={clsx(
-        'bg-white rounded-xl transition-shadow duration-200',
-        bordered && 'border border-secondary-200',
-        hover && 'hover:shadow-card-hover cursor-pointer',
+        'rounded-2xl transition-all duration-300',
+        variantClasses[variant],
+        hover && 'hover:border-amber/50 hover:bg-white/[0.05] hover:shadow-glass-hover cursor-pointer',
         paddingClasses[padding],
         className
       )}
@@ -52,8 +67,8 @@ export function CardTitle({ children, className, subtitle }: {
 }) {
   return (
     <div className={className}>
-      <h3 className="text-lg font-semibold text-secondary-900">{children}</h3>
-      {subtitle && <p className="mt-0.5 text-sm text-secondary-500">{subtitle}</p>}
+      <h3 className="text-lg font-semibold text-cream">{children}</h3>
+      {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
     </div>
   );
 }
@@ -68,7 +83,7 @@ export function CardFooter({ children, className, divided = true }: {
   divided?: boolean;
 }) {
   return (
-    <div className={clsx('mt-4 pt-4 flex items-center', divided && 'border-t border-secondary-200', className)}>
+    <div className={clsx('mt-4 pt-4 flex items-center', divided && 'border-t border-white/[0.06]', className)}>
       {children}
     </div>
   );
