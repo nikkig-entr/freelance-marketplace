@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { SparklesIcon, GlobeAltIcon, EnvelopeIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { Briefcase, Code, Palette, Users, Cpu, Shield, Globe, Zap, Mail, X } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 // Inline SVG components for social icons not available in lucide-react
 function LinkedinIcon({ className = '' }: { className?: string }) {
