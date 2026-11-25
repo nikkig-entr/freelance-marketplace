@@ -6,6 +6,8 @@ from app.core.config import get_settings
 from app.models.user import User
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.models.user import UserPlan
+from app.models.withdrawal import Withdrawal
+from app.models.transaction import Transaction
 
 settings = get_settings()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -76,6 +78,42 @@ class StripeService:
         return session.url
 
     @staticmethod
+    async def create_deposit_checkout_session(
+        user: User,
+        amount_cents: int,
+        db: AsyncSession,
+        success_url: Optional[str] = None,
+        cancel_url: Optional[str] = None,
+    ) -> str:
+        """Create a Stripe Checkout session for account deposits."""
+        customer_id = await StripeService.get_or_create_customer(user, db)
+
+        session = stripe.checkout.Session.create(
+            customer=customer_id,
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "Account Deposit",
+                        "description": f"Add ${amount_cents / 100:.2f} to your freelance account",
+                    },
+                    "unit_amount": amount_cents,
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=success_url or settings.STRIPE_SUCCESS_URL + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=cancel_url or settings.STRIPE_CANCEL_URL,
+            metadata={
+                "user_id": str(user.id),
+                "type": "deposit",
+                "amount_cents": str(amount_cents),
+            },
+        )
+        return session.url
+
+    @staticmethod
     async def create_portal_session(customer_id: str) -> str:
         """Create Stripe Customer Portal session."""
         session = stripe.billing_portal.Session.create(
@@ -83,6 +121,20 @@ class StripeService:
             return_url=f"{settings.FRONTEND_URL}/settings/billing",
         )
         return session.url
+
+    @staticmethod
+    async def create_withdrawal_transfer(withdrawal: Withdrawal) -> stripe.Transfer:
+        """Create a Stripe Transfer for withdrawal (to connected account)."""
+        transfer = stripe.Transfer.create(
+            amount=withdrawal.net_amount_cents,
+            currency="usd",
+            destination=withdrawal.user.stripe_account_id,
+            metadata={
+                "withdrawal_id": str(withdrawal.id),
+                "user_id": str(withdrawal.user_id),
+            },
+        )
+        return transfer
 
     @staticmethod
     async def handle_webhook(payload: bytes, sig_header: str) -> Dict[str, Any]:
@@ -114,14 +166,44 @@ class StripeService:
             await StripeService._handle_payment_failed(data)
         elif event_type == "invoice.payment_succeeded":
             await StripeService._handle_payment_succeeded(data)
+        elif event_type == "transfer.created":
+            await StripeService._handle_transfer_created(data)
 
         return {"status": "ok"}
 
     @staticmethod
     async def _handle_checkout_completed(session: Dict[str, Any]) -> None:
-        """Handle successful checkout."""
-        # Subscription will be created via customer.subscription.created event
-        pass
+        """Handle completed checkout session."""
+        from app.core.database import async_session_maker
+
+        metadata = session.get("metadata", {})
+        user_id = metadata.get("user_id")
+        session_type = metadata.get("type")
+
+        if session_type == "deposit" and user_id:
+            amount_cents = int(metadata.get("amount_cents", 0))
+
+            async with async_session_maker() as db:
+                result = await db.execute(select(User).where(User.id == int(user_id)))
+                user = result.scalar_one_or_none()
+                if not user:
+                    return
+
+                # Create transaction record
+                transaction = Transaction(
+                    user_id=user.id,
+                    amount_cents=amount_cents,
+                    type="deposit",
+                    status="completed",
+                    stripe_payment_intent_id=session.get("payment_intent"),
+                    description=f"Deposit via Stripe Checkout",
+                )
+                db.add(transaction)
+
+                # Update user balance
+                user.balance_cents += amount_cents
+
+                await db.commit()
 
     @staticmethod
     async def _handle_subscription_updated(subscription: Dict[str, Any]) -> None:
@@ -234,6 +316,23 @@ class StripeService:
         pass
 
     @staticmethod
+    async def _handle_transfer_created(transfer: Dict[str, Any]) -> None:
+        """Handle transfer creation (withdrawal)."""
+        from app.core.database import async_session_maker
+
+        metadata = transfer.get("metadata", {})
+        withdrawal_id = metadata.get("withdrawal_id")
+
+        if withdrawal_id:
+            async with async_session_maker() as db:
+                result = await db.execute(select(Withdrawal).where(Withdrawal.id == int(withdrawal_id)))
+                withdrawal = result.scalar_one_or_none()
+                if withdrawal:
+                    withdrawal.status = "completed"
+                    withdrawal.stripe_transfer_id = transfer["id"]
+                    await db.commit()
+
+    @staticmethod
     async def cancel_subscription(user: User, db: AsyncSession) -> bool:
         """Cancel user's subscription at period end."""
         if not user.stripe_subscription_id:
@@ -271,3 +370,25 @@ class StripeService:
             return invoice
         except stripe.StripeError:
             return None
+
+    @staticmethod
+    async def get_subscription(subscription_id: str) -> stripe.Subscription:
+        """Get Stripe subscription."""
+        return stripe.Subscription.retrieve(subscription_id)
+
+    @staticmethod
+    async def cancel_subscription_stripe(subscription_id: str) -> stripe.Subscription:
+        """Cancel Stripe subscription at period end."""
+        return stripe.Subscription.modify(
+            subscription_id,
+            cancel_at_period_end=True,
+        )
+
+    @staticmethod
+    async def list_invoices(customer_id: str, limit: int = 20) -> list[stripe.Invoice]:
+        """List customer invoices."""
+        invoices = stripe.Invoice.list(
+            customer=customer_id,
+            limit=limit,
+        )
+        return invoices.data

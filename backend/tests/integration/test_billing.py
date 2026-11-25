@@ -54,11 +54,8 @@ class TestBillingEndpoints:
     @pytest.mark.asyncio
     async def test_create_checkout_session_pro(self, async_client, db_session, test_user, auth_headers):
         """Test creating checkout session for Pro plan."""
-        with patch('app.services.stripe.create_subscription_checkout') as mock_checkout:
-            mock_session = MagicMock()
-            mock_session.id = "cs_test123"
-            mock_session.url = "https://checkout.stripe.com/test"
-            mock_checkout.return_value = mock_session
+        with patch('app.services.stripe_service.StripeService.create_checkout_session') as mock_checkout:
+            mock_checkout.return_value = "https://checkout.stripe.com/test"
 
             response = await async_client.post("/api/v1/subscription/checkout", json={
                 "plan_id": "pro",
@@ -75,11 +72,8 @@ class TestBillingEndpoints:
     @pytest.mark.asyncio
     async def test_create_checkout_session_agency(self, async_client, db_session, test_user, auth_headers):
         """Test creating checkout session for Agency plan."""
-        with patch('app.services.stripe.create_subscription_checkout') as mock_checkout:
-            mock_session = MagicMock()
-            mock_session.id = "cs_test123"
-            mock_session.url = "https://checkout.stripe.com/test"
-            mock_checkout.return_value = mock_session
+        with patch('app.services.stripe_service.StripeService.create_checkout_session') as mock_checkout:
+            mock_checkout.return_value = "https://checkout.stripe.com/test"
 
             response = await async_client.post("/api/v1/subscription/checkout", json={
                 "plan_id": "agency",
@@ -134,7 +128,7 @@ class TestBillingEndpoints:
     @pytest.mark.asyncio
     async def test_webhook_subscription_created(self, async_client, db_session):
         """Test Stripe webhook for subscription created."""
-        with patch('app.services.stripe.handle_stripe_webhook') as mock_webhook:
+        with patch('app.services.stripe_service.StripeService.handle_webhook') as mock_webhook:
             mock_webhook.return_value = {"status": "processed"}
 
             response = await async_client.post("/api/v1/webhooks/stripe", json={
@@ -147,7 +141,7 @@ class TestBillingEndpoints:
     @pytest.mark.asyncio
     async def test_webhook_invalid_signature(self, async_client, db_session):
         """Test webhook with invalid signature."""
-        with patch('app.services.stripe.handle_stripe_webhook') as mock_webhook:
+        with patch('app.services.stripe_service.StripeService.handle_webhook') as mock_webhook:
             from stripe._error import SignatureVerificationError
             mock_webhook.side_effect = SignatureVerificationError("Invalid signature", "sig")
 

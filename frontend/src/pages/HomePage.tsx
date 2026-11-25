@@ -5,11 +5,14 @@ import { CategoriesProjectsSection } from '@/components/sections/CategoriesProje
 import { PricingSection } from '@/components/sections/PricingSection';
 import { CTASection } from '@/components/sections/CTASection';
 import { Footer } from '@/components/sections/Footer';
+import { usePreloader } from '@/contexts/PreloaderContext';
 
 export function HomePage() {
+  const { isPreloaderComplete } = usePreloader();
+
   return (
     <div className="space-y-0">
-      <HeroSection />
+      <HeroSection isVisible={isPreloaderComplete} />
       <BentoGridSection />
       <AIShowcaseSection />
       <CategoriesProjectsSection />

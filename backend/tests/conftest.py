@@ -303,7 +303,7 @@ def mock_celery():
 @pytest.fixture(autouse=True)
 def mock_stripe():
     """Mock Stripe API calls for tests."""
-    with patch("app.services.stripe.stripe") as mock_stripe:
+    with patch("app.services.stripe_service.stripe") as mock_stripe:
         # Mock checkout session create
         mock_session = MagicMock()
         mock_session.id = "cs_test_mock123"

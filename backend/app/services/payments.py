@@ -10,7 +10,7 @@ from app.models.bid import Bid, BidStatus
 from app.models.transaction import Transaction, TransactionType
 from app.models.withdrawal import Withdrawal, WithdrawalStatus
 from app.models.subscription import Subscription, SubscriptionStatus
-from app.services.stripe import create_checkout_session as stripe_create_checkout
+from app.services.stripe_service import StripeService
 from app.services.notifications import (
     notify_payment_received,
     notify_project_completed,

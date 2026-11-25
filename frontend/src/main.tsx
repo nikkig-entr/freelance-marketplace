@@ -7,6 +7,10 @@ import { Toaster } from 'react-hot-toast'
 import { router } from './router'
 import { AuthProvider } from './contexts/AuthContext'
 import { WebSocketProvider } from './contexts/WebSocketContext'
+import { PreloaderProvider } from './contexts/PreloaderContext'
+import { useLenis } from './hooks/useLenis'
+import { IntroPreloader } from './components/ui/IntroPreloader'
+import { CustomCursorProvider } from './components/ui/CustomCursor'
 import './styles/index.css'
 
 const queryClient = new QueryClient({
@@ -20,40 +24,54 @@ const queryClient = new QueryClient({
   },
 })
 
+function AppRoot() {
+  useLenis()
+
+  return (
+    <PreloaderProvider>
+      <CustomCursorProvider enabled={true}>
+        <IntroPreloader>
+          <AuthProvider>
+            <WebSocketProvider>
+              <RouterProvider router={router} />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'var(--color-graphite)',
+                    color: 'var(--color-cream)',
+                    boxShadow: 'var(--shadow-glass-strong)',
+                    borderRadius: 'var(--radius-xl)',
+                    padding: '1rem',
+                    border: '1px solid var(--glass-border)',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'var(--color-accent)',
+                      secondary: 'var(--color-obsidian)',
+                    },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#fff',
+                    },
+                  },
+                }}
+              />
+            </WebSocketProvider>
+          </AuthProvider>
+        </IntroPreloader>
+      </CustomCursorProvider>
+    </PreloaderProvider>
+  )
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <WebSocketProvider>
-          <RouterProvider router={router} />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#11151B',
-                color: '#F5F2EB',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-                borderRadius: '0.75rem',
-                padding: '1rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#2DD4BF',
-                  secondary: '#090C10',
-                },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
-                },
-              },
-            }}
-          />
-        </WebSocketProvider>
-      </AuthProvider>
+      <AppRoot />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>

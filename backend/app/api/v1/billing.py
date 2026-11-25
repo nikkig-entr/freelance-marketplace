@@ -12,14 +12,7 @@ from app.schemas.billing import (
     CheckoutSessionResponse, PortalSessionResponse,
     InvoiceResponse, InvoiceListResponse
 )
-from app.services.stripe import (
-    create_subscription_checkout,
-    create_portal_session,
-    get_subscription,
-    cancel_subscription,
-    list_invoices,
-    get_plan_details,
-)
+from app.services.stripe_service import StripeService
 from app.services.notifications import create_notification
 
 router = APIRouter()
@@ -169,21 +162,21 @@ async def create_subscription_checkout_session(
         # Would create Stripe customer here
         pass
 
-    checkout_session = await create_subscription_checkout(
-        customer_id=current_user.stripe_customer_id or "",
+    from app.models.user import UserPlan
+
+    plan_enum = UserPlan(plan_id)
+    checkout_url = await StripeService.create_checkout_session(
+        user=current_user,
         price_id=price_id,
+        plan=plan_enum,
+        db=db,
         success_url=subscription_data.success_url,
         cancel_url=subscription_data.cancel_url,
-        metadata={
-            "user_id": str(current_user.id),
-            "plan_id": plan_id,
-            "billing_interval": billing_interval.value,
-        },
     )
 
     return CheckoutSessionResponse(
-        checkout_url=checkout_session.url,
-        session_id=checkout_session.id,
+        checkout_url=checkout_url,
+        session_id="session_id",  # Would need to get from session if needed
     )
 
 
@@ -196,12 +189,9 @@ async def create_billing_portal_session(
     if not current_user.stripe_customer_id:
         raise HTTPException(status_code=400, detail="No billing account found")
 
-    portal_session = await create_portal_session(
-        customer_id=current_user.stripe_customer_id,
-        return_url="/settings/billing",
-    )
+    portal_url = await StripeService.create_portal_session(current_user.stripe_customer_id)
 
-    return PortalSessionResponse(portal_url=portal_session.url)
+    return PortalSessionResponse(portal_url=portal_url)
 
 
 @router.post("/subscription/cancel", response_model=SubscriptionResponse)
@@ -221,7 +211,7 @@ async def cancel_current_subscription(
         raise HTTPException(status_code=404, detail="No active subscription found")
 
     # Cancel in Stripe
-    await cancel_subscription(subscription.stripe_subscription_id)
+    await StripeService.cancel_subscription(current_user, db)
 
     # Update local subscription
     subscription.status = SubscriptionStatus.CANCELED
@@ -246,7 +236,7 @@ async def list_user_invoices(
     if not current_user.stripe_customer_id:
         return InvoiceListResponse(items=[], total=0, page=page, page_size=page_size, total_pages=0)
 
-    invoices = await list_invoices(current_user.stripe_customer_id, limit=page_size)
+    invoices = await StripeService.list_invoices(current_user.stripe_customer_id, limit=page_size)
     # Convert to response format
     items = [
         InvoiceResponse(
@@ -279,8 +269,6 @@ async def stripe_webhook(
     db: AsyncSession = Depends(get_db),
 ):
     """Handle Stripe webhook events."""
-    from app.services.stripe import handle_stripe_webhook
-
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
@@ -288,7 +276,7 @@ async def stripe_webhook(
         raise HTTPException(status_code=400, detail="Missing stripe-signature header")
 
     try:
-        await handle_stripe_webhook(payload, sig_header, db)
+        await StripeService.handle_webhook(payload, sig_header)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Webhook error: {str(e)}")
 

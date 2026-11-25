@@ -1,6 +1,7 @@
 import { MagnifyingGlassIcon, ShieldCheckIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Badge } from '@/components/ui/Badge';
 import { Briefcase, Code, Zap, Users, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const skillTags = [
   { name: 'React', icon: Code },
@@ -20,43 +21,82 @@ const stats = [
   { value: '98%', label: 'Client Satisfaction' },
 ];
 
-export function HeroSection() {
+interface HeroSectionProps {
+  isVisible?: boolean;
+}
+
+export function HeroSection({ isVisible = true }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Subtle ambient depth - single radial gradient */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
+      <motion.div
+        className="absolute inset-0 -z-10 pointer-events-none"
+        initial={isVisible ? { scale: 1.12 } : { scale: 1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
+        style={{ transformOrigin: 'center center' }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-[var(--color-accent)]/3 blur-[200px]" />
-      </div>
+      </motion.div>
 
       {/* Noise texture - subtle */}
       <div className="absolute inset-0 -z-10 opacity-[0.015] bg-[url('/media/placeholders/pattern.svg')]" />
 
-      <div className="relative container py-20 sm:py-28 lg:py-40">
+      <motion.div
+        className="relative container py-20 sm:py-28 lg:py-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+      >
         <div className="max-w-4xl">
           {/* Badge - minimal */}
-          <div className="mb-8 animate-in">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+            className="mb-8"
+          >
             <Badge variant="primary" size="md" className="inline-flex" dot>
               <SparklesIcon className="w-3.5 h-3.5" />
               New: AI-Powered Tools for Pro & Agency Plans
             </Badge>
-          </div>
+          </motion.div>
 
           {/* Main Headline - typography driven */}
-          <h1 className="text-display-sm font-extrabold text-[var(--color-text)] tracking-[-0.02em] leading-[1.05] animate-slide-up">
+          <motion.h1
+            className="text-display-sm font-extrabold text-[var(--color-text)] tracking-[-0.02em] leading-[1.05]"
+            initial={{ opacity: 0, y: 30, clipPath: 'inset(100% 0 0 0)' }}
+            animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
+            transition={{
+              duration: 1.0,
+              ease: [0.76, 0, 0.24, 1],
+              delay: isVisible ? 0.3 : 0,
+            }}
+          >
             Find Work.
             <br />
             <span className="text-gradient-accent">Build Your Career.</span>
-          </h1>
+          </motion.h1>
 
           {/* Subheadline - restrained */}
-          <p className="mt-6 text-body-lg text-[var(--color-text-muted)] max-w-2xl leading-relaxed animate-slide-up delay-1">
+          <motion.p
+            className="mt-6 text-body-lg text-[var(--color-text-muted)] max-w-2xl leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+          >
             The modern freelance marketplace connecting talented professionals with great clients.
             Secure escrow payments, AI-powered matching, and zero hassle.
-          </p>
+          </motion.p>
 
           {/* Search + Skill Tags */}
-          <div className="mt-12 animate-slide-up delay-2">
+          <motion.div
+            className="mt-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
+          >
             <div className="glass-card p-3 mb-6 max-w-2xl">
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" />
@@ -72,21 +112,28 @@ export function HeroSection() {
             {/* Clickable Skill Tags - minimal */}
             <div className="flex flex-wrap items-center gap-2 max-w-3xl" role="list" aria-label="Popular skills">
               {skillTags.map((skill, index) => (
-                <button
+                <motion.button
                   key={skill.name}
                   className="glass-card-hover px-4 py-2 rounded-xl text-sm font-medium text-[var(--color-text-muted)] transition-all duration-300 flex items-center gap-2"
                   role="listitem"
-                  style={{ animationDelay: `${index * 30}ms` }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 1.0 + index * 0.03 }}
                 >
                   <skill.icon className="w-4 h-4 text-[var(--color-text-subtle)] hover:text-[var(--color-accent)] transition-colors" aria-hidden="true" />
                   {skill.name}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Trust Indicators - minimal */}
-          <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-[var(--color-text-subtle)] animate-slide-up delay-3">
+          <motion.div
+            className="mt-10 flex flex-wrap items-center gap-6 text-sm text-[var(--color-text-subtle)]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 1.2 }}
+          >
             <span className="flex items-center gap-1.5">
               <ShieldCheckIcon className="w-4 h-4 text-[var(--color-accent)]" />
               No credit card required
@@ -99,21 +146,37 @@ export function HeroSection() {
               <CheckIcon className="w-4 h-4 text-[var(--color-gray-500)]" />
               14-day free trial on Pro
             </span>
-          </div>
+          </motion.div>
 
           {/* Stats Row - clean typography */}
-          <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 animate-slide-up delay-4">
+          <motion.div
+            className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 1.4 }}
+          >
             {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center" style={{ animationDelay: `${index * 80}ms` }}>
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 1.4 + index * 0.08 }}
+              >
                 <p className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[var(--color-text)] tracking-tight leading-none">{stat.value}</p>
                 <p className="mt-2 text-sm text-[var(--color-text-muted)] leading-normal">{stat.label}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Floating Preview Card - refined */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block max-w-xl">
+        <motion.div
+          className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block max-w-xl"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1.6 }}
+        >
           <div className="relative">
             <div className="glass-card overflow-hidden">
               {/* Top bar - minimal */}
@@ -207,15 +270,26 @@ export function HeroSection() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Scroll indicator - minimal */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 2.2 }}
+      >
         <div className="w-5 h-9 border-1.5 border-[var(--color-border)] rounded-full flex justify-center pt-1.5">
-          <div className="w-1 h-1 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDuration: '1.5s' }} />
+          <motion.div
+            className="w-1 h-1 rounded-full bg-[var(--color-text-muted)]"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
+
+export { HeroSection as default };
