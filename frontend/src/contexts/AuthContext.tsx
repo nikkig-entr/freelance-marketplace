@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { User, TokenResponse } from '../types';
 import { api } from '../services/api';
 
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [tokens, setTokens] = useState<TokenResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = !!user && !!tokens;
+  const isAuthenticated = useMemo(() => !!user && !!tokens, [user, tokens]);
 
   const loadStoredAuth = useCallback(async () => {
     const storedAccessToken = localStorage.getItem('access_token');

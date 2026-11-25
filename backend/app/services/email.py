@@ -39,9 +39,9 @@ async def send_email(
         return False
 
 
-async def send_verification_email(email: str, user_id: int) -> bool:
+async def send_verification_email(email: str, user_id: int, role: str = "freelancer", plan: str = "starter") -> bool:
     """Send email verification link."""
-    token = create_access_token(user_id, "freelancer", "starter")
+    token = create_access_token({"user_id": user_id, "role": role, "plan": plan})
     verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
 
     subject = "Verify your email address"
@@ -86,7 +86,7 @@ async def send_password_reset_email(email: str, user_id: int) -> bool:
     """Send password reset link."""
     # Use a special token type for password reset
     from app.core.security import create_access_token
-    import jwt
+    from jose import jwt
     from datetime import datetime, timedelta, timezone
 
     payload = {

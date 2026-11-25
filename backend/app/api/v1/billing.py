@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.dependencies import get_db, get_current_user
-from app.models.user import User, UserPlan, UserRole
-from app.models.subscription import Subscription, SubscriptionStatus, BillingInterval
+from app.models.user import User, UserRole
+from app.models.subscription import Subscription, SubscriptionStatus, BillingInterval, SubscriptionPlan
 from app.schemas.billing import (
     PlanResponse, SubscriptionResponse, SubscriptionCreate,
     CheckoutSessionResponse, PortalSessionResponse,
@@ -162,17 +162,18 @@ async def create_subscription_checkout_session(
         # Would create Stripe customer here
         pass
 
-    from app.models.user import UserPlan
-
-    plan_enum = UserPlan(plan_id)
-    checkout_url = await StripeService.create_checkout_session(
-        user=current_user,
-        price_id=price_id,
-        plan=plan_enum,
-        db=db,
-        success_url=subscription_data.success_url,
-        cancel_url=subscription_data.cancel_url,
-    )
+    plan_enum = SubscriptionPlan(plan_id)
+    try:
+        checkout_url = await StripeService.create_checkout_session(
+            user=current_user,
+            price_id=price_id,
+            plan=plan_enum,
+            db=db,
+            success_url=subscription_data.success_url,
+            cancel_url=subscription_data.cancel_url,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return CheckoutSessionResponse(
         checkout_url=checkout_url,

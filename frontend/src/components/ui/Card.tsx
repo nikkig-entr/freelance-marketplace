@@ -9,7 +9,6 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
   padding?: CardPadding;
   hover?: boolean;
-  bordered?: boolean;
   asChild?: boolean;
 }
 
@@ -33,7 +32,6 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       className,
       hover = false,
       padding = 'md',
-      bordered = true,
       variant = 'default',
       asChild = false,
       ...props
@@ -48,7 +46,6 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         className={clsx(
           'rounded-2xl transition-all duration-300',
           variantClasses[variant],
-          bordered && 'border',
           hover && 'hover:border-[var(--glass-border-hover)] hover:bg-[var(--glass-bg-strong)] hover:shadow-[var(--shadow-lg)] cursor-pointer',
           paddingClasses[padding],
           className

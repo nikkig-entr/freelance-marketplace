@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
 import { api, adminService } from '@/services/api';
 import { Project, ProjectStatus } from '@/types';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
 
@@ -57,7 +56,6 @@ const statusColors: Record<ProjectStatus, 'primary' | 'secondary' | 'outline' | 
 };
 
 export function AdminProjectsPage() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     page: 1,
@@ -74,7 +72,6 @@ export function AdminProjectsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-projects', filters],
     queryFn: () => adminService.getProjects(filters) as Promise<PaginatedProjects>,
-    enabled: !!user && user.role === 'admin',
   });
 
   const { mutate: updateProject } = useMutation({
@@ -142,15 +139,6 @@ export function AdminProjectsPage() {
     }
     return 'Negotiable';
   };
-
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
-        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

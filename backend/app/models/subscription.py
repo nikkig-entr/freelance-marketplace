@@ -20,6 +20,9 @@ from app.core.database import Base
 if TYPE_CHECKING:
     from app.models.user import User
 
+# Use UserPlan from user model to avoid duplication
+from app.models.user import UserPlan as SubscriptionPlan
+
 
 class SubscriptionStatus(str, enum.Enum):
     ACTIVE = "active"
@@ -29,12 +32,6 @@ class SubscriptionStatus(str, enum.Enum):
     TRIALING = "trialing"
     INCOMPLETE = "incomplete"
     INCOMPLETE_EXPIRED = "incomplete_expired"
-
-
-class SubscriptionPlan(str, enum.Enum):
-    STARTER = "starter"
-    PRO = "pro"
-    AGENCY = "agency"
 
 
 class BillingInterval(str, enum.Enum):

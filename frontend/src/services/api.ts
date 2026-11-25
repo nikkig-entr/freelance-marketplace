@@ -1,7 +1,11 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { TokenResponse, ApiError } from '@/types';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '/api/v1';
+const VITE_API_URL = (import.meta as any).env?.VITE_API_URL;
+if (!VITE_API_URL) {
+  throw new Error('VITE_API_URL environment variable is required. Please set it in your .env file.');
+}
+const API_BASE_URL = VITE_API_URL;
 
 class ApiService {
   private client: AxiosInstance;

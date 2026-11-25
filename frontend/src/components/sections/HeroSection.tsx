@@ -30,18 +30,17 @@ export function HeroSection({ isVisible = true }: HeroSectionProps) {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Subtle ambient depth - single radial gradient */}
       <motion.div
-        className="absolute inset-0 -z-10 pointer-events-none"
+        className="absolute inset-0 -z-10 pointer-events-none hero-gradient-mesh"
         initial={isVisible ? { scale: 1.12 } : { scale: 1 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
         style={{ transformOrigin: 'center center' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-[var(--color-accent)]/3 blur-[200px]" />
+        <div className="hero-glow" />
       </motion.div>
 
       {/* Noise texture - subtle */}
-      <div className="absolute inset-0 -z-10 opacity-[0.015] bg-[url('/media/placeholders/pattern.svg')]" />
+      <div className="noise-overlay" />
 
       <motion.div
         className="relative container py-20 sm:py-28 lg:py-40"

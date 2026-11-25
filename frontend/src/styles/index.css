@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,8 +10,6 @@
    One accent: Gold (#C5A572)
    Fonts: Syne (display), Instrument Serif (editorial), Plus Jakarta Sans (UI), JetBrains Mono (code)
    ======================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -672,6 +672,70 @@
 
   .skeleton-avatar {
     @apply skeleton rounded-full;
+  }
+
+  /* ========================================
+     HERO/SECTION UTILITIES
+     ======================================== */
+
+  .hero-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    opacity: 0.08;
+    filter: blur(200px);
+    pointer-events: none;
+  }
+
+  .hero-glow-sm {
+    width: 400px;
+    height: 400px;
+    filter: blur(120px);
+    opacity: 0.06;
+  }
+
+  .hero-gradient-overlay {
+    background: linear-gradient(to bottom, var(--color-bg), var(--color-bg) 60%, transparent);
+  }
+
+  .hero-gradient-mesh {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, var(--color-accent)/5, transparent),
+      radial-gradient(ellipse 60% 40% at 50% 120%, var(--color-accent)/3, transparent);
+    pointer-events: none;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, var(--color-text) 0%, var(--color-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-accent-strong {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .noise-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: url('/media/placeholders/pattern.svg');
+    opacity: 0.015;
+    pointer-events: none;
+  }
+
+  .noise-overlay-subtle {
+    opacity: 0.008;
   }
 
   /* ========================================

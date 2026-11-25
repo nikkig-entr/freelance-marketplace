@@ -13,7 +13,6 @@ import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { adminService } from '@/services/api';
-import { useAuth } from '@/context/AuthContext';
 
 interface AdminStats {
   users: {
@@ -64,22 +63,10 @@ const financialStatCards = [
 ];
 
 export function AdminDashboardPage() {
-  const { user } = useAuth();
-
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => adminService.getStats() as Promise<AdminStats>,
-    enabled: !!user && user.role === 'admin',
   });
-
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
-        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (

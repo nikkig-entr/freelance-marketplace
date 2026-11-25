@@ -15,7 +15,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
 import { api, adminService } from '@/services/api';
 import { User, UserRole, UserPlan } from '@/types';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
 
@@ -80,7 +79,6 @@ const planBadgeVariants: Record<UserPlan, 'primary' | 'secondary' | 'outline'> =
 };
 
 export function AdminUsersPage() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     page: 1,
@@ -99,7 +97,6 @@ export function AdminUsersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-users', filters],
     queryFn: () => adminService.getUsers(filters) as Promise<PaginatedUsers>,
-    enabled: !!user && user.role === 'admin',
   });
 
   const { mutate: updateUser } = useMutation({
@@ -159,15 +156,6 @@ export function AdminUsersPage() {
       updateUser({ id: selectedUser.id, data: editForm });
     }
   };
-
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
-        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

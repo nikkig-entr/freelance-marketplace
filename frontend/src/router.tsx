@@ -98,6 +98,15 @@ const requireAuth = ({ context }: { context: unknown }) => {
   }
 };
 
+const requireAdmin = ({ context }: { context: unknown }) => {
+  const ctx = context as RouterContext;
+  const { isAuthenticated, isLoading, hasRole } = ctx.auth;
+  if (isLoading) return;
+  if (!isAuthenticated || !hasRole(['admin'])) {
+    throw redirect({ to: '/' });
+  }
+};
+
 // Projects routes
 const projectsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -240,70 +249,35 @@ const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
   component: AdminDashboardPage,
-  beforeLoad: ({ context }) => {
-    const ctx = context as RouterContext;
-    requireAuth({ context: ctx });
-    const { hasRole } = ctx.auth;
-    if (!hasRole(['admin'])) {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
 });
 
 const adminUsersRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/users',
   component: AdminUsersPage,
-  beforeLoad: ({ context }) => {
-    const ctx = context as RouterContext;
-    requireAuth({ context: ctx });
-    const { hasRole } = ctx.auth;
-    if (!hasRole(['admin'])) {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
 });
 
 const adminProjectsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/projects',
   component: AdminProjectsPage,
-  beforeLoad: ({ context }) => {
-    const ctx = context as RouterContext;
-    requireAuth({ context: ctx });
-    const { hasRole } = ctx.auth;
-    if (!hasRole(['admin'])) {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
 });
 
 const adminWithdrawalsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/withdrawals',
   component: AdminWithdrawalsPage,
-  beforeLoad: ({ context }) => {
-    const ctx = context as RouterContext;
-    requireAuth({ context: ctx });
-    const { hasRole } = ctx.auth;
-    if (!hasRole(['admin'])) {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
 });
 
 const adminTransactionsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/transactions',
   component: AdminTransactionsPage,
-  beforeLoad: ({ context }) => {
-    const ctx = context as RouterContext;
-    requireAuth({ context: ctx });
-    const { hasRole } = ctx.auth;
-    if (!hasRole(['admin'])) {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
 });
 
 // Not found route

@@ -1,11 +1,11 @@
 import stripe
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.config import get_settings
 from app.models.user import User
-from app.models.subscription import Subscription, SubscriptionStatus
-from app.models.user import UserPlan
+from app.models.subscription import Subscription, SubscriptionStatus, SubscriptionPlan
 from app.models.withdrawal import Withdrawal
 from app.models.transaction import Transaction
 
@@ -45,12 +45,15 @@ class StripeService:
     async def create_checkout_session(
         user: User,
         price_id: str,
-        plan: UserPlan,
+        plan: SubscriptionPlan,
         db: AsyncSession,
         success_url: Optional[str] = None,
         cancel_url: Optional[str] = None,
     ) -> str:
         """Create Stripe Checkout session for subscription."""
+        # Validate price_id belongs to the correct plan
+        await StripeService._validate_price_id(price_id, plan)
+
         customer_id = await StripeService.get_or_create_customer(user, db)
 
         session = stripe.checkout.Session.create(
@@ -76,6 +79,19 @@ class StripeService:
             allow_promotion_codes=True,
         )
         return session.url
+
+    @staticmethod
+    async def _validate_price_id(price_id: str, plan: SubscriptionPlan) -> None:
+        """Validate that the price_id matches the expected plan."""
+        # In production, fetch the price from Stripe and verify it matches the plan
+        # For now, do a basic format check and mapping
+        valid_price_prefixes = {
+            SubscriptionPlan.PRO: "price_pro_",
+            SubscriptionPlan.AGENCY: "price_agency_",
+        }
+        expected_prefix = valid_price_prefixes.get(plan)
+        if expected_prefix and not price_id.startswith(expected_prefix):
+            raise ValueError(f"Invalid price_id for plan {plan.value}: expected prefix '{expected_prefix}'")
 
     @staticmethod
     async def create_deposit_checkout_session(
@@ -218,7 +234,7 @@ class StripeService:
             return
 
         try:
-            plan = UserPlan(plan_str)
+            plan = SubscriptionPlan(plan_str)
         except ValueError:
             return
 
@@ -243,11 +259,11 @@ class StripeService:
             sub.stripe_customer_id = subscription["customer"]
             sub.stripe_subscription_id = subscription["id"]
             sub.stripe_price_id = subscription["items"]["data"][0]["price"]["id"] if subscription["items"]["data"] else None
-            sub.stripe_current_period_start = __import__("datetime").datetime.fromtimestamp(
-                subscription["current_period_start"], tz=__import__("datetime").timezone.utc
+            sub.stripe_current_period_start = datetime.fromtimestamp(
+                subscription["current_period_start"], tz=timezone.utc
             )
-            sub.stripe_current_period_end = __import__("datetime").datetime.fromtimestamp(
-                subscription["current_period_end"], tz=__import__("datetime").timezone.utc
+            sub.stripe_current_period_end = datetime.fromtimestamp(
+                subscription["current_period_end"], tz=timezone.utc
             )
             sub.stripe_cancel_at_period_end = subscription.get("cancel_at_period_end", False)
 
@@ -288,7 +304,7 @@ class StripeService:
                 return
 
             # Downgrade to starter
-            user.plan = UserPlan.STARTER
+            user.plan = SubscriptionPlan.STARTER
             user.stripe_subscription_id = None
             user.stripe_price_id = None
             user.plan_expires_at = None
@@ -299,7 +315,7 @@ class StripeService:
             sub = result.scalar_one_or_none()
             if sub:
                 sub.status = SubscriptionStatus.CANCELED
-                sub.plan = UserPlan.STARTER
+                sub.plan = SubscriptionPlan.STARTER
 
             await db.commit()
 

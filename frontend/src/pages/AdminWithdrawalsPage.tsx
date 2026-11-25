@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { api, adminService } from '@/services/api';
 import { Withdrawal, WithdrawalStatus } from '@/types';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
 
@@ -52,7 +51,6 @@ const statusBadgeVariants: Record<WithdrawalStatus, 'primary' | 'secondary' | 'o
 };
 
 export function AdminWithdrawalsPage() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     page: 1,
@@ -67,7 +65,6 @@ export function AdminWithdrawalsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-withdrawals', filters],
     queryFn: () => adminService.getWithdrawals(filters) as Promise<PaginatedWithdrawals>,
-    enabled: !!user && user.role === 'admin',
   });
 
   const { mutate: approveWithdrawal } = useMutation({
@@ -126,15 +123,6 @@ export function AdminWithdrawalsPage() {
     setSelectedWithdrawal(withdrawal);
     setRejectReason('');
   };
-
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
-        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
