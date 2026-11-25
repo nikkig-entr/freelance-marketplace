@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import { api } from '../../services/api';
-import { User, UserRole, UserPlan } from '../../types';
+import { userService } from '@/services/api';
 import {
   UserCircleIcon,
   BellIcon,
@@ -10,8 +10,6 @@ import {
   PaintBrushIcon,
   TrashIcon,
   ArrowLeftIcon,
-  CheckIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -41,7 +39,7 @@ interface NotificationForm {
 }
 
 export function SettingsPage() {
-  const { user, refreshUser, updateUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -49,7 +47,6 @@ export function SettingsPage() {
   const {
     register: registerProfile,
     handleSubmit: handleSubmitProfile,
-    watch: watchProfile,
     setValue: setValueProfile,
     formState: { errors: profileErrors },
   } = useForm<ProfileForm>({
@@ -68,8 +65,7 @@ export function SettingsPage() {
   const {
     register: registerNotifications,
     handleSubmit: handleSubmitNotifications,
-    watch: watchNotifications,
-    formState: { errors: notificationErrors },
+    formState: { errors: _notificationErrors },
   } = useForm<NotificationForm>({
     defaultValues: {
       email_notifications: true,
@@ -86,12 +82,12 @@ export function SettingsPage() {
     if (user) {
       setValueProfile('full_name', user.full_name || '');
       setValueProfile('avatar_url', user.avatar_url || '');
-      setValueProfile('bio', (user.profile?.bio as string) || '');
-      setValueProfile('website', (user.profile?.website as string) || '');
-      setValueProfile('location', (user.profile?.location as string) || '');
-      setValueProfile('skills', (user.profile?.skills as string[])?.join(', ') || '');
-      setValueProfile('hourly_rate', (user.profile?.hourly_rate as number)?.toString() || '');
-      setValueProfile('availability', (user.profile?.availability as 'available' | 'busy' | 'unavailable') || 'available');
+      setValueProfile('bio', user.bio || '');
+      setValueProfile('website', user.website || '');
+      setValueProfile('location', user.location || '');
+      setValueProfile('skills', user.skills?.join(', ') || '');
+      setValueProfile('hourly_rate', user.hourly_rate?.toString() || '');
+      setValueProfile('availability', (user.availability as 'available' | 'busy' | 'unavailable') || 'available');
       if (user.avatar_url) setAvatarPreview(user.avatar_url);
     }
   }, [user, setValueProfile]);
@@ -109,7 +105,7 @@ export function SettingsPage() {
         hourly_rate: data.hourly_rate ? parseFloat(data.hourly_rate) : undefined,
         availability: data.availability,
       };
-      await api.updateUser(user!.id, { profile: profileData });
+      await userService.updateProfile(user!.id, profileData);
       await refreshUser();
       toast.success('Profile updated successfully!');
     } catch (error: any) {
@@ -119,7 +115,7 @@ export function SettingsPage() {
     }
   };
 
-  const onSubmitPassword = async (data: PasswordForm) => {
+  const onSubmitPassword = async (_data: PasswordForm) => {
     setIsSaving(true);
     try {
       // This would call a password change endpoint
@@ -132,7 +128,7 @@ export function SettingsPage() {
     }
   };
 
-  const onSubmitNotifications = async (data: NotificationForm) => {
+  const onSubmitNotifications = async (_data: NotificationForm) => {
     setIsSaving(true);
     try {
       // await api.updateNotifications(data);
@@ -421,27 +417,8 @@ export function SettingsPage() {
 
                 <div className="border-t border-gray-200 pt-8">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h3>
-                  <div className="space-y-4">
-                    {[
-                      { provider: 'Google', connected: !!user?.google_id, icon: '🌐' },
-                      { provider: 'GitHub', connected: !!user?.github_id, icon: '🐙' },
-                      { provider: 'Telegram', connected: !!user?.telegram_id, icon: '📱' },
-                    ].map((account) => (
-                      <div key={account.provider} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{account.icon}</span>
-                          <div>
-                            <p className="font-medium text-gray-900">{account.provider}</p>
-                            <p className="text-sm text-gray-500">
-                              {account.connected ? 'Connected' : 'Not connected'}
-                            </p>
-                          </div>
-                        </div>
-                        <button className={`btn-secondary text-sm ${account.connected ? 'text-red-600 hover:bg-red-50 border-red-200' : ''}`}>
-                          {account.connected ? 'Disconnect' : 'Connect'}
-                        </button>
-                      </div>
-                    ))}
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600">Social login connections are managed during login. This feature will be available soon.</p>
                   </div>
                 </div>
 
@@ -507,6 +484,3 @@ export function SettingsPage() {
     </div>
   );
 }
-
-// Need to import Link
-import { Link } from '@tanstack/react-router';

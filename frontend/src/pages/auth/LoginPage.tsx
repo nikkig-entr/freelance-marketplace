@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { AuthLayout } from '@/components/layout/Layout';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
@@ -41,7 +41,7 @@ export function LoginPage() {
     try {
       await login(data.email, data.password);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate({ to: '/' });
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Invalid email or password';
       toast.error(message);
@@ -55,13 +55,13 @@ export function LoginPage() {
       <Card padding="lg">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center">
-              <SparklesIcon className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+              <SparklesIcon className="w-6 h-6 text-[var(--color-bg)]" />
             </div>
-            <span className="font-heading font-bold text-xl text-secondary-900">FreelanceHub</span>
+            <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
           </Link>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">Welcome back</h1>
-          <p className="mt-2 text-secondary-600">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Welcome back</h1>
+          <p className="mt-2 text-[var(--color-text-muted)]">Sign in to your account to continue</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -84,7 +84,7 @@ export function LoginPage() {
               rightIcon={
                 <button
                   type="button"
-                  className="text-secondary-400 hover:text-secondary-600"
+                  className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -99,12 +99,12 @@ export function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
                 {...register('remember')}
               />
-              <span className="text-sm text-secondary-600">Remember me</span>
+              <span className="text-sm text-[var(--color-text-muted)]">Remember me</span>
             </label>
-            <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+            <Link to="/forgot-password" className="text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hover)]">
               Forgot password?
             </Link>
           </div>
@@ -115,9 +115,9 @@ export function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-secondary-600">
+          <p className="text-[var(--color-text-muted)]">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link to="/register" className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium">
               Sign up free
             </Link>
           </p>
@@ -126,10 +126,10 @@ export function LoginPage() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-secondary-200" />
+              <div className="w-full border-t border-[var(--color-border)]" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-secondary-500">Or continue with</span>
+              <span className="px-4 bg-[var(--color-bg)] text-[var(--color-text-subtle)]">Or continue with</span>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">

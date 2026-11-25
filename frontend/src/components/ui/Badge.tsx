@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   dot?: boolean;
@@ -18,12 +18,10 @@ export function Badge({
   dotColor,
 }: BadgeProps) {
   const variantClasses = {
-    primary: 'bg-amber/10 text-amber border border-amber/20',
-    success: 'bg-teal/10 text-teal border border-teal/20',
-    warning: 'bg-amber/10 text-amber border border-amber/20',
-    danger: 'bg-danger-500/10 text-danger-500 border border-danger-500/20',
-    secondary: 'bg-white/[0.05] text-muted border border-white/[0.1]',
-    outline: 'bg-transparent text-cream border border-white/[0.15]',
+    primary: 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] border border-[var(--color-accent)]/30',
+    secondary: 'glass text-[var(--color-text-muted)] border-[var(--glass-border)]',
+    outline: 'bg-transparent text-[var(--color-text)] border border-[var(--color-border)]',
+    danger: 'bg-[var(--color-gray-800)] text-[var(--color-gray-400)] border border-[var(--color-border)]',
   };
 
   const sizeClasses = {
@@ -35,7 +33,7 @@ export function Badge({
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1.5 font-medium rounded-full',
+        'inline-flex items-center gap-1.5 font-medium rounded-full border',
         variantClasses[variant],
         sizeClasses[size],
         className
@@ -44,7 +42,7 @@ export function Badge({
       {dot && (
         <span
           className={clsx('w-1.5 h-1.5 rounded-full', dotColor)}
-          style={{ backgroundColor: dotColor }}
+          style={{ backgroundColor: dotColor || 'var(--color-accent)' }}
         />
       )}
       {children}
@@ -63,22 +61,22 @@ export function StatusBadge({
 }) {
   const statusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
     draft: { label: 'Draft', variant: 'secondary' },
-    open: { label: 'Open', variant: 'success' },
+    open: { label: 'Open', variant: 'primary' },
     in_progress: { label: 'In Progress', variant: 'primary' },
-    in_review: { label: 'In Review', variant: 'warning' },
-    completed: { label: 'Completed', variant: 'success' },
+    in_review: { label: 'In Review', variant: 'secondary' },
+    completed: { label: 'Completed', variant: 'primary' },
     cancelled: { label: 'Cancelled', variant: 'danger' },
     disputed: { label: 'Disputed', variant: 'danger' },
-    pending: { label: 'Pending', variant: 'warning' },
-    accepted: { label: 'Accepted', variant: 'success' },
+    pending: { label: 'Pending', variant: 'secondary' },
+    accepted: { label: 'Accepted', variant: 'primary' },
     rejected: { label: 'Rejected', variant: 'danger' },
     withdrawn: { label: 'Withdrawn', variant: 'secondary' },
     shortlisted: { label: 'Shortlisted', variant: 'primary' },
-    active: { label: 'Active', variant: 'success' },
-    past_due: { label: 'Past Due', variant: 'warning' },
+    active: { label: 'Active', variant: 'primary' },
+    past_due: { label: 'Past Due', variant: 'danger' },
     unpaid: { label: 'Unpaid', variant: 'danger' },
     trialing: { label: 'Trialing', variant: 'primary' },
-    incomplete: { label: 'Incomplete', variant: 'warning' },
+    incomplete: { label: 'Incomplete', variant: 'secondary' },
     incomplete_expired: { label: 'Expired', variant: 'danger' },
     processing: { label: 'Processing', variant: 'primary' },
     failed: { label: 'Failed', variant: 'danger' },
@@ -101,7 +99,7 @@ export function PlanBadge({
   const planConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
     starter: { label: 'Starter', variant: 'secondary' },
     pro: { label: 'Pro', variant: 'primary' },
-    agency: { label: 'Agency', variant: 'success' },
+    agency: { label: 'Agency', variant: 'primary' },
   };
 
   const config = planConfig[plan];

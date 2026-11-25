@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { AuthLayout } from '@/components/layout/Layout';
-import { useAuth } from '@/context/AuthContext';
-import { UserRole } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
@@ -28,13 +27,13 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 const roleOptions = [
   {
-    value: 'freelancer' as UserRole,
+    value: 'freelancer' as const,
     label: 'I want to find work',
     description: 'Get hired for projects, build your portfolio',
     icon: UserIcon,
   },
   {
-    value: 'client' as UserRole,
+    value: 'client' as const,
     label: 'I want to hire talent',
     description: 'Post projects, find skilled freelancers',
     icon: BuildingOfficeIcon,
@@ -46,7 +45,6 @@ export function RegisterPage() {
   const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('freelancer');
 
   const {
     register,
@@ -75,7 +73,7 @@ export function RegisterPage() {
         role: data.role,
       });
       toast.success('Account created successfully!');
-      navigate('/dashboard');
+      navigate({ to: '/' });
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Registration failed. Please try again.';
       toast.error(message);
@@ -89,13 +87,13 @@ export function RegisterPage() {
       <Card padding="lg">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center">
-              <SparklesIcon className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+              <SparklesIcon className="w-6 h-6 text-[var(--color-bg)]" />
             </div>
-            <span className="font-heading font-bold text-xl text-secondary-900">FreelanceHub</span>
+            <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
           </Link>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">Create your account</h1>
-          <p className="mt-2 text-secondary-600">Join thousands of freelancers and clients</p>
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Create your account</h1>
+          <p className="mt-2 text-[var(--color-text-muted)]">Join thousands of freelancers and clients</p>
         </div>
 
         {/* Role Selection */}
@@ -110,31 +108,31 @@ export function RegisterPage() {
                 className={`
                   relative p-4 rounded-xl border-2 transition-all duration-200 text-left
                   ${watchedRole === option.value
-                    ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-500/20'
-                    : 'border-secondary-200 hover:border-secondary-300'
+                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-muted)] ring-2 ring-[var(--color-accent)]/20'
+                    : 'border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
                   }
                 `}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center">
                     {watchedRole === option.value ? (
-                      <div className="w-full h-full rounded-lg bg-primary-600 flex items-center justify-center">
-                        <option.icon className="w-5 h-5 text-white" />
+                      <div className="w-full h-full rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+                        <option.icon className="w-5 h-5 text-[var(--color-bg)]" />
                       </div>
                     ) : (
-                      <div className="w-full h-full rounded-lg bg-secondary-100 flex items-center justify-center">
-                        <option.icon className="w-5 h-5 text-secondary-600" />
+                      <div className="w-full h-full rounded-lg bg-[var(--color-surface-muted)] flex items-center justify-center">
+                        <option.icon className="w-5 h-5 text-[var(--color-text-muted)]" />
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-secondary-900">{option.label}</p>
-                    <p className="text-xs text-secondary-500">{option.description}</p>
+                    <p className="font-medium text-[var(--color-text)]">{option.label}</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">{option.description}</p>
                   </div>
                 </div>
                 {watchedRole === option.value && (
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center">
+                    <svg className="w-3 h-3 text-[var(--color-bg)]" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -142,7 +140,7 @@ export function RegisterPage() {
               </button>
             ))}
           </div>
-          {errors.role && <p className="mt-2 text-sm text-danger-600" role="alert">{errors.role.message}</p>}
+          {errors.role && <p className="mt-2 text-sm text-[var(--color-error)]" role="alert">{errors.role.message}</p>}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -174,7 +172,7 @@ export function RegisterPage() {
               rightIcon={
                 <button
                   type="button"
-                  className="text-secondary-400 hover:text-secondary-600"
+                  className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -184,9 +182,9 @@ export function RegisterPage() {
               {...register('password')}
             />
             {watch('password') && (
-              <div className="mt-2 h-1.5 rounded-full bg-secondary-200 overflow-hidden">
+              <div className="mt-2 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
                 <div
-                  className="h-full bg-primary-500 transition-all duration-300"
+                  className="h-full bg-[var(--color-accent)] transition-all duration-300"
                   style={{
                     width: `${Math.min(100, (watch('password').length / 16) * 100)}%`,
                   }}
@@ -208,21 +206,21 @@ export function RegisterPage() {
             <input
               type="checkbox"
               id="terms"
-              className="mt-1 h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+              className="mt-1 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
               {...register('terms')}
             />
-            <label htmlFor="terms" className="text-sm text-secondary-600">
+            <label htmlFor="terms" className="text-sm text-[var(--color-text-muted)]">
               I agree to the{' '}
-              <Link to="/terms" className="text-primary-600 hover:underline">
+              <Link to="/terms" className="text-[var(--color-accent)] hover:underline">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-primary-600 hover:underline">
+              <Link to="/privacy" className="text-[var(--color-accent)] hover:underline">
                 Privacy Policy
               </Link>
             </label>
           </div>
-          {errors.terms && <p className="text-sm text-danger-600" role="alert">{errors.terms.message}</p>}
+          {errors.terms && <p className="text-sm text-[var(--color-error)]" role="alert">{errors.terms.message}</p>}
 
           <Button type="submit" fullWidth size="lg" loading={isLoading}>
             Create Account
@@ -230,9 +228,9 @@ export function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-secondary-600">
+          <p className="text-[var(--color-text-muted)]">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link to="/login" className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium">
               Sign in
             </Link>
           </p>

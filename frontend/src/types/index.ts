@@ -64,6 +64,17 @@ export interface Project {
   published_at: string | null;
   started_at: string | null;
   completed_at: string | null;
+  // Additional fields returned by API
+  requirements?: string | null;
+  skills?: string[];
+  bid_count?: number;
+  view_count?: number;
+  freelancer?: User;
+  accepted_bid?: {
+    accepted_at: string;
+  };
+  deadline_days?: number;
+  category_id?: number;
 }
 
 export interface Bid {
@@ -82,6 +93,10 @@ export interface Bid {
   freelancer?: User;
   created_at: string;
   updated_at: string;
+  // Additional fields returned by API
+  price_cents?: number;
+  delivery_days?: number;
+  portfolio_urls?: string[];
 }
 
 export interface Message {
@@ -238,4 +253,34 @@ export interface ProjectFilters {
   page_size?: number;
   sort_by?: 'created_at' | 'budget' | 'deadline' | 'bids_count';
   sort_order?: 'asc' | 'desc';
+}
+
+export function getStatusColor(status: ProjectStatus): string {
+  const colors: Record<ProjectStatus, string> = {
+    draft: 'text-[var(--color-text-muted)]',
+    open: 'text-[var(--color-accent)]',
+    in_progress: 'text-[var(--color-accent)]',
+    in_review: 'text-[var(--color-text-muted)]',
+    completed: 'text-[var(--color-accent)]',
+    cancelled: 'text-[var(--color-gray-500)]',
+    disputed: 'text-[var(--color-gray-500)]',
+  };
+  return colors[status] || 'text-[var(--color-text-muted)]';
+}
+
+export function formatCurrency(cents: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
+export function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }

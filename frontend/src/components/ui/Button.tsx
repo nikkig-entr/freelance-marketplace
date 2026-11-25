@@ -1,13 +1,17 @@
-import { forwardRef, ButtonHTMLAttributes } from 'react';
+import { forwardRef, ButtonHTMLAttributes, isValidElement, cloneElement, Children } from 'react';
 import { clsx } from 'clsx';
 
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
+  asChild?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -20,6 +24,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       fullWidth = false,
       disabled,
+      asChild = false,
       className,
       children,
       ...props
@@ -27,59 +32,104 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-obsidian disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed';
 
-    const variantStyles = {
-      primary: 'bg-amber text-obsidian hover:bg-amber-400 focus:ring-amber/50 shadow-lg shadow-amber/25 hover:shadow-amber-glow',
-      secondary: 'bg-white/[0.05] text-cream border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.2] focus:ring-white/20',
-      outline: 'border-2 border-white/[0.15] text-cream hover:bg-white/[0.05] hover:border-amber/50 focus:ring-amber/30',
-      danger: 'bg-danger-500 text-white hover:bg-danger-600 focus:ring-danger-500/50',
-      ghost: 'text-muted hover:text-cream hover:bg-white/[0.03] focus:ring-white/10',
+    const variantStyles: Record<ButtonVariant, string> = {
+      primary: 'bg-[var(--color-accent)] text-[var(--color-text-inverse)] hover:bg-[var(--color-accent-hover)] focus-visible:ring-[var(--color-accent)] shadow-lg shadow-[var(--color-accent)]/25 hover:shadow-[var(--color-accent)]/35',
+      secondary: 'glass text-[var(--color-text)] border-[var(--glass-border)] hover:bg-[var(--glass-bg-strong)] hover:border-[var(--glass-border-hover)] focus-visible:ring-[var(--color-text-muted)]',
+      outline: 'border-2 border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-muted)] focus-visible:ring-[var(--color-accent)]',
+      danger: 'bg-[var(--color-gray-800)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-gray-700)] hover:border-[var(--color-border-hover)] focus-visible:ring-[var(--color-text-muted)]',
+      ghost: 'bg-transparent border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] focus-visible:ring-[var(--color-text-muted)]',
     };
 
-    const sizeStyles = {
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-5 py-3 text-base',
-      lg: 'px-7 py-4 text-lg',
-      xl: 'px-10 py-5 text-xl',
+    const sizeStyles: Record<ButtonSize, string> = {
+      sm: 'px-3 py-2 text-sm gap-1.5',
+      md: 'px-5 py-3 text-base gap-2',
+      lg: 'px-7 py-4 text-lg gap-2.5',
+      xl: 'px-10 py-5 text-xl gap-3',
     };
 
     const widthStyles = fullWidth ? 'w-full' : '';
+
+    const loadingSpinner = (
+      <svg
+        className="animate-spin h-4 w-4 sm:h-5 sm:w-5"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
+      </svg>
+    );
+
+    const buttonContent = (
+      <>
+        {loading ? loadingSpinner : leftIcon}
+        {children}
+        {!loading && rightIcon}
+      </>
+    );
+
+    // When asChild is true, we need to ensure only one child is passed to Slot
+    // Clone the single child element and inject the necessary props
+    if (asChild) {
+      const childArray = Children.toArray(children);
+      if (childArray.length !== 1) {
+        // Fallback: render as regular button if not exactly one child
+        return (
+          <button
+            ref={ref}
+            className={clsx(baseStyles, variantStyles[variant], sizeStyles[size], widthStyles, className)}
+            disabled={disabled || loading}
+            aria-busy={loading}
+            {...props}
+          >
+            {buttonContent}
+          </button>
+        );
+      }
+
+      const child = childArray[0];
+      if (!isValidElement(child)) {
+        return <>{child}</>;
+      }
+
+      // Clone the child element and merge props
+      const childProps = child.props as Record<string, unknown>;
+      const mergedClassName = clsx(
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
+        widthStyles,
+        className,
+        childProps.className as string | undefined
+      );
+
+      return cloneElement(child as React.ReactElement<any>, {
+        ref,
+        className: mergedClassName,
+        disabled: disabled || loading,
+        'aria-busy': loading,
+        ...props,
+        ...childProps,
+      });
+    }
 
     return (
       <button
         ref={ref}
         className={clsx(baseStyles, variantStyles[variant], sizeStyles[size], widthStyles, className)}
         disabled={disabled || loading}
+        aria-busy={loading}
         {...props}
       >
-        {loading ? (
-          <svg
-            className="animate-spin h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        ) : (
-          leftIcon
-        )}
-        {children}
-        {!loading && rightIcon}
+        {buttonContent}
       </button>
     );
   }

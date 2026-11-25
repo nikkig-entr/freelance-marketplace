@@ -1,33 +1,33 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate, useSearch } from '@tanstack/react-router';
 import { useAuth } from '../../contexts/AuthContext';
-import { api } from '../../services/api';
-import { Project, Bid, BidStatus, formatCurrency, formatDate, getStatusColor } from '../../types';
+import { projectService, bidService } from '../../services/api';
+import { Project, Bid, ProjectStatus, formatCurrency, formatDate, getStatusColor } from '../../types';
 import {
   ArrowLeftIcon,
   UserCircleIcon,
   CalendarDaysIcon,
   CurrencyDollarIcon,
   ClockIcon,
-  MapPinIcon,
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   XCircleIcon,
   DocumentTextIcon,
-  ArrowRightIcon,
-  EyeIcon,
-  PencilIcon,
   ShareIcon,
   FlagIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
+interface ProjectDetailSearch {
+  tab?: string;
+}
+
 export function ProjectDetailPage() {
   const params = useParams({ from: '/projects/$projectId' });
-  const search = useSearch({ from: '/projects/$projectId' });
+  const search = useSearch({ strict: false }) as ProjectDetailSearch;
   const navigate = useNavigate();
-  const { user, hasRole, canUseAI, getBidLimit } = useAuth();
+  const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,11 +49,11 @@ export function ProjectDetailPage() {
 
   const fetchProject = async () => {
     try {
-      const data = await api.getProject(projectId);
-      setProject(data);
+      const data = await projectService.get(String(projectId));
+      setProject(data as Project);
     } catch (error) {
       toast.error('Failed to load project');
-      navigate('/projects');
+      navigate({ to: '/projects' });
     } finally {
       setIsLoading(false);
     }
@@ -61,8 +61,8 @@ export function ProjectDetailPage() {
 
   const fetchBids = async () => {
     try {
-      const data = await api.getBids(projectId);
-      setBids(data.items || []);
+      const data = await bidService.list(String(projectId));
+      setBids((data as any).items || []);
     } catch (error) {
       console.error('Failed to fetch bids:', error);
     }
@@ -71,7 +71,7 @@ export function ProjectDetailPage() {
   const handleBidSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      navigate('/login', { search: { redirect: `/projects/${projectId}` } });
+      navigate({ to: '/login', search: { redirect: `/projects/${projectId}` } });
       return;
     }
     if (user.role !== 'freelancer' && user.role !== 'admin') {
@@ -80,8 +80,7 @@ export function ProjectDetailPage() {
     }
     setIsSubmittingBid(true);
     try {
-      await api.createBid({
-        project_id: projectId,
+      await bidService.create(String(projectId), {
         price_cents: parseInt(bidForm.price_cents) * 100,
         delivery_days: parseInt(bidForm.delivery_days),
         cover_letter: bidForm.cover_letter,
@@ -101,7 +100,7 @@ export function ProjectDetailPage() {
 
   const handleAcceptBid = async (bidId: number) => {
     try {
-      await api.acceptBid(bidId);
+      await bidService.accept(String(bidId));
       toast.success('Bid accepted!');
       fetchProject();
       fetchBids();
@@ -112,7 +111,7 @@ export function ProjectDetailPage() {
 
   const handleRejectBid = async (bidId: number) => {
     try {
-      await api.rejectBid(bidId);
+      await bidService.reject(String(bidId));
       toast.success('Bid rejected');
       fetchBids();
     } catch (error: any) {
@@ -122,7 +121,7 @@ export function ProjectDetailPage() {
 
   const handleWithdrawBid = async (bidId: number) => {
     try {
-      await api.withdrawBid(bidId);
+      await bidService.withdraw(String(bidId));
       toast.success('Bid withdrawn');
       fetchBids();
     } catch (error: any) {
@@ -136,17 +135,17 @@ export function ProjectDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-8">
-          <div className="h-8 bg-gray-200 rounded w-1/4" />
+          <div className="h-8 bg-[var(--color-border)] rounded w-1/4" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="h-64 bg-gray-200 rounded-xl" />
-              <div className="h-32 bg-gray-200 rounded-xl" />
+              <div className="h-64 bg-[var(--color-border)] rounded-xl" />
+              <div className="h-32 bg-[var(--color-border)] rounded-xl" />
             </div>
             <div className="space-y-6">
-              <div className="h-48 bg-gray-200 rounded-xl" />
-              <div className="h-48 bg-gray-200 rounded-xl" />
+              <div className="h-48 bg-[var(--color-border)] rounded-xl" />
+              <div className="h-48 bg-[var(--color-border)] rounded-xl" />
             </div>
           </div>
         </div>
@@ -156,9 +155,9 @@ export function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Project not found</h2>
+          <h2 className="text-2xl font-bold text-[var(--color-text)]">Project not found</h2>
           <Link to="/projects" className="btn-primary mt-4 inline-block">Back to Projects</Link>
         </div>
       </div>
@@ -167,17 +166,17 @@ export function ProjectDetailPage() {
 
   const tabs = [
     { id: 'details', label: 'Details', icon: DocumentTextIcon },
-    { id: 'bids', label: `Bids (${project.bid_count})`, icon: ChatBubbleLeftRightIcon },
+    { id: 'bids', label: `Bids (${project.bids_count})`, icon: ChatBubbleLeftRightIcon },
     { id: 'chat', label: 'Chat', icon: ChatBubbleLeftRightIcon },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-16 z-30">
+      <header className="bg-[var(--color-surface)] border-b border-[var(--color-border)] sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 py-4">
-            <Link to="/projects" className="text-gray-500 hover:text-gray-700">
+            <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
               <ArrowLeftIcon className="w-6 h-6" />
             </Link>
             <div className="flex-1">
@@ -185,11 +184,11 @@ export function ProjectDetailPage() {
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => navigate({ search: { ...search, tab: tab.id } })}
+                    onClick={() => navigate({ to: '.', search: { tab: tab.id } } as any)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-primary-50 text-primary-600'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)]'
+                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)]'
                     }`}
                   >
                     <tab.icon className="w-5 h-5" />
@@ -199,8 +198,9 @@ export function ProjectDetailPage() {
               </nav>
             </div>
             {isOwner && (
-              <Link to={`/projects/${projectId}/edit`} className="btn-secondary flex items-center gap-2">
-                <PencilIcon className="w-5 h-5" />
+              <Link to="/projects/$projectId/edit"
+params={{ projectId: String(projectId) }} search={{ tab: 'details' }} className="btn-secondary flex items-center gap-2">
+                <DocumentTextIcon className="w-5 h-5" />
                 Edit
               </Link>
             )}
@@ -217,15 +217,16 @@ export function ProjectDetailPage() {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-2xl font-bold text-gray-900">{project.title}</h1>
+                    <h1 className="text-2xl font-bold text-[var(--color-text)]">{project.title}</h1>
                     <span className={`badge ${getStatusColor(project.status)}`}>
                       {project.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
                     <Link
-                      to={`/profile/${project.client_id}`}
-                      className="flex items-center gap-1 hover:text-gray-700"
+                      to="/profile/$userId"
+params={{ userId: String(project.client_id) }}
+                      className="flex items-center gap-1 hover:text-[var(--color-text)]"
                     >
                       <UserCircleIcon className="w-4 h-4" />
                       {project.client?.full_name || 'Client'}
@@ -253,19 +254,19 @@ export function ProjectDetailPage() {
                 )}
               </div>
 
-              <p className="text-gray-700 whitespace-pre-wrap mb-6">{project.description}</p>
+              <p className="text-[var(--color-text-muted)] whitespace-pre-wrap mb-6">{project.description}</p>
 
               {project.requirements && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium text-gray-900 mb-2">Requirements</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{project.requirements}</p>
+                <div className="mb-6 p-4 bg-[var(--color-surface-muted)] rounded-lg">
+                  <h3 className="font-medium text-[var(--color-text)] mb-2">Requirements</h3>
+                  <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">{project.requirements}</p>
                 </div>
               )}
 
               {/* Skills */}
-              {project.skills.length > 0 && (
+              {project.skills && project.skills.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                  <h3 className="font-medium text-[var(--color-text)] mb-2 flex items-center gap-2">
                     Skills Required
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -277,34 +278,34 @@ export function ProjectDetailPage() {
               )}
 
               {/* Meta Info */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[var(--color-border)]">
                 <div>
-                  <p className="text-sm text-gray-500">Budget</p>
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(project.budget_min)}
-                    {project.budget_max && ` - ${formatCurrency(project.budget_max)}`}
+                  <p className="text-sm text-[var(--color-text-muted)]">Budget</p>
+                  <p className="font-semibold text-[var(--color-text)]">
+                    {project.budget_min !== null ? formatCurrency(project.budget_min) : 'N/A'}
+                    {project.budget_max !== null && ` - ${formatCurrency(project.budget_max)}`}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Type</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-sm text-[var(--color-text-muted)]">Type</p>
+                  <p className="font-semibold text-[var(--color-text)]">
                     {project.is_fixed_price ? 'Fixed Price' : 'Hourly'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Bids</p>
-                  <p className="font-semibold text-gray-900">{project.bid_count}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Bids</p>
+                  <p className="font-semibold text-[var(--color-text)]">{project.bids_count}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Views</p>
-                  <p className="font-semibold text-gray-900">{project.view_count}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Views</p>
+                  <p className="font-semibold text-[var(--color-text)]">{project.views_count}</p>
                 </div>
               </div>
             </div>
 
             {/* Tab Content */}
             <div className="card">
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-[var(--color-border)]">
                 {activeTab === 'details' && (
                   <div className="space-y-6">
                     {project.freelancer && (
@@ -321,13 +322,13 @@ export function ProjectDetailPage() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-3">Full Description</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap">{project.description}</p>
+                      <h3 className="font-semibold text-[var(--color-text)] mb-3">Full Description</h3>
+                      <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">{project.description}</p>
                     </div>
                     {project.requirements && (
                       <div>
-                        <h3 className="font-semibold text-gray-900 mb-3">Requirements</h3>
-                        <p className="text-gray-700 whitespace-pre-wrap">{project.requirements}</p>
+                        <h3 className="font-semibold text-[var(--color-text)] mb-3">Requirements</h3>
+                        <p className="text-[var(--color-text-muted)] whitespace-pre-wrap">{project.requirements}</p>
                       </div>
                     )}
                   </div>
@@ -337,48 +338,49 @@ export function ProjectDetailPage() {
                   <div>
                     {bids.length === 0 ? (
                       <div className="p-12 text-center">
-                        <ChatBubbleLeftRightIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900">No bids yet</h3>
-                        <p className="mt-1 text-gray-500">Be the first to bid on this project!</p>
+                        <ChatBubbleLeftRightIcon className="w-12 h-12 text-[var(--color-text-subtle)] mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-[var(--color-text)]">No bids yet</h3>
+                        <p className="mt-1 text-[var(--color-text-muted)]">Be the first to bid on this project!</p>
                       </div>
                     ) : (
-                      <div className="divide-y divide-gray-200">
+                      <div className="divide-y divide-[var(--color-border)]">
                         {bids.map((bid) => (
-                          <div key={bid.id} className="p-6 hover:bg-gray-50">
+                          <div key={bid.id} className="p-6 hover:bg-[var(--color-surface-muted)]">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                  <Link to={`/profile/${bid.freelancer_id}`} className="flex items-center gap-2">
-                                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                  <Link to="/profile/$userId"
+params={{ userId: String(bid.freelancer_id) }} className="flex items-center gap-2">
+                                    <div className="w-10 h-10 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
                                       {bid.freelancer?.avatar_url ? (
                                         <img src={bid.freelancer.avatar_url} alt="" className="w-10 h-10 rounded-full" />
                                       ) : (
-                                        <UserCircleIcon className="w-6 h-6 text-primary-600" />
+                                        <UserCircleIcon className="w-6 h-6 text-[var(--color-accent)]" />
                                       )}
                                     </div>
                                     <div>
-                                      <p className="font-medium text-gray-900">{bid.freelancer?.full_name || 'Freelancer'}</p>
-                                      <p className="text-sm text-gray-500">{bid.freelancer?.rating || 0} ⭐ · {bid.freelancer?.completed_projects || 0} completed</p>
+                                      <p className="font-medium text-[var(--color-text)]">{bid.freelancer?.full_name || 'Freelancer'}</p>
+                                      <p className="text-sm text-[var(--color-text-muted)]">{bid.freelancer?.rating ?? 0} ⭐ · {bid.freelancer?.completed_projects ?? 0} completed</p>
                                     </div>
                                   </Link>
-                                  <span className={`badge ${getStatusColor(bid.status)}`}>
+                                  <span className={`badge ${getStatusColor(bid.status as unknown as ProjectStatus)}`}>
                                     {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
                                   </span>
                                 </div>
-                                <p className="text-gray-700 mb-3">{bid.cover_letter}</p>
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                                <p className="text-[var(--color-text-muted)] mb-3">{bid.cover_letter}</p>
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)]">
                                   <span className="flex items-center gap-1">
                                     <CurrencyDollarIcon className="w-4 h-4" />
-                                    {formatCurrency(bid.price_cents)}
+                                    {formatCurrency(bid.amount_cents)}
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <ClockIcon className="w-4 h-4" />
-                                    {bid.delivery_days} days
+                                    {bid.proposed_timeline_days} days
                                   </span>
-                                  {bid.portfolio_urls.length > 0 && (
+                                  {bid.attachments.length > 0 && (
                                     <span className="flex items-center gap-1">
                                       <DocumentTextIcon className="w-4 h-4" />
-                                      {bid.portfolio_urls.length} portfolio items
+                                      {bid.attachments.length} portfolio items
                                     </span>
                                   )}
                                 </div>
@@ -421,7 +423,8 @@ export function ProjectDetailPage() {
                   <div className="p-6">
                     {user ? (
                       <Link
-                        to={`/chat/${projectId}`}
+                        to="/chat/$projectId"
+params={{ projectId: String(projectId) }}
                         className="btn-primary flex items-center justify-center gap-2 w-full"
                       >
                         <ChatBubbleLeftRightIcon className="w-5 h-5" />
@@ -429,7 +432,7 @@ export function ProjectDetailPage() {
                       </Link>
                     ) : (
                       <div className="text-center">
-                        <p className="text-gray-600 mb-4">Sign in to chat with the client/freelancer</p>
+                        <p className="text-[var(--color-text-muted)] mb-4">Sign in to chat with the client/freelancer</p>
                         <Link to="/login" className="btn-primary inline-block">
                           Sign In
                         </Link>
@@ -445,74 +448,75 @@ export function ProjectDetailPage() {
           <aside className="space-y-6">
             {/* Client Info */}
             <div className="card p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Client</h3>
-              <Link to={`/profile/${project.client_id}`} className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
+              <h3 className="font-semibold text-[var(--color-text)] mb-4">Client</h3>
+              <Link to="/profile/$userId"
+params={{ userId: String(project.client_id) }} className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
                   {project.client?.avatar_url ? (
                     <img src={project.client.avatar_url} alt="" className="w-14 h-14 rounded-full" />
                   ) : (
-                    <UserCircleIcon className="w-8 h-8 text-primary-600" />
+                    <UserCircleIcon className="w-8 h-8 text-[var(--color-accent)]" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{project.client?.full_name || 'Client'}</p>
-                  <p className="text-sm text-gray-500">@{project.client?.email?.split('@')[0] || 'user'}</p>
+                  <p className="font-medium text-[var(--color-text)] truncate">{project.client?.full_name || 'Client'}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">@{project.client?.email?.split('@')[0] || 'user'}</p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="flex items-center gap-1 text-sm text-gray-500">
-                      {project.client?.rating || 0} ⭐
+                    <span className="flex items-center gap-1 text-sm text-[var(--color-text-muted)]">
+                      {project.client?.rating ?? 0} ⭐
                     </span>
-                    <span className="text-sm text-gray-400">·</span>
-                    <span className="text-sm text-gray-500">{project.client?.completed_projects || 0} completed</span>
+                    <span className="text-sm text-[var(--color-text-subtle)]">·</span>
+                    <span className="text-sm text-[var(--color-text-muted)]">{project.client?.completed_projects ?? 0} completed</span>
                   </div>
                 </div>
               </Link>
-              <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-4">
+              <div className="mt-4 pt-4 border-t border-[var(--color-border)] grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Member since</p>
-                  <p className="font-medium text-gray-900">{formatDate(project.client?.created_at || '')}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Member since</p>
+                  <p className="font-medium text-[var(--color-text)]">{formatDate(project.client?.created_at || '')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Verification</p>
-                  <p className="font-medium text-gray-900">{project.client?.is_verified ? 'Verified' : 'Not verified'}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">Verification</p>
+                  <p className="font-medium text-[var(--color-text)]">{project.client?.is_verified ? 'Verified' : 'Not verified'}</p>
                 </div>
               </div>
             </div>
 
             {/* Project Stats */}
             <div className="card p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Project Details</h3>
+              <h3 className="font-semibold text-[var(--color-text)] mb-4">Project Details</h3>
               <dl className="space-y-4">
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Budget Range</dt>
-                  <dd className="font-medium text-gray-900">
-                    {formatCurrency(project.budget_min)}
-                    {project.budget_max && ` - ${formatCurrency(project.budget_max)}`}
+                  <dt className="text-[var(--color-text-muted)]">Budget Range</dt>
+                  <dd className="font-medium text-[var(--color-text)]">
+                    {project.budget_min !== null ? formatCurrency(project.budget_min) : 'N/A'}
+                    {project.budget_max !== null && ` - ${formatCurrency(project.budget_max)}`}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Price Type</dt>
-                  <dd className="font-medium text-gray-900">{project.is_fixed_price ? 'Fixed Price' : 'Hourly'}</dd>
+                  <dt className="text-[var(--color-text-muted)]">Price Type</dt>
+                  <dd className="font-medium text-[var(--color-text)]">{project.is_fixed_price ? 'Fixed Price' : 'Hourly'}</dd>
                 </div>
                 {project.deadline_days && (
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Deadline</dt>
-                    <dd className="font-medium text-gray-900">{project.deadline_days} days</dd>
+                    <dt className="text-[var(--color-text-muted)]">Deadline</dt>
+                    <dd className="font-medium text-[var(--color-text)]">{project.deadline_days} days</dd>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <dt className="text-gray-500">Posted</dt>
-                  <dd className="font-medium text-gray-900">{formatDate(project.created_at)}</dd>
+                  <dt className="text-[var(--color-text-muted)]">Posted</dt>
+                  <dd className="font-medium text-[var(--color-text)]">{formatDate(project.created_at)}</dd>
                 </div>
                 {project.started_at && (
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Started</dt>
-                    <dd className="font-medium text-gray-900">{formatDate(project.started_at)}</dd>
+                    <dt className="text-[var(--color-text-muted)]">Started</dt>
+                    <dd className="font-medium text-[var(--color-text)]">{formatDate(project.started_at)}</dd>
                   </div>
                 )}
                 {project.completed_at && (
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">Completed</dt>
-                    <dd className="font-medium text-gray-900">{formatDate(project.completed_at)}</dd>
+                    <dt className="text-[var(--color-text-muted)]">Completed</dt>
+                    <dd className="font-medium text-[var(--color-text)]">{formatDate(project.completed_at)}</dd>
                   </div>
                 )}
               </dl>
@@ -520,7 +524,7 @@ export function ProjectDetailPage() {
 
             {/* Actions */}
             <div className="card p-6 space-y-3">
-              <h3 className="font-semibold text-gray-900 mb-3">Actions</h3>
+              <h3 className="font-semibold text-[var(--color-text)] mb-3">Actions</h3>
               {canBid && (
                 <button
                   onClick={() => setShowBidModal(true)}
@@ -532,7 +536,8 @@ export function ProjectDetailPage() {
               )}
               {user && (
                 <Link
-                  to={`/chat/${projectId}`}
+                  to="/chat/$projectId"
+params={{ projectId: String(projectId) }}
                   className="w-full btn-secondary flex items-center justify-center gap-2"
                 >
                   <ChatBubbleLeftRightIcon className="w-5 h-5" />
@@ -555,10 +560,10 @@ export function ProjectDetailPage() {
       {/* Bid Modal */}
       {showBidModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Place Your Bid</h2>
-              <button onClick={() => setShowBidModal(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-[var(--color-text)]">Place Your Bid</h2>
+              <button onClick={() => setShowBidModal(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
@@ -566,7 +571,7 @@ export function ProjectDetailPage() {
               <div>
                 <label htmlFor="bid-price" className="label">Your Price (USD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <input
                     id="bid-price"
                     type="number"

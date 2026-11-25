@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Message } from '../types';
 import { useAuth } from './AuthContext';
@@ -18,7 +18,7 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+const WS_URL = (import.meta as unknown as { env: Record<string, string | undefined> }).env.VITE_WS_URL || 'ws://localhost:8000';
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, tokens } = useAuth();

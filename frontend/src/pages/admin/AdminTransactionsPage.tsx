@@ -3,12 +3,20 @@ import { useQuery } from '@tanstack/react-query';
 import { MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, CalendarIcon, CurrencyDollarIcon, UserCircleIcon, CreditCardIcon, BanknotesIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { adminService } from '@/services/api';
 import { TransactionType, Transaction } from '@/types';
 import { formatCurrency, formatDate } from '@/utils/format';
+
+interface PaginatedTransactions {
+  items: Transaction[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
 
 const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
   deposit: 'Deposit',
@@ -44,6 +52,17 @@ const TYPE_FILTERS = [
   { value: 'referral_bonus', label: 'Referral Bonuses' },
 ];
 
+const BADGE_VARIANTS: Record<string, 'primary' | 'secondary' | 'outline' | 'danger'> = {
+  deposit: 'primary',
+  bid_bonus: 'primary',
+  referral_bonus: 'primary',
+  withdrawal: 'secondary',
+  platform_fee: 'secondary',
+  project_payment: 'outline',
+  project_refund: 'secondary',
+  subscription_payment: 'outline',
+};
+
 export function AdminTransactionsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -67,7 +86,7 @@ export function AdminTransactionsPage() {
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-transactions', params],
-    queryFn: () => adminService.getTransactions(params),
+    queryFn: () => adminService.getTransactions(params) as Promise<PaginatedTransactions>,
   });
 
   const transactions: Transaction[] = data?.items || [];
@@ -83,29 +102,13 @@ export function AdminTransactionsPage() {
     }
   };
 
-  const getTypeBadgeVariant = (type: TransactionType) => {
-    switch (type) {
-      case 'deposit':
-      case 'bid_bonus':
-      case 'referral_bonus':
-        return 'success';
-      case 'withdrawal':
-      case 'platform_fee':
-        return 'warning';
-      case 'project_payment':
-        return 'primary';
-      case 'project_refund':
-        return 'info';
-      case 'subscription_payment':
-        return 'default';
-      default:
-        return 'default';
-    }
+  const getTypeBadgeVariant = (type: TransactionType): 'primary' | 'secondary' | 'outline' | 'danger' => {
+    return BADGE_VARIANTS[type] || 'outline';
   };
 
   const handleExport = () => {
     const exportParams = { ...params, page: 1, page_size: 10000 };
-    const queryString = new URLSearchParams(exportParams as Record<string, string>).toString();
+    const queryString = new URLSearchParams(exportParams as unknown as Record<string, string>).toString();
     window.open(`/api/v1/admin/transactions/export?${queryString}`, '_blank');
   };
 
@@ -113,8 +116,8 @@ export function AdminTransactionsPage() {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="text-center py-16">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-secondary-500">Loading transactions...</p>
+          <div className="w-8 h-8 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-[var(--color-text-muted)]">Loading transactions...</p>
         </div>
       </div>
     );
@@ -125,7 +128,7 @@ export function AdminTransactionsPage() {
       <div className="max-w-7xl mx-auto">
         <Card>
           <div className="text-center py-12">
-            <p className="text-danger-600">Failed to load transactions</p>
+            <p className="text-[var(--color-accent)]">Failed to load transactions</p>
             <Button variant="outline" className="mt-4" onClick={() => refetch()}>Retry</Button>
           </div>
         </Card>
@@ -138,8 +141,8 @@ export function AdminTransactionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">Transactions</h1>
-          <p className="text-secondary-600">View and manage all platform transactions</p>
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Transactions</h1>
+          <p className="text-[var(--color-text-muted)]">View and manage all platform transactions</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" leftIcon={<ArrowDownTrayIcon className="w-5 h-5" />} onClick={handleExport}>
@@ -152,14 +155,14 @@ export function AdminTransactionsPage() {
       <Card className="p-4">
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
           <div className="relative flex-1 max-w-md">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" />
             <input
               type="search"
               placeholder="Search by user, description..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               onKeyDown={(e) => e.key === 'Enter' && setPage(1)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-secondary-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent text-[var(--color-text)] placeholder-[var(--color-text-subtle)] bg-[var(--color-bg)]"
             />
           </div>
 
@@ -205,14 +208,14 @@ export function AdminTransactionsPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-sm text-secondary-500 border-b border-secondary-200">
-                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-secondary-700" onClick={() => handleSort('created_at')}>
+              <tr className="text-left text-sm text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-[var(--color-text)]" onClick={() => handleSort('created_at')}>
                   Date {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="pb-3 pr-4 font-medium">User</th>
                 <th className="pb-3 pr-4 font-medium">Type</th>
                 <th className="pb-3 pr-4 font-medium">Description</th>
-                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-secondary-700 text-right" onClick={() => handleSort('amount_cents')}>
+                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-[var(--color-text)] text-right" onClick={() => handleSort('amount_cents')}>
                   Amount {sortBy === 'amount_cents' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="pb-3 pr-4 font-medium">Balance After</th>
@@ -220,29 +223,29 @@ export function AdminTransactionsPage() {
                 <th className="pb-3 font-medium">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-secondary-100">
+            <tbody className="divide-y divide-[var(--color-border)]">
               {transactions.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-secondary-100 flex items-center justify-center mx-auto mb-4">
-                      <CurrencyDollarIcon className="w-8 h-8 text-secondary-400" />
+                    <div className="w-16 h-16 rounded-full bg-[var(--color-surface-muted)] flex items-center justify-center mx-auto mb-4">
+                      <CurrencyDollarIcon className="w-8 h-8 text-[var(--color-text-subtle)]" />
                     </div>
-                    <p className="text-secondary-600">No transactions found</p>
-                    <p className="text-sm text-secondary-400 mt-1">Try adjusting your filters</p>
+                    <p className="text-[var(--color-text-muted)]">No transactions found</p>
+                    <p className="text-sm text-[var(--color-text-subtle)] mt-1">Try adjusting your filters</p>
                   </td>
                 </tr>
               ) : (
                 transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-secondary-50 transition-colors">
-                    <td className="py-4 pr-4 text-secondary-900 whitespace-nowrap">
+                  <tr key={transaction.id} className="hover:bg-[var(--color-surface-muted)] transition-colors">
+                    <td className="py-4 pr-4 text-[var(--color-text)] whitespace-nowrap">
                       {formatDate(transaction.created_at)}
                     </td>
                     <td className="py-4 pr-4">
                       <div className="flex items-center gap-2">
-                        <UserCircleIcon className="w-5 h-5 text-secondary-400" />
+                        <UserCircleIcon className="w-5 h-5 text-[var(--color-text-subtle)]" />
                         <div>
-                          <p className="font-medium text-secondary-900">User #{transaction.user_id}</p>
-                          <p className="text-xs text-secondary-500">ID: {transaction.uuid.slice(0, 8)}</p>
+                          <p className="font-medium text-[var(--color-text)]">User #{transaction.user_id}</p>
+                          <p className="text-xs text-[var(--color-text-subtle)]">ID: {transaction.uuid.slice(0, 8)}</p>
                         </div>
                       </div>
                     </td>
@@ -250,24 +253,24 @@ export function AdminTransactionsPage() {
                       <div className="flex items-center gap-2">
                         {(() => {
                           const Icon = TRANSACTION_TYPE_ICONS[transaction.type];
-                          return <Icon className="w-4 h-4 text-secondary-400" />;
+                          return <Icon className="w-4 h-4 text-[var(--color-text-subtle)]" />;
                         })()}
                         <Badge variant={getTypeBadgeVariant(transaction.type)} size="sm">
                           {TRANSACTION_TYPE_LABELS[transaction.type]}
                         </Badge>
                       </div>
                     </td>
-                    <td className="py-4 pr-4 text-secondary-700 max-w-xs truncate" title={transaction.description || ''}>
+                    <td className="py-4 pr-4 text-[var(--color-text-muted)] max-w-xs truncate" title={transaction.description || ''}>
                       {transaction.description || '—'}
                     </td>
-                    <td className="py-4 pr-4 text-right font-medium text-secondary-900">
+                    <td className="py-4 pr-4 text-right font-medium text-[var(--color-text)]">
                       {formatCurrency(transaction.amount_cents)}
                     </td>
-                    <td className="py-4 pr-4 text-right text-secondary-700">
+                    <td className="py-4 pr-4 text-right text-[var(--color-text-muted)]">
                       {formatCurrency(transaction.balance_after_cents)}
                     </td>
                     <td className="py-4 pr-4">
-                      <Badge variant={transaction.is_completed ? 'success' : 'warning'} size="sm">
+                      <Badge variant={transaction.is_completed ? 'primary' : 'secondary'} size="sm">
                         {transaction.is_completed ? 'Completed' : 'Pending'}
                       </Badge>
                     </td>
@@ -285,15 +288,15 @@ export function AdminTransactionsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-secondary-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-secondary-600">
+          <div className="px-6 py-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-[var(--color-text-muted)]">
               Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total} transactions
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={pageSize}
                 onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="px-3 py-1 rounded-lg border border-secondary-300 text-secondary-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="px-3 py-1 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent bg-[var(--color-bg)]"
               >
                 <option value={10}>10 per page</option>
                 <option value={25}>25 per page</option>
@@ -303,7 +306,7 @@ export function AdminTransactionsPage() {
               <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
                 Previous
               </Button>
-              <span className="px-3 text-sm text-secondary-600">Page {page} of {totalPages}</span>
+              <span className="px-3 text-sm text-[var(--color-text-muted)]">Page {page} of {totalPages}</span>
               <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
                 Next
               </Button>

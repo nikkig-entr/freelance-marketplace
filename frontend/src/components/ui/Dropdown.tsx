@@ -3,15 +3,9 @@ import { Menu, Transition } from '@headlessui/react';
 import { clsx } from 'clsx';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
-interface DropdownItem {
-  label: string;
-  onClick?: () => void;
-  icon?: ReactNode;
-  disabled?: boolean;
-  danger?: boolean;
-  divider?: boolean;
-  href?: string;
-}
+type DropdownItem =
+  | { label: string; onClick?: () => void; icon?: ReactNode; disabled?: boolean; danger?: boolean; divider?: false; href?: never }
+  | { divider: true; label?: undefined; onClick?: undefined; icon?: undefined; disabled?: undefined; danger?: undefined; href?: never };
 
 interface DropdownProps {
   trigger: ReactNode;
@@ -35,13 +29,13 @@ export function Dropdown({ trigger, items, align = 'right', className }: Dropdow
       >
         <Menu.Items
           className={clsx(
-            'absolute z-10 min-w-[160px] mt-2 origin-top-right rounded-xl bg-white py-1 shadow-lg ring-1 ring-secondary-200 focus:outline-none',
+            'absolute z-10 min-w-[160px] mt-2 origin-top-right rounded-xl bg-[var(--color-surface)] py-1 border border-[var(--color-border)] shadow-[var(--shadow-xl)] focus:outline-none',
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >
           {items.map((item, index) => {
-            if (item.divider) {
-              return <div key={index} className="border-t border-secondary-200 my-1" />;
+            if ('divider' in item && item.divider) {
+              return <div key={index} className="border-t border-[var(--color-border)] my-1" />;
             }
 
             return (
@@ -49,17 +43,16 @@ export function Dropdown({ trigger, items, align = 'right', className }: Dropdow
                 {({ active }) => (
                   <button
                     type="button"
-                    href={item.href}
                     onClick={item.onClick}
                     disabled={item.disabled}
                     className={clsx(
                       'w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors',
-                      active ? 'bg-secondary-50' : '',
-                      item.danger ? 'text-danger-600' : 'text-secondary-700',
-                      item.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-secondary-50'
+                      active ? 'bg-[var(--color-surface-hover)]' : '',
+                      item.danger ? 'text-[var(--color-gray-500)]' : 'text-[var(--color-text)]',
+                      item.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--color-surface-hover)]'
                     )}
                   >
-                    {item.icon && <span className="w-5 h-5 flex-shrink-0">{item.icon}</span>}
+                    {item.icon && <span className="w-5 h-5 flex-shrink-0 text-[var(--color-text-muted)]">{item.icon}</span>}
                     {item.label}
                   </button>
                 )}
@@ -106,7 +99,7 @@ export function UserMenu({ user, onProfileClick, onSettingsClick, onLogout, onUp
       ),
       onClick: onSettingsClick,
     },
-    { divider: true },
+    { divider: true } as DropdownItem,
     ...(onUpgradeClick && user.plan !== 'agency'
       ? [
           {
@@ -118,7 +111,7 @@ export function UserMenu({ user, onProfileClick, onSettingsClick, onLogout, onUp
             ),
             onClick: onUpgradeClick,
           },
-          { divider: true },
+          { divider: true } as DropdownItem,
         ]
       : []),
     {
@@ -133,29 +126,29 @@ export function UserMenu({ user, onProfileClick, onSettingsClick, onLogout, onUp
     },
   ];
 
-  return (
-    <Dropdown align="right" items={items}>
-      <button
-        type="button"
-        className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-secondary-100 transition-colors"
-        aria-expanded="false"
-        aria-haspopup="true"
-      >
-        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-          {user.avatar ? (
-            <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
-          ) : (
-            <span className="text-primary-700 font-medium text-sm">
-              {user.name.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </div>
-        <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium text-secondary-900">{user.name}</p>
-          <p className="text-xs text-secondary-500">{user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}</p>
-        </div>
-        <ChevronDownIcon className="w-4 h-4 text-secondary-400" />
-      </button>
-    </Dropdown>
+  const trigger = (
+    <button
+      type="button"
+      className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-[var(--glass-bg)] transition-colors"
+      aria-expanded="false"
+      aria-haspopup="true"
+    >
+      <div className="w-8 h-8 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
+        {user.avatar ? (
+          <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+        ) : (
+          <span className="text-[var(--color-accent)] font-medium text-sm">
+            {user.name.charAt(0).toUpperCase()}
+          </span>
+        )}
+      </div>
+      <div className="hidden sm:block text-left">
+        <p className="text-sm font-medium text-[var(--color-text)]">{user.name}</p>
+        <p className="text-xs text-[var(--color-text-muted)]">{user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}</p>
+      </div>
+      <ChevronDownIcon className="w-4 h-4 text-[var(--color-text-subtle)]" />
+    </button>
   );
+
+  return <Dropdown align="right" items={items} trigger={trigger} />;
 }

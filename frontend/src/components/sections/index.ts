@@ -1,5 +1,7 @@
 export { HeroSection } from './HeroSection';
-export { RemoteWorkSection } from './RemoteWorkSection';
-export { CommunitySection } from './CommunitySection';
-export { ProjectsSection } from './ProjectsSection';
+export { AIShowcaseSection } from './AIShowcaseSection';
+export { BentoGridSection } from './BentoGridSection';
+export { CategoriesProjectsSection } from './CategoriesProjectsSection';
+export { PricingSection } from './PricingSection';
+export { Footer } from './Footer';
 export { CTASection } from './CTASection';

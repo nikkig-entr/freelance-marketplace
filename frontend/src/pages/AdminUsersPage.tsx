@@ -1,26 +1,31 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   PencilIcon,
   TrashIcon,
-  ShieldCheckIcon,
   UserIcon,
-  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { Badge, StatusBadge, PlanBadge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
-import { LoadingSpinner, ListLoader } from '@/components/ui/LoadingSpinner';
-import { adminService, userService } from '@/services/api';
-import { User, UserRole, UserPlan, UserStatus } from '@/types';
-import { useAuth } from '@/context/AuthContext';
+import { api, adminService } from '@/services/api';
+import { User, UserRole, UserPlan } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
+
+interface PaginatedUsers {
+  items: User[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
 
 const roleOptions = [
   { value: '', label: 'All Roles' },
@@ -53,6 +58,27 @@ const sortOptions = [
   { value: 'total_earned_cents:desc', label: 'Earnings High-Low' },
 ];
 
+const roleBadgeVariants: Record<UserRole, 'primary' | 'secondary' | 'danger'> = {
+  client: 'secondary',
+  freelancer: 'primary',
+  admin: 'danger',
+};
+
+const statusBadgeVariants: Record<string, 'primary' | 'secondary' | 'danger' | 'outline'> = {
+  active: 'primary',
+  inactive: 'secondary',
+  suspended: 'danger',
+  pending_verification: 'outline',
+  true: 'primary',
+  false: 'secondary',
+};
+
+const planBadgeVariants: Record<UserPlan, 'primary' | 'secondary' | 'outline'> = {
+  starter: 'outline',
+  pro: 'primary',
+  agency: 'secondary',
+};
+
 export function AdminUsersPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -72,12 +98,12 @@ export function AdminUsersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-users', filters],
-    queryFn: () => adminService.listUsers(filters),
+    queryFn: () => adminService.getUsers(filters) as Promise<PaginatedUsers>,
     enabled: !!user && user.role === 'admin',
   });
 
   const { mutate: updateUser } = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => adminService.updateUser(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<User> }) => api.patch(`/admin/users/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('User updated!');
@@ -89,7 +115,7 @@ export function AdminUsersPage() {
   });
 
   const { mutate: deleteUser } = useMutation({
-    mutationFn: (id: number) => adminService.deleteUser(id),
+    mutationFn: (id: number) => api.delete(`/admin/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success('User deleted!');
@@ -100,7 +126,7 @@ export function AdminUsersPage() {
     },
   });
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: keyof typeof filters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
@@ -116,16 +142,15 @@ export function AdminUsersPage() {
     });
   };
 
-  const hasActiveFilters = ['role', 'plan', 'status', 'search'].some(key => filters[key]);
+  const hasActiveFilters = (['role', 'plan', 'status', 'search'] as const).some(key => filters[key]);
 
-  const openEditModal = (user: User) => {
-    setSelectedUser(user);
+  const openEditModal = (userItem: User) => {
+    setSelectedUser(userItem);
     setEditForm({
-      role: user.role,
-      plan: user.plan,
-      status: user.status,
-      is_verified: user.is_verified,
-      email_notifications: user.email_notifications,
+      role: userItem.role,
+      plan: userItem.plan,
+      is_active: userItem.is_active,
+      is_verified: userItem.is_verified,
     });
   };
 
@@ -138,8 +163,8 @@ export function AdminUsersPage() {
   if (!user || user.role !== 'admin') {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-secondary-900">Access Denied</h1>
-        <p className="mt-2 text-secondary-600">Admin access required.</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
+        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
       </div>
     );
   }
@@ -149,8 +174,8 @@ export function AdminUsersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">User Management</h1>
-          <p className="mt-1 text-secondary-600">
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">User Management</h1>
+          <p className="mt-1 text-[var(--color-text-muted)]">
             {data?.total || 0} user{data?.total !== 1 ? 's' : ''} found
           </p>
         </div>
@@ -206,12 +231,19 @@ export function AdminUsersPage() {
       {/* Users Table */}
       <Card padding="none">
         {isLoading ? (
-          <ListLoader count={10} />
+          <div className="p-8 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse flex items-center gap-4 px-6 py-4">
+                <div className="h-4 bg-[var(--color-surface-muted)] rounded w-48" />
+                <div className="h-4 bg-[var(--color-surface-muted)] rounded w-32 ml-auto" />
+              </div>
+            ))}
+          </div>
         ) : data?.items.length === 0 ? (
           <div className="text-center py-12">
-            <UserIcon className="w-16 h-16 mx-auto mb-4 text-secondary-300" />
-            <h3 className="text-lg font-medium text-secondary-900 mb-1">No users found</h3>
-            <p className="text-secondary-600 mb-4">
+            <UserIcon className="w-16 h-16 mx-auto mb-4 text-[var(--color-text-subtle)]" />
+            <h3 className="text-lg font-medium text-[var(--color-text)] mb-1">No users found</h3>
+            <p className="text-[var(--color-text-muted)] mb-4">
               {hasActiveFilters ? 'Try adjusting your filters' : 'No users registered yet'}
             </p>
             {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
@@ -220,65 +252,65 @@ export function AdminUsersPage() {
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-secondary-50">
+                <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Plan</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Verified</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Balance</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Earnings</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Joined</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-secondary-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Plan</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Verified</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Balance</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Earnings</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Joined</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-secondary-200">
-                  {data.items.map((userItem) => (
-                    <tr key={userItem.id} className="hover:bg-secondary-50">
+                <tbody className="divide-y divide-[var(--color-border)]">
+                  {data?.items.map((userItem) => (
+                    <tr key={userItem.id} className="hover:bg-[var(--color-surface-muted)]">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <Avatar
-                            name={userItem.full_name}
+                            name={userItem.full_name || 'User'}
                             src={userItem.avatar_url}
                             size="md"
                           />
                           <div>
-                            <p className="font-medium text-secondary-900">{userItem.full_name}</p>
-                            <p className="text-sm text-secondary-500">@{userItem.username}</p>
-                            <p className="text-xs text-secondary-400">{userItem.email}</p>
+                            <p className="font-medium text-[var(--color-text)]">{userItem.full_name ?? 'Unknown'}</p>
+                            <p className="text-sm text-[var(--color-text-muted)]">{userItem.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge variant={
-                          userItem.role === 'admin' ? 'danger' :
-                          userItem.role === 'client' ? 'secondary' : 'primary'
-                        }>
+                        <Badge variant={roleBadgeVariants[userItem.role]}>
                           {userItem.role.charAt(0).toUpperCase() + userItem.role.slice(1)}
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        <PlanBadge plan={userItem.plan} size="sm" />
+                        <Badge variant={planBadgeVariants[userItem.plan]} size="sm">
+                          {userItem.plan.charAt(0).toUpperCase() + userItem.plan.slice(1)}
+                        </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        <StatusBadge status={userItem.status} size="sm" />
+                        <Badge variant={statusBadgeVariants[userItem.is_active ? 'true' : 'false'] as 'primary' | 'secondary' | 'danger' | 'outline'} size="sm">
+                          {userItem.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
                       </td>
                       <td className="px-6 py-4">
                         {userItem.is_verified ? (
-                          <Badge variant="success" size="sm">✓ Verified</Badge>
+                          <Badge variant="primary" size="sm">✓ Verified</Badge>
                         ) : (
                           <Badge variant="outline" size="sm">Not Verified</Badge>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-secondary-900">
-                        ${(userItem.balance_cents / 100).toLocaleString()}
+                      <td className="px-6 py-4 text-[var(--color-text)]">
+                        {formatCurrency(userItem.balance_cents)}
                       </td>
-                      <td className="px-6 py-4 text-secondary-900">
-                        ${(userItem.total_earned_cents / 100).toLocaleString()}
+                      <td className="px-6 py-4 text-[var(--color-text)]">
+                        {formatCurrency(userItem.pending_balance_cents)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-secondary-500">
-                        {format(new Date(userItem.created_at), 'MMM d, yyyy')}
+                      <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
+                        {formatDate(userItem.created_at)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -289,8 +321,8 @@ export function AdminUsersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-danger-600 hover:bg-danger-50"
-                              onClick={() => setShowDeleteModal(true)}
+                              className="text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]"
+                              onClick={() => { setSelectedUser(userItem); setShowDeleteModal(true); }}
                             >
                               <TrashIcon className="w-4 h-4" />
                             </Button>
@@ -305,9 +337,9 @@ export function AdminUsersPage() {
 
             {/* Pagination */}
             {data && data.total_pages > 1 && (
-              <div className="border-t border-secondary-200 px-6 py-4">
+              <div className="border-t border-[var(--color-border)] px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-secondary-600">
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     Showing {(filters.page - 1) * filters.page_size + 1} to {Math.min(filters.page * filters.page_size, data.total)} of {data.total} users
                   </p>
                   <div className="flex items-center gap-2">
@@ -341,7 +373,7 @@ export function AdminUsersPage() {
           isOpen={!!selectedUser}
           onClose={() => setSelectedUser(null)}
           title="Edit User"
-          description={`Editing ${selectedUser.full_name} (@${selectedUser.username})`}
+          description={`Editing ${selectedUser.full_name} (@${selectedUser.email})`}
           size="lg"
         >
           <div className="space-y-4">
@@ -368,13 +400,11 @@ export function AdminUsersPage() {
             <Select
               label="Status"
               options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
-                { value: 'suspended', label: 'Suspended' },
-                { value: 'pending_verification', label: 'Pending Verification' },
+                { value: 'true', label: 'Active' },
+                { value: 'false', label: 'Inactive' },
               ]}
-              value={editForm.status}
-              onChange={(e) => setEditForm({ ...editForm, status: e.target.value as UserStatus })}
+              value={String(editForm.is_active ?? true)}
+              onChange={(e) => setEditForm({ ...editForm, is_active: e.target.value === 'true' })}
             />
             <div className="flex items-center gap-3">
               <input
@@ -382,19 +412,9 @@ export function AdminUsersPage() {
                 id="is_verified"
                 checked={editForm.is_verified}
                 onChange={(e) => setEditForm({ ...editForm, is_verified: e.target.checked })}
-                className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
               />
-              <label htmlFor="is_verified" className="text-sm font-medium text-secondary-700">Email Verified</label>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="email_notifications"
-                checked={editForm.email_notifications}
-                onChange={(e) => setEditForm({ ...editForm, email_notifications: e.target.checked })}
-                className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
-              />
-              <label htmlFor="email_notifications" className="text-sm font-medium text-secondary-700">Email Notifications</label>
+              <label htmlFor="is_verified" className="text-sm font-medium text-[var(--color-text)]">Email Verified</label>
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setSelectedUser(null)}>Cancel</Button>

@@ -1,5 +1,11 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, beforeAll, afterAll } from 'vitest';
+
+// Extend global namespace for vitest globals
+declare const global: {
+  ResizeObserver: typeof ResizeObserver;
+  IntersectionObserver: typeof IntersectionObserver;
+} & typeof globalThis;
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

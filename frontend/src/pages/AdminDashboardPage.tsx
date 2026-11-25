@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { Link } from '@tanstack/react-router';
 import {
   UsersIcon,
   CurrencyDollarIcon,
@@ -12,32 +11,56 @@ import {
 } from '@heroicons/react/24/outline';
 import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardTitle, CardGrid } from '@/components/ui/Card';
-import { Badge, StatusBadge } from '@/components/ui/Badge';
-import { LoadingSpinner, CardLoader } from '@/components/ui/LoadingSpinner';
+import { Card } from '@/components/ui/Card';
 import { adminService } from '@/services/api';
-import { AdminStats } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
+interface AdminStats {
+  users: {
+    total: number;
+    active: number;
+    freelancers: number;
+    clients: number;
+    by_plan: Record<string, number>;
+  };
+  projects: {
+    total: number;
+    open: number;
+    in_progress: number;
+    completed: number;
+  };
+  bids: {
+    total: number;
+    pending: number;
+    accepted: number;
+  };
+  financial: {
+    total_revenue_cents: number;
+    pending_withdrawals_cents: number;
+    mrr_cents: number;
+    active_subscriptions: number;
+  };
+}
+
 const statCards = [
-  { key: 'total', label: 'Total Users', icon: UsersIcon, color: 'primary' },
-  { key: 'active', label: 'Active Users', icon: CheckCircleIcon, color: 'success' },
-  { key: 'freelancers', label: 'Freelancers', icon: Briefcase, color: 'warning' },
-  { key: 'clients', label: 'Clients', icon: UsersIcon, color: 'secondary' },
+  { key: 'total' as const, label: 'Total Users', icon: UsersIcon },
+  { key: 'active' as const, label: 'Active Users', icon: CheckCircleIcon },
+  { key: 'freelancers' as const, label: 'Freelancers', icon: Briefcase },
+  { key: 'clients' as const, label: 'Clients', icon: UsersIcon },
 ];
 
 const projectStatCards = [
-  { key: 'total', label: 'Total Projects', icon: Briefcase, color: 'primary' },
-  { key: 'open', label: 'Open', icon: ClockIcon, color: 'warning' },
-  { key: 'in_progress', label: 'In Progress', icon: ChatBubbleLeftRightIcon, color: 'primary' },
-  { key: 'completed', label: 'Completed', icon: CheckCircleIcon, color: 'success' },
+  { key: 'total' as const, label: 'Total Projects', icon: Briefcase },
+  { key: 'open' as const, label: 'Open', icon: ClockIcon },
+  { key: 'in_progress' as const, label: 'In Progress', icon: ChatBubbleLeftRightIcon },
+  { key: 'completed' as const, label: 'Completed', icon: CheckCircleIcon },
 ];
 
 const financialStatCards = [
-  { key: 'total_revenue_cents', label: 'Total Revenue', icon: CurrencyDollarIcon, color: 'success', isCurrency: true },
-  { key: 'pending_withdrawals_cents', label: 'Pending Withdrawals', icon: ExclamationTriangleIcon, color: 'warning', isCurrency: true },
-  { key: 'mrr_cents', label: 'MRR', icon: ArrowTrendingUpIcon, color: 'primary', isCurrency: true },
-  { key: 'active_subscriptions', label: 'Active Subscriptions', icon: UsersIcon, color: 'secondary' },
+  { key: 'total_revenue_cents' as const, label: 'Total Revenue', icon: CurrencyDollarIcon, isCurrency: true },
+  { key: 'pending_withdrawals_cents' as const, label: 'Pending Withdrawals', icon: ExclamationTriangleIcon, isCurrency: true },
+  { key: 'mrr_cents' as const, label: 'MRR', icon: ArrowTrendingUpIcon, isCurrency: true },
+  { key: 'active_subscriptions' as const, label: 'Active Subscriptions', icon: UsersIcon },
 ];
 
 export function AdminDashboardPage() {
@@ -45,15 +68,15 @@ export function AdminDashboardPage() {
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats'],
-    queryFn: () => adminService.getStats(),
+    queryFn: () => adminService.getStats() as Promise<AdminStats>,
     enabled: !!user && user.role === 'admin',
   });
 
   if (!user || user.role !== 'admin') {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-secondary-900">Access Denied</h1>
-        <p className="mt-2 text-secondary-600">Admin access required.</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
+        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
       </div>
     );
   }
@@ -63,13 +86,18 @@ export function AdminDashboardPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-heading font-bold text-secondary-900">Admin Dashboard</h1>
-            <p className="mt-1 text-secondary-600">Platform overview and analytics</p>
+            <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Admin Dashboard</h1>
+            <p className="mt-1 text-[var(--color-text-muted)]">Platform overview and analytics</p>
           </div>
         </div>
-        <CardGrid columns={4}>
-          {[1, 2, 3, 4].map((i) => <CardLoader key={i} />)}
-        </CardGrid>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="h-8 bg-[var(--color-surface-muted)] rounded w-3/4 mb-4" />
+              <div className="h-12 bg-[var(--color-surface-muted)] rounded w-1/2" />
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -81,149 +109,149 @@ export function AdminDashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">Admin Dashboard</h1>
-          <p className="mt-1 text-secondary-600">Platform overview and analytics</p>
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Admin Dashboard</h1>
+          <p className="mt-1 text-[var(--color-text-muted)]">Platform overview and analytics</p>
         </div>
       </div>
 
       {/* User Stats */}
-      <CardTitle title="Users" />
-      <CardGrid columns={4}>
+      <h2 className="text-lg font-semibold text-[var(--color-text)]">Users</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
         {statCards.map((stat) => {
           const value = stats?.users[stat.key] || 0;
           return (
             <Card key={stat.key}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-secondary-600">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-secondary-900">{value.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-muted)]">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-[var(--color-text)]">{value.toLocaleString()}</p>
                 </div>
-                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-100 flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className="w-12 h-12 bg-[var(--color-accent-muted)] rounded-xl flex items-center justify-center">
+                  <stat.icon className="w-6 h-6 text-[var(--color-accent)]" />
                 </div>
               </div>
             </Card>
           );
         })}
-      </CardGrid>
+      </div>
 
       {/* User Plan Breakdown */}
       <Card className="mt-6">
-        <CardTitle title="Users by Plan" />
+        <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">Users by Plan</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Object.entries(stats?.users.by_plan || {}).map(([plan, count]) => (
-            <div key={plan} className="p-4 rounded-xl bg-secondary-50 text-center">
-              <p className="text-2xl font-bold text-secondary-900">{count}</p>
-              <p className="text-sm text-secondary-500 capitalize">{plan}</p>
+            <div key={plan} className="p-4 rounded-xl bg-[var(--color-surface-muted)] text-center">
+              <p className="text-2xl font-bold text-[var(--color-text)]">{count}</p>
+              <p className="text-sm text-[var(--color-text-muted)] capitalize">{plan}</p>
             </div>
           ))}
         </div>
       </Card>
 
       {/* Project Stats */}
-      <CardTitle title="Projects" className="mt-8" />
-      <CardGrid columns={4}>
+      <h2 className="text-lg font-semibold text-[var(--color-text)] mt-8">Projects</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
         {projectStatCards.map((stat) => {
           const value = stats?.projects[stat.key] || 0;
           return (
             <Card key={stat.key}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-secondary-600">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-secondary-900">{value.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-muted)]">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-[var(--color-text)]">{value.toLocaleString()}</p>
                 </div>
-                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-100 flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className="w-12 h-12 bg-[var(--color-accent-muted)] rounded-xl flex items-center justify-center">
+                  <stat.icon className="w-6 h-6 text-[var(--color-accent)]" />
                 </div>
               </div>
             </Card>
           );
         })}
-      </CardGrid>
+      </div>
 
       {/* Bid Stats */}
-      <CardTitle title="Bids" className="mt-8" />
-      <CardGrid columns={3}>
+      <h2 className="text-lg font-semibold text-[var(--color-text)] mt-8">Bids</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
         {[
-          { key: 'total', label: 'Total Bids', color: 'primary' },
-          { key: 'pending', label: 'Pending', color: 'warning' },
-          { key: 'accepted', label: 'Accepted', color: 'success' },
+          { key: 'total' as const, label: 'Total Bids' },
+          { key: 'pending' as const, label: 'Pending' },
+          { key: 'accepted' as const, label: 'Accepted' },
         ].map((stat) => {
           const value = stats?.bids[stat.key] || 0;
           return (
             <Card key={stat.key}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-secondary-600">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-secondary-900">{value.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-muted)]">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-[var(--color-text)]">{value.toLocaleString()}</p>
                 </div>
-                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-100 flex items-center justify-center`}>
-                  <ChatBubbleLeftRightIcon className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className="w-12 h-12 bg-[var(--color-accent-muted)] rounded-xl flex items-center justify-center">
+                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-[var(--color-accent)]" />
                 </div>
               </div>
             </Card>
           );
         })}
-      </CardGrid>
+      </div>
 
       {/* Financial Stats */}
-      <CardTitle title="Financial" className="mt-8" />
-      <CardGrid columns={4}>
+      <h2 className="text-lg font-semibold text-[var(--color-text)] mt-8">Financial</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
         {financialStatCards.map((stat) => {
           const value = stats?.financial[stat.key] || 0;
           return (
             <Card key={stat.key}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-secondary-600">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-bold text-secondary-900">
+                  <p className="text-sm font-medium text-[var(--color-text-muted)]">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold text-[var(--color-text)]">
                     {stat.isCurrency ? formatCurrency(value) : value.toLocaleString()}
                   </p>
                 </div>
-                <div className={`w-12 h-12 rounded-xl bg-${stat.color}-100 flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+                <div className="w-12 h-12 bg-[var(--color-accent-muted)] rounded-xl flex items-center justify-center">
+                  <stat.icon className="w-6 h-6 text-[var(--color-accent)]" />
                 </div>
               </div>
             </Card>
           );
         })}
-      </CardGrid>
+      </div>
 
       {/* Quick Actions */}
-      <CardTitle title="Quick Actions" className="mt-8" />
-      <CardGrid columns={4}>
+      <h2 className="text-lg font-semibold text-[var(--color-text)] mt-8">Quick Actions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
         <Button asChild variant="outline" className="h-full flex flex-col items-center gap-2 p-6">
           <Link to="/admin/users">
-            <UsersIcon className="w-8 h-8 text-secondary-500" />
-            <span className="font-medium text-secondary-900">Manage Users</span>
+            <UsersIcon className="w-8 h-8 text-[var(--color-text-muted)]" />
+            <span className="font-medium text-[var(--color-text)]">Manage Users</span>
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-full flex flex-col items-center gap-2 p-6">
           <Link to="/admin/projects">
-            <Briefcase className="w-8 h-8 text-secondary-500" />
-            <span className="font-medium text-secondary-900">Manage Projects</span>
+            <Briefcase className="w-8 h-8 text-[var(--color-text-muted)]" />
+            <span className="font-medium text-[var(--color-text)]">Manage Projects</span>
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-full flex flex-col items-center gap-2 p-6">
           <Link to="/admin/withdrawals">
-            <CurrencyDollarIcon className="w-8 h-8 text-secondary-500" />
-            <span className="font-medium text-secondary-900">Withdrawals</span>
+            <CurrencyDollarIcon className="w-8 h-8 text-[var(--color-text-muted)]" />
+            <span className="font-medium text-[var(--color-text)]">Withdrawals</span>
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-full flex flex-col items-center gap-2 p-6">
           <Link to="/admin/transactions">
-            <ChatBubbleLeftRightIcon className="w-8 h-8 text-secondary-500" />
-            <span className="font-medium text-secondary-900">Transactions</span>
+            <ChatBubbleLeftRightIcon className="w-8 h-8 text-[var(--color-text-muted)]" />
+            <span className="font-medium text-[var(--color-text)]">Transactions</span>
           </Link>
         </Button>
-      </CardGrid>
+      </div>
 
       {/* Recent Activity */}
-      <CardTitle title="Recent Activity" className="mt-8" />
+      <h2 className="text-lg font-semibold text-[var(--color-text)] mt-8">Recent Activity</h2>
       <Card padding="none">
-        <div className="divide-y divide-secondary-200">
-          <div className="p-4 bg-secondary-50">
-            <p className="text-sm text-secondary-500">Recent activity will appear here</p>
+        <div className="divide-y divide-[var(--color-border)]">
+          <div className="p-4 bg-[var(--color-surface-muted)]">
+            <p className="text-sm text-[var(--color-text-subtle)]">Recent activity will appear here</p>
           </div>
         </div>
       </Card>

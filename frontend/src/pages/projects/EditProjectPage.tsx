@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { api } from '../../services/api';
-import { Project, Category } from '../../types';
+import { projectService } from '@/services/api';
+import { Project, ProjectStatus } from '@/types';
 import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,12 @@ interface EditProjectForm {
   budget_max: string;
   is_fixed_price: boolean;
   deadline_days: string;
-  status: 'draft' | 'open';
+  status: ProjectStatus;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 export function EditProjectPage() {
@@ -42,21 +47,22 @@ export function EditProjectPage() {
 
   const fetchProject = async () => {
     try {
-      const data = await api.getProject(projectId);
-      setProject(data);
-      setValue('title', data.title);
-      setValue('description', data.description);
-      setValue('requirements', data.requirements || '');
-      setValue('category_id', data.category_id || 0);
-      setValue('skills', data.skills.join(', '));
-      setValue('budget_min', String(data.budget_min / 100));
-      setValue('budget_max', data.budget_max ? String(data.budget_max / 100) : '');
-      setValue('is_fixed_price', data.is_fixed_price);
-      setValue('deadline_days', data.deadline_days ? String(data.deadline_days) : '');
-      setValue('status', data.status);
+      const data = await projectService.get<Project>(String(projectId));
+      const projectData = data;
+      setProject(projectData);
+      setValue('title', projectData.title);
+      setValue('description', projectData.description);
+      setValue('requirements', projectData.requirements || '');
+      setValue('category_id', (projectData as any).category_id || 0);
+      setValue('skills', (projectData.required_skills || []).join(', '));
+      setValue('budget_min', String((projectData.budget_min || 0) / 100));
+      setValue('budget_max', projectData.budget_max ? String(projectData.budget_max / 100) : '');
+      setValue('is_fixed_price', projectData.is_fixed_price);
+      setValue('deadline_days', (projectData as any).deadline_days ? String((projectData as any).deadline_days) : '');
+      setValue('status', projectData.status);
     } catch (error) {
       toast.error('Failed to load project');
-      navigate(`/projects/${projectId}`);
+      navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +70,7 @@ export function EditProjectPage() {
 
   const fetchCategories = async () => {
     try {
-      const data = await api.getCategories();
+      const data = await projectService.getCategories<{ items: Category[] }>();
       setCategories(data.items || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -86,9 +92,9 @@ export function EditProjectPage() {
         deadline_days: data.deadline_days ? parseInt(data.deadline_days) : undefined,
         status: data.status,
       };
-      await api.updateProject(projectId, projectData);
+      await projectService.update(String(projectId), projectData);
       toast.success('Project updated successfully!');
-      navigate(`/projects/${projectId}`);
+      navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
     } catch (error: any) {
       toast.error(error.response?.data?.error?.message || 'Failed to update project');
     } finally {
@@ -98,13 +104,13 @@ export function EditProjectPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-8">
-          <div className="h-8 bg-gray-200 rounded w-1/4" />
+          <div className="h-8 bg-[var(--color-border)] rounded w-1/4" />
           <div className="space-y-6">
-            <div className="h-12 bg-gray-200 rounded" />
-            <div className="h-12 bg-gray-200 rounded" />
-            <div className="h-12 bg-gray-200 rounded" />
+            <div className="h-12 bg-[var(--color-border)] rounded" />
+            <div className="h-12 bg-[var(--color-border)] rounded" />
+            <div className="h-12 bg-[var(--color-border)] rounded" />
           </div>
         </div>
       </div>
@@ -118,23 +124,23 @@ export function EditProjectPage() {
   const canPublish = project.status === 'draft';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link to={`/projects/${projectId}`} className="text-gray-500 hover:text-gray-700">
+          <Link to="/projects/$projectId" params={{ projectId: String(projectId) }} search={{ tab: 'details' }} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Project</h1>
-            <p className="mt-1 text-gray-600">Update your project details</p>
+            <h1 className="text-3xl font-bold text-[var(--color-text)]">Edit Project</h1>
+            <p className="mt-1 text-[var(--color-text-muted)]">Update your project details</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Info */}
           <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Project Details</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">Project Details</h2>
 
             <div>
               <label htmlFor="title" className="label">Project Title *</label>
@@ -148,7 +154,7 @@ export function EditProjectPage() {
                   maxLength: { value: 255, message: 'Title must be less than 255 characters' },
                 })}
               />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+              {errors.title && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.title.message}</p>}
             </div>
 
             <div>
@@ -176,7 +182,7 @@ export function EditProjectPage() {
                   minLength: { value: 50, message: 'Description must be at least 50 characters' },
                 })}
               />
-              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+              {errors.description && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.description.message}</p>}
             </div>
 
             <div>
@@ -198,19 +204,19 @@ export function EditProjectPage() {
                 placeholder="React, TypeScript, Node.js (comma separated)"
                 {...register('skills')}
               />
-              <p className="mt-1 text-sm text-gray-500">Separate skills with commas</p>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">Separate skills with commas</p>
             </div>
           </div>
 
           {/* Budget & Timeline */}
           <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Budget & Timeline</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">Budget & Timeline</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="budget_min" className="label">Minimum Budget (USD) *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <input
                     id="budget_min"
                     type="number"
@@ -223,13 +229,13 @@ export function EditProjectPage() {
                     })}
                   />
                 </div>
-                {errors.budget_min && <p className="mt-1 text-sm text-red-600">{errors.budget_min.message}</p>}
+                {errors.budget_min && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.budget_min.message}</p>}
               </div>
 
               <div>
                 <label htmlFor="budget_max" className="label">Maximum Budget (USD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <input
                     id="budget_max"
                     type="number"
@@ -246,10 +252,10 @@ export function EditProjectPage() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border)] rounded focus:ring-2 focus:ring-[var(--color-accent)]"
                   {...register('is_fixed_price')}
                 />
-                <span className="text-sm text-gray-700">Fixed price project (not hourly)</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Fixed price project (not hourly)</span>
               </label>
             </div>
 
@@ -268,7 +274,7 @@ export function EditProjectPage() {
 
           {/* Status */}
           <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Status</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">Status</h2>
             <div>
               <label htmlFor="status" className="label">Project Status</label>
               <select
@@ -279,7 +285,7 @@ export function EditProjectPage() {
                 <option value="draft">Draft</option>
                 <option value="open">Open for Bids</option>
               </select>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                 Only draft projects can be edited. Once published, you cannot change the status back to draft.
               </p>
             </div>
@@ -287,7 +293,7 @@ export function EditProjectPage() {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-4">
-            <Link to={`/projects/${projectId}`} className="btn-secondary">
+            <Link to="/projects/$projectId" params={{ projectId: String(projectId) }} search={{ tab: 'details' }} className="btn-secondary">
               Cancel
             </Link>
             {canPublish && (
@@ -295,9 +301,9 @@ export function EditProjectPage() {
                 type="button"
                 onClick={async () => {
                   try {
-                    await api.publishProject(projectId);
+                    await projectService.publish(String(projectId));
                     toast.success('Project published!');
-                    navigate(`/projects/${projectId}`);
+                    navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
                   } catch (error: any) {
                     toast.error(error.response?.data?.error?.message || 'Failed to publish');
                   }
@@ -317,6 +323,3 @@ export function EditProjectPage() {
     </div>
   );
 }
-
-// Need to import Link
-import { Link } from '@tanstack/react-router';

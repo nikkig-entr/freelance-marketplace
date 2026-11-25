@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { User, AuthTokens } from '../types';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { User, TokenResponse } from '../types';
 import { api } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
-  tokens: AuthTokens | null;
+  tokens: TokenResponse | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; full_name: string; role: string }) => Promise<void>;
+  register: (data: { email: string; password: string; password_confirm: string; full_name: string; role: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [tokens, setTokens] = useState<AuthTokens | null>(null);
+  const [tokens, setTokens] = useState<TokenResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user && !!tokens;
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   };
 
-  const register = async (data: { email: string; password: string; full_name: string; role: string }) => {
+  const register = async (data: { email: string; password: string; password_confirm: string; full_name: string; role: string }) => {
     const newTokens = await api.register(data);
     setTokens(newTokens);
     const userData = await api.getCurrentUser();

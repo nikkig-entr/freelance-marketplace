@@ -1,30 +1,31 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
-  CurrencyDollarIcon,
-  ChatBubbleLeftRightIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { Badge, StatusBadge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
-import { LoadingSpinner, ListLoader } from '@/components/ui/LoadingSpinner';
-import { adminService } from '@/services/api';
+import { api, adminService } from '@/services/api';
 import { Project, ProjectStatus } from '@/types';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
+
+interface PaginatedProjects {
+  items: Project[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
 
 const statusOptions = [
   { value: '', label: 'All Statuses' },
@@ -45,6 +46,16 @@ const sortOptions = [
   { value: 'views_count:desc', label: 'Most Views' },
 ];
 
+const statusColors: Record<ProjectStatus, 'primary' | 'secondary' | 'outline' | 'danger'> = {
+  draft: 'secondary',
+  open: 'primary',
+  in_progress: 'primary',
+  in_review: 'secondary',
+  completed: 'primary',
+  cancelled: 'danger',
+  disputed: 'danger',
+};
+
 export function AdminProjectsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -62,12 +73,12 @@ export function AdminProjectsPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-projects', filters],
-    queryFn: () => adminService.listProjects(filters),
+    queryFn: () => adminService.getProjects(filters) as Promise<PaginatedProjects>,
     enabled: !!user && user.role === 'admin',
   });
 
   const { mutate: updateProject } = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Project> }) => adminService.updateProject(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Project> }) => api.patch(`/admin/projects/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
       toast.success('Project updated!');
@@ -79,7 +90,7 @@ export function AdminProjectsPage() {
   });
 
   const { mutate: deleteProject } = useMutation({
-    mutationFn: (id: number) => adminService.deleteProject(id),
+    mutationFn: (id: number) => api.delete(`/admin/projects/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
       toast.success('Project deleted!');
@@ -90,7 +101,7 @@ export function AdminProjectsPage() {
     },
   });
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: keyof typeof filters, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
@@ -104,7 +115,7 @@ export function AdminProjectsPage() {
     });
   };
 
-  const hasActiveFilters = ['status', 'search'].some(key => filters[key]);
+  const hasActiveFilters = (['status', 'search'] as const).some(key => filters[key]);
 
   const openEditModal = (project: Project) => {
     setSelectedProject(project);
@@ -123,11 +134,11 @@ export function AdminProjectsPage() {
 
   const budgetText = (project: Project) => {
     if (project.budget_min && project.budget_max) {
-      return `$${(project.budget_min / 100).toLocaleString()} - $${(project.budget_max / 100).toLocaleString()}`;
+      return `${formatCurrency(project.budget_min)} - ${formatCurrency(project.budget_max)}`;
     } else if (project.budget_min) {
-      return `From $${(project.budget_min / 100).toLocaleString()}`;
+      return `From ${formatCurrency(project.budget_min)}`;
     } else if (project.budget_max) {
-      return `Up to $${(project.budget_max / 100).toLocaleString()}`;
+      return `Up to ${formatCurrency(project.budget_max)}`;
     }
     return 'Negotiable';
   };
@@ -135,8 +146,8 @@ export function AdminProjectsPage() {
   if (!user || user.role !== 'admin') {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-secondary-900">Access Denied</h1>
-        <p className="mt-2 text-secondary-600">Admin access required.</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Access Denied</h1>
+        <p className="mt-2 text-[var(--color-text-muted)]">Admin access required.</p>
       </div>
     );
   }
@@ -146,8 +157,8 @@ export function AdminProjectsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-secondary-900">Project Management</h1>
-          <p className="mt-1 text-secondary-600">
+          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Project Management</h1>
+          <p className="mt-1 text-[var(--color-text-muted)]">
             {data?.total || 0} project{data?.total !== 1 ? 's' : ''} found
           </p>
         </div>
@@ -191,12 +202,19 @@ export function AdminProjectsPage() {
       {/* Projects Table */}
       <Card padding="none">
         {isLoading ? (
-          <ListLoader count={10} />
+          <div className="p-8 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse flex items-center gap-4 px-6 py-4">
+                <div className="h-4 bg-[var(--color-surface-muted)] rounded w-48" />
+                <div className="h-4 bg-[var(--color-surface-muted)] rounded w-32 ml-auto" />
+              </div>
+            ))}
+          </div>
         ) : data?.items.length === 0 ? (
           <div className="text-center py-12">
-            <Briefcase className="w-16 h-16 mx-auto mb-4 text-secondary-300" />
-            <h3 className="text-lg font-medium text-secondary-900 mb-1">No projects found</h3>
-            <p className="text-secondary-600 mb-4">
+            <Briefcase className="w-16 h-16 mx-auto mb-4 text-[var(--color-text-subtle)]" />
+            <h3 className="text-lg font-medium text-[var(--color-text)] mb-1">No projects found</h3>
+            <p className="text-[var(--color-text-muted)] mb-4">
               {hasActiveFilters ? 'Try adjusting your filters' : 'No projects yet'}
             </p>
             {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
@@ -205,57 +223,58 @@ export function AdminProjectsPage() {
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-secondary-50">
+                <thead className="bg-[var(--color-surface-muted)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Project</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Budget</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Bids</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Views</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Featured</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Created</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-secondary-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Project</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Client</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Budget</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Bids</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Views</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Featured</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Created</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-secondary-200">
-                  {data.items.map((project) => (
-                    <tr key={project.id} className="hover:bg-secondary-50">
+                <tbody className="divide-y divide-[var(--color-border)]">
+                  {data?.items.map((project) => (
+                    <tr key={project.id} className="hover:bg-[var(--color-surface-muted)]">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-secondary-900 truncate max-w-xs">{project.title}</p>
-                          <p className="text-sm text-secondary-500 truncate max-w-xs">{project.category}</p>
+                          <p className="font-medium text-[var(--color-text)] truncate max-w-xs">{project.title}</p>
+                          <p className="text-sm text-[var(--color-text-muted)] truncate max-w-xs">{project.category}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-secondary-900">{project.client?.full_name || 'Unknown'}</span>
-                          <span className="text-xs text-secondary-400">@{project.client?.username || ''}</span>
+                          <span className="text-sm text-[var(--color-text)]">{project.client?.full_name || 'Unknown'}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <StatusBadge status={project.status} size="sm" />
+                        <Badge variant={statusColors[project.status]} size="sm">
+                          {project.status.replace('_', ' ')}
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 text-secondary-900">{budgetText(project)}</td>
-                      <td className="px-6 py-4 text-secondary-900">{project.bids_count}</td>
-                      <td className="px-6 py-4 text-secondary-900">{project.views_count}</td>
+                      <td className="px-6 py-4 text-[var(--color-text)]">{budgetText(project)}</td>
+                      <td className="px-6 py-4 text-[var(--color-text)]">{project.bids_count}</td>
+                      <td className="px-6 py-4 text-[var(--color-text)]">{project.views_count}</td>
                       <td className="px-6 py-4">
                         {project.is_featured ? (
-                          <Badge variant="warning" size="sm"><StarIcon className="w-3 h-3 mr-1" /> Yes</Badge>
+                          <Badge variant="secondary" size="sm"><StarIcon className="w-3 h-3 mr-1" /> Yes</Badge>
                         ) : (
                           <Badge variant="outline" size="sm">No</Badge>
                         )}
                         {project.is_urgent && <Badge variant="danger" size="sm" className="ml-1">Urgent</Badge>}
                       </td>
-                      <td className="px-6 py-4 text-sm text-secondary-500">
-                        {format(new Date(project.created_at), 'MMM d, yyyy')}
+                      <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
+                        {formatDate(project.created_at)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="sm" onClick={() => openEditModal(project)}>
                             <PencilIcon className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => setShowDeleteModal(true)}>
+                          <Button variant="ghost" size="sm" onClick={() => { setSelectedProject(project); setShowDeleteModal(true); }}>
                             <TrashIcon className="w-4 h-4" />
                           </Button>
                         </div>
@@ -268,9 +287,9 @@ export function AdminProjectsPage() {
 
             {/* Pagination */}
             {data && data.total_pages > 1 && (
-              <div className="border-t border-secondary-200 px-6 py-4">
+              <div className="border-t border-[var(--color-border)] px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-secondary-600">
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     Showing {(filters.page - 1) * filters.page_size + 1} to {Math.min(filters.page * filters.page_size, data.total)} of {data.total} projects
                   </p>
                   <div className="flex items-center gap-2">
@@ -327,9 +346,9 @@ export function AdminProjectsPage() {
                 id="is_featured"
                 checked={editForm.is_featured}
                 onChange={(e) => setEditForm({ ...editForm, is_featured: e.target.checked })}
-                className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
               />
-              <label htmlFor="is_featured" className="text-sm font-medium text-secondary-700">Featured Project</label>
+              <label htmlFor="is_featured" className="text-sm font-medium text-[var(--color-text)]">Featured Project</label>
             </div>
             <div className="flex items-center gap-3">
               <input
@@ -337,9 +356,9 @@ export function AdminProjectsPage() {
                 id="is_urgent"
                 checked={editForm.is_urgent}
                 onChange={(e) => setEditForm({ ...editForm, is_urgent: e.target.checked })}
-                className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
               />
-              <label htmlFor="is_urgent" className="text-sm font-medium text-secondary-700">Urgent</label>
+              <label htmlFor="is_urgent" className="text-sm font-medium text-[var(--color-text)]">Urgent</label>
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setSelectedProject(null)}>Cancel</Button>

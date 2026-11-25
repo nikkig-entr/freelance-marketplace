@@ -1,102 +1,131 @@
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { ReactNode } from 'react';
+import { Slot } from '@radix-ui/react-slot';
 
-interface CardProps {
-  children: ReactNode;
-  className?: string;
+export type CardVariant = 'default' | 'strong' | 'subtle';
+export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: CardVariant;
+  padding?: CardPadding;
   hover?: boolean;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
   bordered?: boolean;
-  variant?: 'default' | 'glass' | 'strong' | 'subtle';
+  asChild?: boolean;
 }
 
-const paddingClasses = {
+const paddingClasses: Record<CardPadding, string> = {
   none: '',
   sm: 'p-4',
   md: 'p-6',
   lg: 'p-8',
 };
 
-const variantClasses = {
-  default: 'bg-white/[0.03] backdrop-blur-xl border border-white/[0.08]',
-  glass: 'bg-white/[0.03] backdrop-blur-xl border border-white/[0.08]',
-  strong: 'bg-white/[0.05] backdrop-blur-2xl border border-white/[0.12]',
-  subtle: 'bg-white/[0.015] backdrop-blur-lg border border-white/[0.04]',
+const variantClasses: Record<CardVariant, string> = {
+  default: 'bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)]',
+  strong: 'bg-[var(--glass-bg-strong)] backdrop-blur-[var(--glass-blur-strong)] border border-[var(--glass-border)]',
+  subtle: 'bg-[var(--glass-bg)] backdrop-blur-[var(--glass-blur)] border border-[var(--glass-border)]/50',
 };
 
-export function Card({
-  children,
-  className,
-  hover = false,
-  padding = 'md',
-  bordered = true,
-  variant = 'glass',
-}: CardProps) {
-  return (
-    <div
-      className={clsx(
-        'rounded-2xl transition-all duration-300',
-        variantClasses[variant],
-        hover && 'hover:border-amber/50 hover:bg-white/[0.05] hover:shadow-glass-hover cursor-pointer',
-        paddingClasses[padding],
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  (
+    {
+      children,
+      className,
+      hover = false,
+      padding = 'md',
+      bordered = true,
+      variant = 'default',
+      asChild = false,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : 'div';
+
+    return (
+      <Comp
+        ref={ref}
+        className={clsx(
+          'rounded-2xl transition-all duration-300',
+          variantClasses[variant],
+          bordered && 'border',
+          hover && 'hover:border-[var(--glass-border-hover)] hover:bg-[var(--glass-bg-strong)] hover:shadow-[var(--shadow-lg)] cursor-pointer',
+          paddingClasses[padding],
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </Comp>
+    );
+  }
+);
+
+Card.displayName = 'Card';
+
+export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
+  action?: ReactNode;
 }
 
-export function CardHeader({ children, className, action }: {
-  children: ReactNode;
-  className?: string;
-  action?: ReactNode;
-}) {
-  return (
-    <div className={clsx('flex items-center justify-between mb-4', className)}>
+export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ children, className, action, ...props }, ref) => (
+    <div ref={ref} className={clsx('flex items-center justify-between mb-4', className)} {...props}>
       <div>{children}</div>
       {action && <div>{action}</div>}
     </div>
-  );
-}
+  )
+);
 
-export function CardTitle({ children, className, subtitle }: {
-  children: ReactNode;
-  className?: string;
+CardHeader.displayName = 'CardHeader';
+
+export interface CardTitleProps extends HTMLAttributes<HTMLDivElement> {
   subtitle?: ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <h3 className="text-lg font-semibold text-cream">{children}</h3>
-      {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+}
+
+export const CardTitle = forwardRef<HTMLDivElement, CardTitleProps>(
+  ({ children, className, subtitle, ...props }, ref) => (
+    <div ref={ref} className={clsx('', className)} {...props}>
+      <h3 className="text-lg font-semibold text-[var(--color-text)]">{children}</h3>
+      {subtitle && <span className="mt-0.5 text-caption text-[var(--color-text-muted)]">{subtitle}</span>}
     </div>
-  );
-}
+  )
+);
 
-export function CardBody({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={clsx('', className)}>{children}</div>;
-}
+CardTitle.displayName = 'CardTitle';
 
-export function CardFooter({ children, className, divided = true }: {
-  children: ReactNode;
-  className?: string;
-  divided?: boolean;
-}) {
-  return (
-    <div className={clsx('mt-4 pt-4 flex items-center', divided && 'border-t border-white/[0.06]', className)}>
+export const CardBody = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+  ({ children, className, ...props }, ref) => (
+    <div ref={ref} className={clsx('', className)} {...props}>
       {children}
     </div>
-  );
+  )
+);
+
+CardBody.displayName = 'CardBody';
+
+export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
+  divided?: boolean;
 }
 
-export function CardGrid({ children, columns = 3, gap = 6, className }: {
-  children: ReactNode;
+export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ children, className, divided = true, ...props }, ref) => (
+    <div ref={ref} className={clsx('mt-4 pt-4 flex items-center', divided && 'border-t border-[var(--color-border)]', className)} {...props}>
+      {children}
+    </div>
+  )
+);
+
+CardFooter.displayName = 'CardFooter';
+
+export interface CardGridProps extends HTMLAttributes<HTMLDivElement> {
   columns?: 1 | 2 | 3 | 4;
   gap?: number;
-  className?: string;
-}) {
-  return (
+}
+
+export const CardGrid = forwardRef<HTMLDivElement, CardGridProps>(
+  ({ children, columns = 3, gap = 6, className, ...props }, ref) => (
     <div
+      ref={ref}
       className={clsx(
         'grid gap-6',
         {
@@ -108,8 +137,11 @@ export function CardGrid({ children, columns = 3, gap = 6, className }: {
         className
       )}
       style={{ gap: `${gap}px` }}
+      {...props}
     >
       {children}
     </div>
-  );
-}
+  )
+);
+
+CardGrid.displayName = 'CardGrid';

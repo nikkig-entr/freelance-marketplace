@@ -1,11 +1,10 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet } from '@tanstack/react-router';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { clsx } from 'clsx';
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-obsidian flex flex-col">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />

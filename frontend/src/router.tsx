@@ -1,6 +1,5 @@
-import { createRouter, createRootRoute, createRoute, Outlet, Link } from '@tanstack/react-router';
+import { createRouter, createRootRoute, createRoute, redirect } from '@tanstack/react-router';
 import { useAuth } from './contexts/AuthContext';
-import { Navigate } from '@tanstack/react-router';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -20,12 +19,18 @@ import { WithdrawalPage } from './pages/balance/WithdrawalPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { BillingPage } from './pages/BillingPage';
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
-import { AdminUsersPage } from './pages/admin/AdminUsersPage';
-import { AdminProjectsPage } from './pages/admin/AdminProjectsPage';
-import { AdminWithdrawalsPage } from './pages/admin/AdminWithdrawalsPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
+import { AdminProjectsPage } from './pages/AdminProjectsPage';
+import { AdminWithdrawalsPage } from './pages/AdminWithdrawalsPage';
 import { AdminTransactionsPage } from './pages/admin/AdminTransactionsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { CategoriesPage } from './pages/CategoriesPage';
+import { TalentPage } from './pages/TalentPage';
+import { AIToolsPage } from './pages/AIToolsPage';
+import { ContactPage } from './pages/ContactPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { TermsPage } from './pages/TermsPage';
 
 const rootRoute = createRootRoute({
   component: () => <Layout />,
@@ -43,9 +48,9 @@ const loginRoute = createRoute({
   path: '/login',
   component: LoginPage,
   beforeLoad: ({ context }) => {
-    const { isAuthenticated } = context.auth;
+    const { isAuthenticated } = (context as RouterContext).auth;
     if (isAuthenticated) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -55,9 +60,9 @@ const registerRoute = createRoute({
   path: '/register',
   component: RegisterPage,
   beforeLoad: ({ context }) => {
-    const { isAuthenticated } = context.auth;
+    const { isAuthenticated } = (context as RouterContext).auth;
     if (isAuthenticated) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -81,22 +86,16 @@ const verifyEmailRoute = createRoute({
 });
 
 // Protected routes
-const requireAuth = ({ context }: { context: { auth: ReturnType<typeof useAuth> } }) => {
-  const { isAuthenticated, isLoading } = context.auth;
+interface RouterContext {
+  auth: ReturnType<typeof useAuth>;
+}
+
+const requireAuth = ({ context }: { context: unknown }) => {
+  const { isAuthenticated, isLoading } = (context as RouterContext).auth;
   if (isLoading) return;
   if (!isAuthenticated) {
-    throw new Navigate({ to: '/login', search: { redirect: window.location.pathname } });
+    throw redirect({ to: '/login', search: { redirect: window.location.pathname } });
   }
-};
-
-const requireRole = (roles: string[]) => {
-  return ({ context }: { context: { auth: ReturnType<typeof useAuth> } }) => {
-    const { isAuthenticated, isLoading, hasRole } = context.auth;
-    if (isLoading) return;
-    if (!isAuthenticated || !hasRole(roles)) {
-      throw new Navigate({ to: '/' });
-    }
-  };
 };
 
 // Projects routes
@@ -112,10 +111,11 @@ const createProjectRoute = createRoute({
   path: '/create',
   component: CreateProjectPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['client', 'admin'])) {
-      throw new Navigate({ to: '/projects' });
+      throw redirect({ to: '/projects' });
     }
   },
 });
@@ -198,16 +198,54 @@ const billingRoute = createRoute({
   beforeLoad: requireAuth,
 });
 
+// Public pages
+const categoriesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/categories',
+  component: CategoriesPage,
+});
+
+const talentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/talent',
+  component: TalentPage,
+});
+
+const aiToolsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ai-tools',
+  component: AIToolsPage,
+});
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/contact',
+  component: ContactPage,
+});
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: PrivacyPage,
+});
+
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: TermsPage,
+});
+
 // Admin routes
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
   component: AdminDashboardPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['admin'])) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -217,10 +255,11 @@ const adminUsersRoute = createRoute({
   path: '/users',
   component: AdminUsersPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['admin'])) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -230,10 +269,11 @@ const adminProjectsRoute = createRoute({
   path: '/projects',
   component: AdminProjectsPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['admin'])) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -243,10 +283,11 @@ const adminWithdrawalsRoute = createRoute({
   path: '/withdrawals',
   component: AdminWithdrawalsPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['admin'])) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -256,10 +297,11 @@ const adminTransactionsRoute = createRoute({
   path: '/transactions',
   component: AdminTransactionsPage,
   beforeLoad: ({ context }) => {
-    requireAuth({ context });
-    const { hasRole } = context.auth;
+    const ctx = context as RouterContext;
+    requireAuth({ context: ctx });
+    const { hasRole } = ctx.auth;
     if (!hasRole(['admin'])) {
-      throw new Navigate({ to: '/' });
+      throw redirect({ to: '/' });
     }
   },
 });
@@ -286,6 +328,12 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
   profileRoute,
   billingRoute,
+  categoriesRoute,
+  talentRoute,
+  aiToolsRoute,
+  contactRoute,
+  privacyRoute,
+  termsRoute,
   adminRoute.addChildren([adminUsersRoute, adminProjectsRoute, adminWithdrawalsRoute, adminTransactionsRoute]),
   notFoundRoute,
 ]);

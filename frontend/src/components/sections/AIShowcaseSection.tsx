@@ -1,18 +1,62 @@
-import { Link } from 'react-router-dom';
-import { SparklesIcon, DocumentTextIcon, ArrowRightIcon, CheckCircleIcon, CpuChipIcon, MagnifyingGlassIcon, DocumentIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-import { Code, Zap, Users, Shield, FileText, Search, Brain, Wand2 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
+import { Link } from '@tanstack/react-router';
+import { SparklesIcon, ArrowRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { Brain, Wand2, FileText, Search, Shield, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { AmbientBackground } from '@/components/ui/AmbientBackground';
 
-const aiFeatures = [
+type ParseTZOutput = {
+  phase: string;
+  tasks: string[];
+  duration: string;
+}[];
+type ParseTZDemo = {
+  input: string;
+  output: ParseTZOutput;
+  skills: string[];
+  timeline: string;
+  budget: string;
+};
+
+type AICandidate = {
+  name: string;
+  title: string;
+  match: number;
+  skills: string[];
+  rate: string;
+  availability: string;
+  badge: string;
+};
+type AIMatchDemo = {
+  input: string;
+  output: AICandidate[];
+};
+
+type SmartContractOutput = {
+  sections: string[];
+  highlights: string[];
+};
+type SmartContractDemo = {
+  input: string;
+  output: SmartContractOutput;
+};
+
+type AIFeature = {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+  demo: ParseTZDemo | AIMatchDemo | SmartContractDemo;
+};
+
+const aiFeatures: AIFeature[] = [
   {
     id: 'parse-tz',
     title: 'Parse TZ',
     subtitle: 'Technical Specification Decomposition',
     icon: FileText,
-    accent: 'amber',
     description: 'Upload a project brief or technical specification and our AI instantly breaks it down into structured milestones, tasks, required skills, and time estimates.',
     demo: {
       input: 'Build a real-time chat app with React, Node.js, and WebSockets. Needs user auth, rooms, direct messages, file sharing, and mobile responsive UI.',
@@ -32,7 +76,6 @@ const aiFeatures = [
     title: 'AI Match',
     subtitle: 'Intelligent Talent Discovery',
     icon: Search,
-    accent: 'teal',
     description: 'Describe your project needs and our matching engine analyzes 50K+ verified freelancers to surface the top 5 candidates with match scores, relevant experience, and availability.',
     demo: {
       input: 'Need a senior React developer for a 3-month fintech dashboard project. Must have D3.js, TypeScript, and experience with real-time data visualization.',
@@ -50,7 +93,6 @@ const aiFeatures = [
     title: 'Smart Contract',
     subtitle: 'AI-Generated Legal Agreements',
     icon: Shield,
-    accent: 'amber',
     description: 'Generate legally-sound contracts tailored to your project type, jurisdiction, and requirements. Includes IP clauses, payment terms, confidentiality, and dispute resolution.',
     demo: {
       input: 'Fixed-price contract for a React dashboard redesign. $5,000 total, 3 milestones, 6-week timeline. Client in Delaware, freelancer in Germany. IP transfer required.',
@@ -87,40 +129,34 @@ export function AIShowcaseSection() {
   const activeFeatureData = aiFeatures.find(f => f.id === activeFeature)!;
 
   return (
-    <section className="section relative">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-amber/5 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-teal/5 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-amber/3 blur-3xl animate-pulse-soft" />
-      </div>
-
-      <div className="container relative">
-        {/* Header */}
+    <section className="section">
+      <AmbientBackground size="lg" opacity="default">
+        <div className="container">
+        {/* Header - centered, typography focused */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <Badge variant="primary" size="lg" className="mb-4 inline-flex" dot dotColor="#2DD4BF">
-            <SparklesIcon className="w-4 h-4" />
+          <Badge variant="primary" size="md" className="mb-4 inline-flex" dot>
+            <SparklesIcon className="w-3.5 h-3.5" />
             AI Assistant Platform
           </Badge>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-cream tracking-tight">
-            Three AI Tools That <span className="text-gradient">Change Everything</span>
+          <h2 className="text-headline-1 text-[var(--color-text)]">
+            Three AI Tools That <span className="text-gradient-accent">Change Everything</span>
           </h2>
-          <p className="mt-4 text-lg text-muted max-w-2xl mx-auto">
+          <p className="mt-4 text-body text-[var(--color-text-muted)] max-w-2xl mx-auto">
             Built directly into your workflow. No separate subscriptions, no context switching — just intelligence where you need it.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Feature Tabs */}
+          {/* Feature Tabs - clean, vertical */}
           <div className="lg:col-span-4">
             <div className="glass-card p-4 sticky top-24">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber to-teal flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-obsidian" />
+                <div className="w-11 h-11 rounded-xl bg-[var(--color-accent)] flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-[var(--color-text-inverse)]" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted">Powered by</p>
-                  <p className="font-semibold text-cream">FreelanceHub AI</p>
+                  <p className="text-sm text-[var(--color-text-subtle)] tracking-wide">Powered by</p>
+                  <p className="font-semibold text-[var(--color-text)]">FreelanceHub AI</p>
                 </div>
               </div>
 
@@ -140,16 +176,16 @@ export function AIShowcaseSection() {
                     className={`
                       w-full text-left p-4 rounded-xl transition-all duration-300 flex items-center gap-4
                       ${activeFeature === feature.id
-                        ? 'bg-white/[0.05] border border-amber/30 shadow-lg shadow-amber/10'
-                        : 'hover:bg-white/[0.03] border border-white/[0.06]'
+                        ? 'bg-[var(--color-accent-muted)] border border-[var(--color-accent)]/30'
+                        : 'hover:bg-[var(--glass-bg)] border border-[var(--color-border)]'
                       }
                     `}
                   >
                     <div className={`
-                      w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300
+                      w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300
                       ${activeFeature === feature.id
-                        ? `bg-${feature.accent}/20 text-${feature.accent} shadow-${feature.accent}-glow`
-                        : 'bg-white/[0.03] text-muted border border-white/[0.08]'
+                        ? 'bg-[var(--color-accent)] text-[var(--color-text-inverse)]'
+                        : 'glass text-[var(--color-text-muted)]'
                       }
                     `}>
                       <feature.icon className="w-5 h-5" aria-hidden="true" />
@@ -157,32 +193,32 @@ export function AIShowcaseSection() {
                     <div className="flex-1 min-w-0">
                       <p className={`
                         font-semibold text-sm truncate transition-colors
-                        ${activeFeature === feature.id ? 'text-cream' : 'text-muted'}
+                        ${activeFeature === feature.id ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}
                       `}>
                         {feature.title}
                       </p>
-                      <p className="text-xs text-muted/70 truncate mt-0.5">{feature.subtitle}</p>
+                      <p className="text-xs text-[var(--color-text-subtle)] truncate mt-0.5">{feature.subtitle}</p>
                     </div>
                     {activeFeature === feature.id && (
-                      <ArrowRightIcon className="w-5 h-5 text-amber flex-shrink-0" />
+                      <ArrowRightIcon className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0" />
                     )}
                   </button>
                 ))}
               </nav>
 
-              {/* Stats bar */}
-              <div className="mt-8 pt-6 border-t border-white/[0.06] grid grid-cols-3 gap-4 text-center">
+              {/* Stats bar - minimal */}
+              <div className="mt-8 pt-6 border-t border-[var(--color-border)] grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-amber">50K+</p>
-                  <p className="text-xs text-muted">Profiles Analyzed</p>
+                  <p className="text-2xl font-extrabold text-[var(--color-accent)]">50K+</p>
+                  <p className="text-xs text-[var(--color-text-subtle)]">Profiles Analyzed</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-teal">3.2x</p>
-                  <p className="text-xs text-muted">Better Matches</p>
+                  <p className="text-2xl font-extrabold text-[var(--color-text)]">3.2x</p>
+                  <p className="text-xs text-[var(--color-text-subtle)]">Better Matches</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-cream">94%</p>
-                  <p className="text-xs text-muted">Accuracy Rate</p>
+                  <p className="text-2xl font-extrabold text-[var(--color-text)]">94%</p>
+                  <p className="text-xs text-[var(--color-text-subtle)]">Accuracy Rate</p>
                 </div>
               </div>
             </div>
@@ -196,15 +232,15 @@ export function AIShowcaseSection() {
             `}>
               {/* Feature Header */}
               <div className="flex items-center gap-4 mb-6">
-                <div className={`w-14 h-14 rounded-xl bg-${activeFeatureData.accent}/20 flex items-center justify-center`}>
-                  <activeFeatureData.icon className={`w-7 h-7 text-${activeFeatureData.accent}`} aria-hidden="true" />
+                <div className="w-13 h-13 rounded-xl bg-[var(--color-accent-muted)] flex items-center justify-center">
+                  <activeFeatureData.icon className="w-6 h-6 text-[var(--color-accent)]" aria-hidden="true" />
                 </div>
                 <div>
-                  <Badge variant={activeFeatureData.accent === 'amber' ? 'primary' : 'success'} size="sm" className="mb-2">
-                    {activeFeatureData.accent === 'amber' ? 'Decomposition' : activeFeatureData.accent === 'teal' ? 'Matching' : 'Generation'}
+                  <Badge variant="primary" size="sm" className="mb-2">
+                    {activeFeatureData.id === 'parse-tz' ? 'Decomposition' : activeFeatureData.id === 'ai-match' ? 'Matching' : 'Generation'}
                   </Badge>
-                  <h3 className="text-2xl font-heading font-bold text-cream">{activeFeatureData.title}</h3>
-                  <p className="text-sm text-muted mt-0.5">{activeFeatureData.subtitle}</p>
+                  <h3 className="text-headline-3 text-[var(--color-text)]">{activeFeatureData.title}</h3>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{activeFeatureData.subtitle}</p>
                 </div>
               </div>
 
@@ -213,11 +249,11 @@ export function AIShowcaseSection() {
                 {/* Input */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-cream">Input</h4>
+                    <h4 className="font-medium text-[var(--color-text)]">Input</h4>
                     <Badge variant="outline" size="sm">Natural Language</Badge>
                   </div>
-                  <div className="glass-strong p-5 rounded-xl border border-white/[0.1] min-h-[200px]">
-                    <p className="text-muted/70 whitespace-pre-wrap font-mono text-sm leading-relaxed">{activeFeatureData.demo.input}</p>
+                  <div className="glass-strong p-5 rounded-xl border border-[var(--color-border)] min-h-[200px]">
+                    <p className="text-[var(--color-text-muted)] whitespace-pre-wrap font-mono text-sm leading-relaxed">{activeFeatureData.demo.input}</p>
                   </div>
                   <Button variant="primary" className="w-full" leftIcon={<Wand2 className="w-4 h-4" />}>
                     Analyze with AI
@@ -227,16 +263,16 @@ export function AIShowcaseSection() {
                 {/* Output */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-cream">AI Output</h4>
-                    <Badge variant="outline" size="sm" className="text-teal border-teal/30">Live Preview</Badge>
+                    <h4 className="font-medium text-[var(--color-text)]">AI Output</h4>
+                    <Badge variant="outline" size="sm" className="text-[var(--color-accent)] border-[var(--color-accent)]/30">Live Preview</Badge>
                   </div>
-                  <div className="glass-strong p-5 rounded-xl border border-white/[0.1] max-h-[400px] overflow-y-auto">
+                  <div className="glass-strong p-5 rounded-xl border border-[var(--color-border)] max-h-[400px] overflow-y-auto">
                     {activeFeatureData.id === 'parse-tz' && (
                       <div className="space-y-4">
-                        {activeFeatureData.demo.output.map((phase, i) => (
+                        {(activeFeatureData.demo as ParseTZDemo).output.map((phase, i) => (
                           <div key={i} className="space-y-2 p-4 glass-subtle rounded-xl">
                             <div className="flex items-center justify-between">
-                              <span className="font-semibold text-cream">{phase.phase}</span>
+                              <span className="font-semibold text-[var(--color-text)]">{phase.phase}</span>
                               <Badge variant="secondary" size="sm">{phase.duration}</Badge>
                             </div>
                             <div className="flex flex-wrap gap-1.5 mt-2">
@@ -246,18 +282,18 @@ export function AIShowcaseSection() {
                             </div>
                           </div>
                         ))}
-                        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/[0.06]">
+                        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--color-border)]">
                           <div className="glass-subtle p-3 rounded-xl text-center">
-                            <p className="text-xs text-muted">Required Skills</p>
-                            <p className="text-sm font-medium text-cream mt-1">{activeFeatureData.demo.skills.length}</p>
+                            <p className="text-xs text-[var(--color-text-subtle)]">Required Skills</p>
+                            <p className="text-sm font-medium text-[var(--color-text)] mt-1">{(activeFeatureData.demo as ParseTZDemo).skills.length}</p>
                           </div>
                           <div className="glass-subtle p-3 rounded-xl text-center">
-                            <p className="text-xs text-muted">Estimated Timeline</p>
-                            <p className="text-sm font-medium text-amber mt-1">{activeFeatureData.demo.timeline}</p>
+                            <p className="text-xs text-[var(--color-text-subtle)]">Estimated Timeline</p>
+                            <p className="text-sm font-medium text-[var(--color-accent)] mt-1">{(activeFeatureData.demo as ParseTZDemo).timeline}</p>
                           </div>
                           <div className="glass-subtle p-3 rounded-xl text-center">
-                            <p className="text-xs text-muted">Budget Range</p>
-                            <p className="text-sm font-medium text-teal mt-1">{activeFeatureData.demo.budget}</p>
+                            <p className="text-xs text-[var(--color-text-subtle)]">Budget Range</p>
+                            <p className="text-sm font-medium text-[var(--color-text)] mt-1">{(activeFeatureData.demo as ParseTZDemo).budget}</p>
                           </div>
                         </div>
                       </div>
@@ -265,21 +301,21 @@ export function AIShowcaseSection() {
 
                     {activeFeatureData.id === 'ai-match' && (
                       <div className="space-y-3">
-                        {activeFeatureData.demo.output.map((candidate, i) => (
-                          <div key={i} className="glass-subtle p-4 rounded-xl border border-white/[0.06] hover:border-amber/20 transition-colors">
+                        {(activeFeatureData.demo as AIMatchDemo).output.map((candidate, i) => (
+                          <div key={i} className="glass-subtle p-4 rounded-xl border border-[var(--color-border)] hover:border-[var(--color-accent)]/30 transition-colors">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-white/[0.05] flex items-center justify-center">
-                                  <Users className="w-5 h-5 text-muted" />
+                                <div className="w-9 h-9 rounded-full glass flex items-center justify-center">
+                                  <Users className="w-4 h-4 text-[var(--color-text-muted)]" />
                                 </div>
                                 <div>
-                                  <p className="font-medium text-cream">{candidate.name}</p>
-                                  <p className="text-sm text-muted">{candidate.title}</p>
+                                  <p className="font-medium text-[var(--color-text)]">{candidate.name}</p>
+                                  <p className="text-sm text-[var(--color-text-muted)]">{candidate.title}</p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-2xl font-bold text-amber">{candidate.match}%</p>
-                                <p className="text-xs text-muted">Match Score</p>
+                                <p className="text-2xl font-extrabold text-[var(--color-accent)]">{candidate.match}%</p>
+                                <p className="text-xs text-[var(--color-text-subtle)]">Match Score</p>
                               </div>
                             </div>
                             <div className="flex flex-wrap gap-1.5 mb-3">
@@ -288,8 +324,8 @@ export function AIShowcaseSection() {
                               ))}
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted">{candidate.rate}</span>
-                              <span className="text-teal">{candidate.availability}</span>
+                              <span className="text-[var(--color-text-muted)]">{candidate.rate}</span>
+                              <span className="text-[var(--color-text-muted)]">{candidate.availability}</span>
                               <Badge variant="primary" size="sm">{candidate.badge}</Badge>
                             </div>
                           </div>
@@ -300,23 +336,23 @@ export function AIShowcaseSection() {
                     {activeFeatureData.id === 'smart-contract' && (
                       <div className="space-y-4">
                         <div>
-                          <h5 className="font-medium text-cream mb-3">Contract Sections</h5>
+                          <h5 className="font-medium text-[var(--color-text)] mb-3">Contract Sections</h5>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {activeFeatureData.demo.output.sections.map((section, i) => (
+                            {(activeFeatureData.demo as SmartContractDemo).output.sections.map((section, i) => (
                               <div key={i} className="flex items-center gap-3 p-3 glass-subtle rounded-xl">
-                                <span className="w-6 h-6 rounded-full bg-amber/20 text-amber text-xs font-mono flex items-center justify-center flex-shrink-0">{i + 1}</span>
-                                <span className="text-sm text-cream">{section}</span>
+                                <span className="w-6 h-6 rounded-full bg-[var(--color-accent-muted)] text-[var(--color-accent)] text-xs font-mono flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                                <span className="text-sm text-[var(--color-text)]">{section}</span>
                               </div>
                             ))}
                           </div>
                         </div>
-                        <div className="pt-4 border-t border-white/[0.06]">
-                          <h5 className="font-medium text-cream mb-3">Key Highlights</h5>
+                        <div className="pt-4 border-t border-[var(--color-border)]">
+                          <h5 className="font-medium text-[var(--color-text)] mb-3">Key Highlights</h5>
                           <div className="space-y-2">
-                            {activeFeatureData.demo.output.highlights.map((highlight, i) => (
+                            {(activeFeatureData.demo as SmartContractDemo).output.highlights.map((highlight, i) => (
                               <div key={i} className="flex items-start gap-3 p-3 glass-subtle rounded-xl">
-                                <CheckCircleIcon className="w-5 h-5 text-teal flex-shrink-0 mt-0.5" />
-                                <span className="text-sm text-cream">{highlight}</span>
+                                <CheckCircleIcon className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-[var(--color-text)]">{highlight}</span>
                               </div>
                             ))}
                           </div>
@@ -328,18 +364,18 @@ export function AIShowcaseSection() {
               </div>
 
               {/* Description */}
-              <p className="mt-6 text-muted leading-relaxed">{activeFeatureData.description}</p>
+              <p className="mt-6 text-[var(--color-text-muted)] leading-relaxed">{activeFeatureData.description}</p>
             </div>
           </div>
         </div>
 
-        {/* CTA */}
+        {/* CTA - minimal */}
         <div className="mt-16 text-center">
-          <Card className="glass-card p-8 lg:p-12 max-w-3xl mx-auto gradient-border">
-            <h3 className="text-2xl sm:text-3xl font-bold text-cream mb-4">
+          <div className="glass-card p-8 lg:p-12 max-w-3xl mx-auto gradient-border-accent">
+            <h3 className="text-headline-3 text-[var(--color-text)] mb-4">
               Ready to experience AI-powered freelancing?
             </h3>
-            <p className="text-muted mb-8 max-w-xl mx-auto">
+            <p className="text-[var(--color-text-muted)] mb-8 max-w-xl mx-auto">
               Join thousands of freelancers and clients using AI to work smarter, not harder.
               Start your 14-day Pro trial today.
             </p>
@@ -351,9 +387,10 @@ export function AIShowcaseSection() {
                 <Link to="/ai-tools">Explore AI Tools</Link>
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
+      </AmbientBackground>
     </section>
   );
 }

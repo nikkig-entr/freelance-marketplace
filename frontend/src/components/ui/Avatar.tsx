@@ -31,10 +31,10 @@ const statusSizeClasses = {
 };
 
 const statusColorClasses = {
-  online: 'bg-success-500',
-  offline: 'bg-secondary-400',
-  busy: 'bg-danger-500',
-  away: 'bg-warning-500',
+  online: 'bg-[var(--color-accent)]',
+  offline: 'bg-[var(--color-text-subtle)]',
+  busy: 'bg-[var(--color-gray-500)]',
+  away: 'bg-[var(--color-gray-400)]',
 };
 
 const statusPositionClasses = {
@@ -55,14 +55,14 @@ function getInitials(name: string): string {
 
 function getColorFromName(name: string): string {
   const colors = [
-    'bg-primary-500',
-    'bg-emerald-500',
-    'bg-amber-500',
-    'bg-rose-500',
-    'bg-indigo-500',
-    'bg-violet-500',
-    'bg-teal-500',
-    'bg-orange-500',
+    'bg-[var(--color-accent-muted)] text-[var(--color-accent)]',
+    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
+    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -97,7 +97,7 @@ export function Avatar({
           className={clsx(
             sizeClasses[size],
             shapeClass,
-            'flex items-center justify-center font-medium text-white',
+            'flex items-center justify-center font-medium',
             getColorFromName(name || 'User')
           )}
           aria-label={name || 'User avatar'}
@@ -108,7 +108,7 @@ export function Avatar({
       {showStatus && (
         <span
           className={clsx(
-            'absolute border-2 border-white',
+            'absolute border-2 border-[var(--color-bg)]',
             statusSizeClasses[size],
             'rounded-full',
             statusColorClasses[status],
@@ -138,13 +138,13 @@ export function AvatarGroup({
   return (
     <div className={clsx('flex -space-x-2', className)} aria-label={`${avatars.length} users`}>
       {visibleAvatars.map((avatar) => (
-        <Avatar key={avatar.id} {...avatar} size={size} className="border-2 border-white" />
+        <Avatar key={avatar.id} {...avatar} size={size} className="border-2 border-[var(--color-bg)]" />
       ))}
       {remainingCount > 0 && (
         <div
           className={clsx(
             sizeClasses[size],
-            'rounded-full flex items-center justify-center font-medium text-secondary-600 bg-secondary-100 border-2 border-white'
+            'rounded-full flex items-center justify-center font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border-2 border-[var(--color-bg)]'
           )}
         >
           +{remainingCount}

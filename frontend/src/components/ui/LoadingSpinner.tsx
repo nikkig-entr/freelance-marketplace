@@ -14,7 +14,7 @@ export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) 
 
   return (
     <svg
-      className={clsx('animate-spin text-primary-600', sizeClasses[size], className)}
+      className={clsx('animate-spin text-[var(--color-accent)]', sizeClasses[size], className)}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -40,7 +40,7 @@ export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) 
 
 export function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
       <LoadingSpinner size="lg" />
     </div>
   );
@@ -50,12 +50,12 @@ export function CardLoader() {
   return (
     <div className="card animate-pulse">
       <div className="card-header">
-        <div className="h-6 w-3/4 bg-secondary-200 rounded animate-pulse" />
+        <div className="h-6 w-3/4 bg-[var(--color-surface-hover)] rounded animate-pulse" />
       </div>
       <div className="card-body space-y-4">
-        <div className="h-4 w-full bg-secondary-200 rounded animate-pulse" />
-        <div className="h-4 w-2/3 bg-secondary-200 rounded animate-pulse" />
-        <div className="h-4 w-1/2 bg-secondary-200 rounded animate-pulse" />
+        <div className="h-4 w-full bg-[var(--color-surface-hover)] rounded animate-pulse" />
+        <div className="h-4 w-2/3 bg-[var(--color-surface-hover)] rounded animate-pulse" />
+        <div className="h-4 w-1/2 bg-[var(--color-surface-hover)] rounded animate-pulse" />
       </div>
     </div>
   );

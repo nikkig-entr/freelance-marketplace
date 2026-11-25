@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { CheckIcon, XMarkIcon, SparklesIcon, ShieldCheckIcon, BoltIcon, CpuChipIcon, UserGroupIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
-import { Card } from '@/components/ui/Card';
+import { CheckIcon, XMarkIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Briefcase, Zap, Users, Shield, Brain, Crown, Globe, Lock, Infinity } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { Crown } from 'lucide-react';
+import { AmbientBackground } from '@/components/ui/AmbientBackground';
 
 const plans = [
   {
@@ -27,8 +27,6 @@ const plans = [
     ],
     cta: 'Start Free',
     popular: false,
-    gradient: 'from-white/[0.02] to-white/[0.01]',
-    border: 'border-white/[0.08]',
   },
   {
     name: 'Pro',
@@ -50,8 +48,6 @@ const plans = [
     ],
     cta: 'Start 14-Day Trial',
     popular: true,
-    gradient: 'from-amber/10 to-amber/5',
-    border: 'border-amber/30 gradient-border-amber',
   },
   {
     name: 'Agency',
@@ -73,42 +69,37 @@ const plans = [
     ],
     cta: 'Contact Sales',
     popular: false,
-    gradient: 'from-teal/10 to-teal/5',
-    border: 'border-teal/30',
   },
 ];
 
-const billingPeriods = [
+type BillingPeriod = 'monthly' | 'yearly';
+
+const billingPeriods: { value: BillingPeriod; label: string; savings: string | null }[] = [
   { value: 'monthly', label: 'Monthly', savings: null },
   { value: 'yearly', label: 'Yearly', savings: 'Save 20%' },
 ];
 
 export function PricingSection() {
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [billing, setBilling] = useState<BillingPeriod>('monthly');
 
   return (
-    <section className="section relative">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-amber/3 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-teal/3 blur-3xl" />
-      </div>
-
-      <div className="container relative">
-        {/* Header */}
+    <section className="section">
+      <AmbientBackground size="lg" opacity="default">
+        <div className="container">
+        {/* Header - Centered, Typography Focused */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <Badge variant="primary" size="lg" className="mb-4 inline-flex">
+          <Badge variant="primary" size="md" className="mb-4 inline-flex">
             Simple, Transparent Pricing
           </Badge>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-cream tracking-tight">
-            Choose Your <span className="text-gradient">Plan</span>
+          <h2 className="text-headline-1 text-[var(--color-text)]">
+            Choose Your <span className="text-gradient-accent">Plan</span>
           </h2>
-          <p className="mt-4 text-lg text-muted max-w-2xl mx-auto">
+          <p className="mt-4 text-body text-[var(--color-text-muted)] max-w-2xl mx-auto">
             No hidden fees. No long-term contracts. Cancel anytime. All plans include secure escrow payments.
           </p>
         </div>
 
-        {/* Billing Toggle */}
+        {/* Billing Toggle - Clean */}
         <div className="flex justify-center mb-12">
           <div className="glass-card p-1 rounded-xl flex items-center gap-1">
             {billingPeriods.map((period) => (
@@ -117,26 +108,26 @@ export function PricingSection() {
                 onClick={() => setBilling(period.value)}
                 className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   billing === period.value
-                    ? 'bg-amber text-obsidian shadow-lg shadow-amber/25'
-                    : 'text-muted hover:text-cream hover:bg-white/[0.03]'
+                    ? 'bg-[var(--color-accent)] text-[var(--color-text-inverse)] shadow-lg shadow-[var(--color-accent)]/25'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
                 }`}
               >
                 {period.label}
                 {period.savings && billing === period.value && (
-                  <Badge variant="success" size="sm" className="ml-1">{period.savings}</Badge>
+                  <Badge variant="primary" size="sm" className="ml-1">{period.savings}</Badge>
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Pricing Cards */}
+        {/* Pricing Cards - Clean, Minimal */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {plans.map((plan, index) => (
             <article
               key={plan.name}
-              className={`relative glass-card-hover p-6 lg:p-8 flex flex-col h-full ${plan.popular ? 'scale-105 z-10' : ''}`}
-              style={{ background: plan.gradient, border: plan.border }}
+              className={`relative glass-card-hover p-6 lg:p-8 flex flex-col h-full ${plan.popular ? 'ring-1 ring-[var(--color-accent)]/30' : ''}`}
+              style={{ animationDelay: `${index * 80}ms` }}
             >
               {/* Popular Badge */}
               {plan.popular && (
@@ -149,31 +140,31 @@ export function PricingSection() {
 
               {/* Plan Header */}
               <div className="mb-8">
-                <h3 className="text-xl font-heading font-bold text-cream mb-2">{plan.name}</h3>
-                <p className="text-muted text-sm mb-6">{plan.description}</p>
+                <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">{plan.name}</h3>
+                <p className="text-[var(--color-text-muted)] text-sm mb-6">{plan.description}</p>
 
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl lg:text-5xl font-bold text-cream">
+                  <span className="text-5xl lg:text-6xl font-extrabold text-[var(--color-text)] tracking-tight">
                     ${billing === 'monthly' ? plan.price.monthly : plan.price.yearly}
                   </span>
-                  <span className="text-muted mb-1">/month</span>
+                  <span className="text-[var(--color-text-muted)] mb-1">/month</span>
                   {billing === 'yearly' && plan.price.yearly > 0 && (
-                    <span className="text-xs text-teal ml-2">Billed ${plan.price.yearly * 12}/year</span>
+                    <span className="text-xs text-[var(--color-gray-500)] ml-2">Billed ${plan.price.yearly * 12}/year</span>
                   )}
                   {plan.price.monthly === 0 && (
-                    <span className="text-xs text-teal ml-2">Free forever</span>
+                    <span className="text-xs text-[var(--color-gray-500)] ml-2">Free forever</span>
                   )}
                 </div>
               </div>
 
-              {/* Features */}
+              {/* Features - Clean List */}
               <ul className="space-y-3 flex-1 mb-8" role="list">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 ${
                       feature.included
-                        ? 'bg-teal/20 text-teal'
-                        : 'bg-white/[0.03] text-muted/30 border border-white/[0.06]'
+                        ? 'bg-[var(--color-accent)]/20 text-[var(--color-accent)]'
+                        : 'glass text-[var(--color-text-subtle)]'
                     }`}>
                       {feature.included ? (
                         <CheckIcon className="w-3.5 h-3.5" />
@@ -181,7 +172,7 @@ export function PricingSection() {
                         <XMarkIcon className="w-3.5 h-3.5" />
                       )}
                     </div>
-                    <span className={`text-sm ${feature.included ? 'text-cream' : 'text-muted/60'}`}>
+                    <span className={`text-sm ${feature.included ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
                       {feature.name}
                     </span>
                   </li>
@@ -201,23 +192,24 @@ export function PricingSection() {
           ))}
         </div>
 
-        {/* Enterprise Note */}
+        {/* Enterprise Note - Minimal */}
         <div className="mt-16 text-center">
-          <Card className="glass-card p-6 lg:p-8 max-w-3xl mx-auto">
+          <div className="glass-card p-6 lg:p-8 max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Crown className="w-6 h-6 text-amber" />
-              <h3 className="text-lg font-semibold text-cream">Need a custom solution?</h3>
+              <Crown className="w-6 h-6 text-[var(--color-accent)]" />
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">Need a custom solution?</h3>
             </div>
-            <p className="text-muted mb-6">
+            <p className="text-[var(--color-text-muted)] mb-6">
               Enterprise plans with custom limits, SLA guarantees, dedicated infrastructure,
               and white-label options. Perfect for large agencies and platforms.
             </p>
             <Button variant="outline" asChild size="lg">
               <Link to="/contact">Contact Sales</Link>
             </Button>
-          </Card>
+          </div>
         </div>
       </div>
+      </AmbientBackground>
     </section>
   );
 }

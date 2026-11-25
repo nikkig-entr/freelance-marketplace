@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation } from '@tanstack/react-router';
 import { clsx } from 'clsx';
 import {
   ChartBarIcon,
@@ -39,7 +39,7 @@ export function AdminLayout() {
               {adminNavigation.map((item) => {
                 const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
                 return (
-                  <NavLink
+                  <Link
                     key={item.name}
                     to={item.href}
                     className={clsx(
@@ -58,7 +58,7 @@ export function AdminLayout() {
                       aria-hidden="true"
                     />
                     <span className="truncate">{item.name}</span>
-                  </NavLink>
+                  </Link>
                 );
               })}
             </nav>

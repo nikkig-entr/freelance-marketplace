@@ -16,13 +16,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="label">
+          <label htmlFor={inputId} className="input-label">
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--color-text-subtle)]">
               {leftIcon}
             </div>
           )}
@@ -41,18 +41,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary-400">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[var(--color-text-subtle)]">
               {rightIcon}
             </div>
           )}
         </div>
         {error && (
-          <p id={`${inputId}-error`} className="mt-1.5 text-sm text-danger-600" role="alert">
+          <p id={`${inputId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${inputId}-helper`} className="mt-1.5 text-sm text-secondary-500">
+          <p id={`${inputId}-helper`} className="input-hint">
             {helperText}
           </p>
         )}
@@ -76,7 +76,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={textareaId} className="label">
+          <label htmlFor={textareaId} className="input-label">
             {label}
           </label>
         )}
@@ -89,12 +89,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {error && (
-          <p id={`${textareaId}-error`} className="mt-1.5 text-sm text-danger-600" role="alert">
+          <p id={`${textareaId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${textareaId}-helper`} className="mt-1.5 text-sm text-secondary-500">
+          <p id={`${textareaId}-helper`} className="input-hint">
             {helperText}
           </p>
         )}
@@ -111,9 +111,9 @@ interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
 
 export function Label({ required, children, className, ...props }: LabelProps) {
   return (
-    <label className={clsx('label', className)} {...props}>
+    <label className={clsx('input-label', className)} {...props}>
       {children}
-      {required && <span className="text-danger-500 ml-1" aria-hidden="true">*</span>}
+      {required && <span className="text-[var(--color-gray-500)] ml-1" aria-hidden="true">*</span>}
     </label>
   );
 }
@@ -138,10 +138,10 @@ export function Select({
 
   return (
     <div className="w-full">
-      {label && <label htmlFor={selectId} className="label">{label}</label>}
+      {label && <label htmlFor={selectId} className="input-label">{label}</label>}
       <select
         id={selectId}
-        className={clsx('input appearance-none bg-white', error && 'input-error', className)}
+        className={clsx('input appearance-none', error && 'input-error', className)}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${selectId}-error` : helperText ? `${selectId}-helper` : undefined}
         {...props}
@@ -153,12 +153,12 @@ export function Select({
         ))}
       </select>
       {error && (
-        <p id={`${selectId}-error`} className="mt-1.5 text-sm text-danger-600" role="alert">
+        <p id={`${selectId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
           {error}
         </p>
       )}
       {helperText && !error && (
-        <p id={`${selectId}-helper`} className="mt-1.5 text-sm text-secondary-500">
+        <p id={`${selectId}-helper`} className="input-hint">
           {helperText}
         </p>
       )}
@@ -186,18 +186,18 @@ export function Checkbox({
         type="checkbox"
         id={checkboxId}
         className={clsx(
-          'mt-1 h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors',
+          'mt-1 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] transition-colors',
           className
         )}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${checkboxId}-error` : undefined}
         {...props}
       />
-      <label htmlFor={checkboxId} className="text-sm text-secondary-700 cursor-pointer">
+      <label htmlFor={checkboxId} className="text-sm text-[var(--color-text-muted)] cursor-pointer">
         {label}
       </label>
       {error && (
-        <p id={`${checkboxId}-error`} className="mt-1.5 text-sm text-danger-600" role="alert">
+        <p id={`${checkboxId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
           {error}
         </p>
       )}

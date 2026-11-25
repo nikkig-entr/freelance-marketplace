@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { api } from '../../services/api';
-import { Category } from '../../types';
+import { projectService } from '@/services/api';
 import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { Briefcase } from 'lucide-react';
+import { BriefcaseIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CreateProjectForm {
@@ -17,6 +16,11 @@ interface CreateProjectForm {
   budget_max: string;
   is_fixed_price: boolean;
   deadline_days: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 export function CreateProjectPage() {
@@ -48,7 +52,7 @@ export function CreateProjectPage() {
     const timer = setTimeout(async () => {
       if (description.length > 50) {
         try {
-          const data = await api.parseProject(description);
+          const data = await projectService.parseProject<{ skills: string[] }>(description);
           if (data.skills && data.skills.length > 0) {
             setSuggestedSkills(data.skills);
           }
@@ -62,7 +66,7 @@ export function CreateProjectPage() {
 
   const fetchCategories = async () => {
     try {
-      const data = await api.getCategories();
+      const data = await projectService.getCategories<{ items: Category[] }>();
       setCategories(data.items || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -83,9 +87,9 @@ export function CreateProjectPage() {
         is_fixed_price: data.is_fixed_price,
         deadline_days: data.deadline_days ? parseInt(data.deadline_days) : undefined,
       };
-      const project = await api.createProject(projectData);
+      const project = await projectService.create<{ id: number }>(projectData);
       toast.success('Project created successfully!');
-      navigate(`/projects/${project.id}`);
+      navigate({ to: '/projects/$projectId', params: { projectId: String(project.id) }, search: { tab: 'details' } });
     } catch (error: any) {
       toast.error(error.response?.data?.error?.message || 'Failed to create project');
     } finally {
@@ -101,24 +105,24 @@ export function CreateProjectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/projects" className="text-gray-500 hover:text-gray-700">
+          <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Project</h1>
-            <p className="mt-1 text-gray-600">Fill in the details below to post your project</p>
+            <h1 className="text-3xl font-bold text-[var(--color-text)]">Create New Project</h1>
+            <p className="mt-1 text-[var(--color-text-muted)]">Fill in the details below to post your project</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Info */}
           <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-primary-600" />
+            <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
+              <BriefcaseIcon className="w-5 h-5 text-[var(--color-accent)]" />
               Project Details
             </h2>
 
@@ -135,7 +139,7 @@ export function CreateProjectPage() {
                   maxLength: { value: 255, message: 'Title must be less than 255 characters' },
                 })}
               />
-              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+              {errors.title && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.title.message}</p>}
             </div>
 
             <div>
@@ -164,17 +168,17 @@ export function CreateProjectPage() {
                   minLength: { value: 50, message: 'Description must be at least 50 characters' },
                 })}
               />
-              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+              {errors.description && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.description.message}</p>}
               {suggestedSkills.length > 0 && (
-                <div className="mt-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
-                  <p className="text-sm font-medium text-primary-800 mb-2">AI Suggested Skills:</p>
+                <div className="mt-3 p-3 bg-[var(--color-accent-muted)] rounded-lg border border-[var(--color-accent)]/20">
+                  <p className="text-sm font-medium text-[var(--color-accent)] mb-2">AI Suggested Skills:</p>
                   <div className="flex flex-wrap gap-2">
                     {suggestedSkills.map((skill) => (
                       <button
                         key={skill}
                         type="button"
                         onClick={() => addSuggestedSkill(skill)}
-                        className="badge badge-primary cursor-pointer hover:bg-primary-200"
+                        className="badge badge-primary cursor-pointer hover:bg-[var(--color-accent)]/20"
                       >
                         + {skill}
                       </button>
@@ -204,19 +208,19 @@ export function CreateProjectPage() {
                 placeholder="React, TypeScript, Node.js, PostgreSQL (comma separated)"
                 {...register('skills')}
               />
-              <p className="mt-1 text-sm text-gray-500">Separate skills with commas</p>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">Separate skills with commas</p>
             </div>
           </div>
 
           {/* Budget & Timeline */}
           <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Budget & Timeline</h2>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">Budget & Timeline</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="budget_min" className="label">Minimum Budget (USD) *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <input
                     id="budget_min"
                     type="number"
@@ -230,13 +234,13 @@ export function CreateProjectPage() {
                     })}
                   />
                 </div>
-                {errors.budget_min && <p className="mt-1 text-sm text-red-600">{errors.budget_min.message}</p>}
+                {errors.budget_min && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.budget_min.message}</p>}
               </div>
 
               <div>
                 <label htmlFor="budget_max" className="label">Maximum Budget (USD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <input
                     id="budget_max"
                     type="number"
@@ -247,7 +251,7 @@ export function CreateProjectPage() {
                     {...register('budget_max')}
                   />
                 </div>
-                <p className="mt-1 text-sm text-gray-500">Leave empty for fixed price</p>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">Leave empty for fixed price</p>
               </div>
             </div>
 
@@ -255,10 +259,10 @@ export function CreateProjectPage() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border)] rounded focus:ring-2 focus:ring-[var(--color-accent)]"
                   {...register('is_fixed_price')}
                 />
-                <span className="text-sm text-gray-700">Fixed price project (not hourly)</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Fixed price project (not hourly)</span>
               </label>
             </div>
 
@@ -273,7 +277,7 @@ export function CreateProjectPage() {
                 placeholder="14"
                 {...register('deadline_days', { valueAsNumber: true })}
               />
-              <p className="mt-1 text-sm text-gray-500">Optional: Number of days to complete the project</p>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">Optional: Number of days to complete the project</p>
             </div>
           </div>
 
@@ -301,6 +305,3 @@ export function CreateProjectPage() {
     </div>
   );
 }
-
-// Need to import Link
-import { Link } from '@tanstack/react-router';

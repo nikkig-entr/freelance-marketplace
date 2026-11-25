@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearch, useNavigate } from '@tanstack/react-router';
-import { api } from '../../services/api';
-import { Project, ProjectStatus, formatCurrency, getStatusColor } from '../../types';
+import { projectService } from '@/services/api';
+import { Project, ProjectStatus, formatCurrency, getStatusColor } from '@/types';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
-  ArrowUpDownIcon,
   ClockIcon,
   CurrencyDollarIcon,
   MapPinIcon,
   XMarkIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
-import { Briefcase } from 'lucide-react';
+import { BriefcaseIcon } from 'lucide-react';
 
 interface ProjectFilters {
   search?: string;
@@ -27,13 +27,22 @@ interface ProjectFilters {
   page_size?: number;
 }
 
+interface ProjectsSearch {
+  search?: string;
+  status?: ProjectStatus;
+  category_id?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  page_size?: number;
+}
+
 export function ProjectsPage() {
+  const search = useSearch({ from: '/projects' }) as ProjectsSearch;
   const navigate = useNavigate();
-  const search = useSearch({ from: '/projects' });
   const [projects, setProjects] = useState<Project[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ProjectFilters>({
@@ -52,16 +61,16 @@ export function ProjectsPage() {
   useEffect(() => {
     const newFilters = { ...filters, page, page_size: pageSize };
     setFilters(newFilters);
-    search(newFilters);
-  }, [page, pageSize]);
+    navigate({ to: '/projects', search: newFilters as any });
+  }, [filters, page, pageSize]);
 
   useEffect(() => {
     fetchProjects();
-  }, [filters]);
+  }, [search, page, pageSize]);
 
   const fetchCategories = async () => {
     try {
-      const data = await api.getCategories();
+      const data = await projectService.getCategories<{ items: Array<{id: number; name: string}> }>();
       setCategories(data.items || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -71,9 +80,9 @@ export function ProjectsPage() {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      const data = await api.getProjects(filters);
+      const params = { ...filters, page, page_size: pageSize };
+      const data = await projectService.list<{ items: Project[]; total: number; total_pages: number }>(params);
       setProjects(data.items || []);
-      setTotal(data.total || 0);
       setTotalPages(data.total_pages || 0);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -93,13 +102,15 @@ export function ProjectsPage() {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters: ProjectFilters = {
       search: '',
       status: 'open',
       sort_by: 'created_at',
       sort_order: 'desc',
-    });
+    };
+    setFilters(clearedFilters);
     setPage(1);
+    navigate({ to: '/projects', search: clearedFilters });
   };
 
   const hasActiveFilters = Object.entries(filters).some(
@@ -298,7 +309,7 @@ export function ProjectsPage() {
               </div>
             ) : projects.length === 0 ? (
               <div className="text-center py-16">
-                <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900">No projects found</h3>
                 <p className="mt-1 text-gray-500">Try adjusting your search or filters</p>
                 <button onClick={clearFilters} className="mt-4 btn-secondary">
@@ -311,7 +322,9 @@ export function ProjectsPage() {
                   {projects.map((project) => (
                     <Link
                       key={project.id}
-                      to={`/projects/${project.id}`}
+                      to="/projects/$projectId"
+                      params={{ projectId: String(project.id) }}
+                      search={{ tab: 'details' }}
                       className="card-hover p-6"
                     >
                       <div className="flex items-start justify-between gap-4 mb-3">
@@ -322,17 +335,17 @@ export function ProjectsPage() {
                       </div>
                       <p className="text-gray-600 text-sm line-clamp-3 mb-4">{project.description}</p>
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {project.skills.slice(0, 4).map((skill) => (
+                        {(project.skills || []).slice(0, 4).map((skill) => (
                           <span key={skill} className="badge badge-gray">{skill}</span>
                         ))}
-                        {project.skills.length > 4 && (
-                          <span className="badge badge-gray">+{project.skills.length - 4}</span>
+                        {(project.skills || []).length > 4 && (
+                          <span className="badge badge-gray">+{(project.skills || []).length - 4}</span>
                         )}
                       </div>
                       <div className="border-t border-gray-200 pt-4 space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">{formatCurrency(project.budget_min)}</span>
-                          {project.budget_max && (
+                          <span className="text-gray-500">{project.budget_min !== null ? formatCurrency(project.budget_min) : 'N/A'}</span>
+                          {project.budget_max !== null && (
                             <span className="text-gray-500">- {formatCurrency(project.budget_max)}</span>
                           )}
                         </div>
@@ -355,7 +368,7 @@ export function ProjectsPage() {
                         <div className="flex items-center gap-4 text-sm text-gray-500 pt-2 border-t border-gray-100">
                           <span className="flex items-center gap-1">
                             <MapPinIcon className="w-4 h-4" />
-                            {project.bid_count} bids
+                            {project.bids_count ?? project.bid_count ?? 0} bids
                           </span>
                         </div>
                       </div>
@@ -417,6 +430,3 @@ export function ProjectsPage() {
     </div>
   );
 }
-
-// Need to import PlusIcon
-import { PlusIcon } from '@heroicons/react/24/outline';

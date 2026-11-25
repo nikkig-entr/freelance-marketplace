@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { useSearch, useNavigate } from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { Briefcase } from 'lucide-react';
-import { api } from '../../services/api';
+import { SparklesIcon } from '@heroicons/react/24/outline';
+import { authService } from '@/services/api';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { AuthLayout } from '@/components/layout/Layout';
 import toast from 'react-hot-toast';
 
 interface ResetPasswordForm {
@@ -12,9 +16,8 @@ interface ResetPasswordForm {
 }
 
 export function ResetPasswordPage() {
-  const navigate = useNavigate();
-  const search = useSearch({ from: '/reset-password' });
-  const token = search.token as string | undefined;
+  const search = useSearch({ strict: false }) as { token?: string };
+  const token = search.token;
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +38,7 @@ export function ResetPasswordPage() {
     }
     setIsLoading(true);
     try {
-      await api.resetPassword(token, data.password);
+      await authService.resetPassword(token, data.password);
       setIsSuccess(true);
       toast.success('Password has been reset');
     } catch (error: any) {
@@ -48,66 +51,70 @@ export function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full text-center">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+      <AuthLayout>
+        <Card padding="lg">
+          <div className="text-center">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8">
+              <div className="w-10 h-10 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+                <SparklesIcon className="w-6 h-6 text-[var(--color-bg)]" />
+              </div>
+              <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
+            </Link>
+            <div className="w-16 h-16 bg-[var(--color-success-muted)] rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-[var(--color-success)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
-            <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
-          </Link>
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <h2 className="text-2xl font-bold text-[var(--color-text)]">Password Reset</h2>
+            <p className="mt-2 text-[var(--color-text-muted)]">Your password has been successfully updated.</p>
+            <Button variant="primary" fullWidth size="lg" asChild className="mt-8">
+              <Link to="/login">Sign In</Link>
+            </Button>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Password Reset</h2>
-          <p className="mt-2 text-gray-600">Your password has been successfully updated.</p>
-          <Link to="/login" className="btn-primary w-full block py-3 mt-8">
-            Sign In
-          </Link>
-        </div>
-      </div>
+        </Card>
+      </AuthLayout>
     );
   }
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full text-center">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+      <AuthLayout>
+        <Card padding="lg">
+          <div className="text-center">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8">
+              <div className="w-10 h-10 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+                <SparklesIcon className="w-6 h-6 text-[var(--color-bg)]" />
+              </div>
+              <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
+            </Link>
+            <div className="w-16 h-16 bg-[var(--color-error-muted)] rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-[var(--color-error)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </div>
-            <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
-          </Link>
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <h2 className="text-2xl font-bold text-[var(--color-text)]">Invalid Reset Link</h2>
+            <p className="mt-2 text-[var(--color-text-muted)]">This password reset link is invalid or has expired.</p>
+            <Button variant="primary" fullWidth size="lg" asChild className="mt-8">
+              <Link to="/forgot-password">Request New Link</Link>
+            </Button>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Invalid Reset Link</h2>
-          <p className="mt-2 text-gray-600">This password reset link is invalid or has expired.</p>
-          <Link to="/forgot-password" className="btn-primary w-full block py-3 mt-8">
-            Request New Link
-          </Link>
-        </div>
-      </div>
+        </Card>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <AuthLayout>
+      <Card padding="lg">
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+              <SparklesIcon className="w-6 h-6 text-[var(--color-bg)]" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">FreelanceHub</span>
+            <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900">Reset your password</h2>
-          <p className="mt-2 text-gray-600">Enter your new password below.</p>
+          <h2 className="text-2xl font-bold text-[var(--color-text)]">Reset your password</h2>
+          <p className="mt-2 text-[var(--color-text-muted)]">Enter your new password below.</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -116,12 +123,22 @@ export function ResetPasswordPage() {
               New Password
             </label>
             <div className="relative">
-              <input
+              <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
-                className={`input pr-12 ${errors.password ? 'input-error' : ''}`}
                 placeholder="••••••••"
+                error={errors.password?.message}
+                rightIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  </button>
+                }
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {
@@ -130,61 +147,34 @@ export function ResetPasswordPage() {
                   },
                 })}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-              </button>
             </div>
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
-            <p className="mt-1 text-sm text-gray-500">At least 8 characters</p>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">At least 8 characters</p>
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="label">
-              Confirm New Password
-            </label>
-            <input
-              id="confirmPassword"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              className={`input ${errors.confirmPassword ? 'input-error' : ''}`}
-              placeholder="••••••••"
-              {...register('confirmPassword', {
-                required: 'Please confirm your password',
-                validate: (value) => value === password || 'Passwords do not match',
-              })}
-            />
-            {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>}
-          </div>
+          <Input
+            id="confirmPassword"
+            label="Confirm New Password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            placeholder="••••••••"
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword', {
+              required: 'Please confirm your password',
+              validate: (value) => value === password || 'Passwords do not match',
+            })}
+          />
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full btn-primary py-3"
-          >
-            {isLoading ? (
-              <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            ) : (
-              'Reset Password'
-            )}
-          </button>
+          <Button type="submit" fullWidth size="lg" loading={isLoading}>
+            Reset Password
+          </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600">
-          <Link to="/login" className="text-primary-600 hover:text-primary-500 font-medium">
+        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+          <Link to="/login" className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium">
             Back to Sign In
           </Link>
         </p>
-      </div>
-    </div>
+      </Card>
+    </AuthLayout>
   );
 }
-
-// Need to import Link
-import { Link } from '@tanstack/react-router';

@@ -34,9 +34,15 @@ export function Modal({
     full: 'max-w-4xl',
   };
 
+  const handleOverlayClose = (value: boolean) => {
+    if (value && closeOnOverlayClick) {
+      onClose();
+    }
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={closeOnOverlayClick ? onClose : undefined}>
+      <Dialog as="div" className="relative z-50" onClose={handleOverlayClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -46,7 +52,7 @@ export function Modal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -62,21 +68,21 @@ export function Modal({
             >
               <Dialog.Panel
                 className={clsx(
-                  'w-full transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all',
+                  'w-full transform overflow-hidden rounded-2xl bg-[var(--color-surface)] text-left align-middle shadow-[var(--shadow-xl)] transition-all border border-[var(--color-border)]',
                   sizeClasses[size],
                   className
                 )}
               >
                 {(title || showCloseButton) && (
-                  <div className="flex items-start justify-between p-6 border-b border-secondary-200">
+                  <div className="flex items-start justify-between p-6 border-b border-[var(--color-border)]">
                     <div>
                       {title && (
-                        <Dialog.Title as="h3" className="text-lg font-semibold text-secondary-900">
+                        <Dialog.Title as="h3" className="text-lg font-semibold text-[var(--color-text)]">
                           {title}
                         </Dialog.Title>
                       )}
                       {description && (
-                        <Dialog.Description className="mt-1 text-sm text-secondary-500">
+                        <Dialog.Description className="mt-1 text-sm text-[var(--color-text-muted)]">
                           {description}
                         </Dialog.Description>
                       )}
@@ -84,7 +90,7 @@ export function Modal({
                     {showCloseButton && (
                       <button
                         type="button"
-                        className="text-secondary-400 hover:text-secondary-600 transition-colors"
+                        className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors"
                         onClick={onClose}
                         aria-label="Close modal"
                       >
@@ -128,11 +134,11 @@ export function ConfirmModal({
 }: ConfirmModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="text-secondary-600">{message}</p>
+      <p className="text-[var(--color-text-muted)]">{message}</p>
       <div className="mt-6 flex justify-end gap-3">
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn-secondary"
           onClick={onClose}
           disabled={isLoading}
         >
@@ -140,7 +146,7 @@ export function ConfirmModal({
         </button>
         <button
           type="button"
-          className={clsx('btn', variant === 'danger' ? 'btn-danger' : 'btn-primary')}
+          className={`${variant === 'danger' ? 'btn-danger' : 'btn-primary'}`}
           onClick={onConfirm}
           disabled={isLoading}
         >
