@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { projectService } from '@/services/api';
@@ -40,12 +40,7 @@ export function EditProjectPage() {
 
   const projectId = parseInt(params.projectId);
 
-  useEffect(() => {
-    fetchProject();
-    fetchCategories();
-  }, [projectId]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const data = await projectService.get<Project>(String(projectId));
       const projectData = data;
@@ -53,29 +48,34 @@ export function EditProjectPage() {
       setValue('title', projectData.title);
       setValue('description', projectData.description);
       setValue('requirements', projectData.requirements || '');
-      setValue('category_id', (projectData as any).category_id || 0);
+      setValue('category_id', projectData.category_id || 0);
       setValue('skills', (projectData.required_skills || []).join(', '));
       setValue('budget_min', String((projectData.budget_min || 0) / 100));
       setValue('budget_max', projectData.budget_max ? String(projectData.budget_max / 100) : '');
       setValue('is_fixed_price', projectData.is_fixed_price);
-      setValue('deadline_days', (projectData as any).deadline_days ? String((projectData as any).deadline_days) : '');
+      setValue('deadline_days', projectData.deadline_days ? String(projectData.deadline_days) : '');
       setValue('status', projectData.status);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load project');
       navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projectId, navigate, setValue]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await projectService.getCategories<{ items: Category[] }>();
       setCategories(data.items || []);
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
+    } catch {
+      console.error('Failed to fetch categories');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProject();
+    fetchCategories();
+  }, [fetchProject, fetchCategories]);
 
   const onSubmit = async (data: EditProjectForm) => {
     setIsLoading(true);
@@ -95,8 +95,8 @@ export function EditProjectPage() {
       await projectService.update(String(projectId), projectData);
       toast.success('Project updated successfully!');
       navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to update project');
+    } catch {
+      toast.error('Failed to update project');
     } finally {
       setIsLoading(false);
     }
@@ -304,8 +304,8 @@ export function EditProjectPage() {
                     await projectService.publish(String(projectId));
                     toast.success('Project published!');
                     navigate({ to: '/projects/$projectId', params: { projectId: String(projectId) }, search: { tab: 'details' } });
-                  } catch (error: any) {
-                    toast.error(error.response?.data?.error?.message || 'Failed to publish');
+                  } catch {
+                    toast.error('Failed to publish');
                   }
                 }}
                 className="btn-primary flex items-center gap-2"

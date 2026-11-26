@@ -93,7 +93,7 @@ export function WithdrawalPage() {
     try {
       const data = await balanceService.withdrawals() as { items: Withdrawal[] };
       setWithdrawals(data.items || []);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load withdrawals');
     } finally {
       setIsLoading(false);
@@ -151,8 +151,8 @@ export function WithdrawalPage() {
       setValue('crypto_network', '');
       setValue('paypal_email', '');
       fetchWithdrawals();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to submit withdrawal');
+    } catch {
+      toast.error('Failed to submit withdrawal');
     } finally {
       setIsSubmitting(false);
     }

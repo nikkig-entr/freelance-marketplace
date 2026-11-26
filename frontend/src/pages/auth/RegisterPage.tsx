@@ -52,8 +52,8 @@ export function RegisterPage() {
       });
       toast.success('Account created successfully!');
       navigate({ to: '/' });
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Registration failed. Please try again.';
+    } catch {
+      const message = 'Registration failed. Please try again.';
       toast.error(message);
     } finally {
       setIsLoading(false);

@@ -102,7 +102,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       setSocket(null);
       setIsConnected(false);
     };
-  }, [isAuthenticated, tokens]);
+  }, [isAuthenticated, tokens, socket]);
 
   const joinProject = useCallback((projectId: number) => {
     if (socket?.connected) {

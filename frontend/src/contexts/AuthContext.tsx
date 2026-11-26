@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { User, TokenResponse } from '../types';
+import { User, TokenResponse, UserRole } from '../types';
 import { api } from '../services/api';
 
 interface AuthContextType {
@@ -8,7 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; password_confirm: string; full_name: string; role: string }) => Promise<void>;
+  register: (data: { email: string; password: string; password_confirm: string; full_name: string; role: UserRole }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           token_type: 'bearer',
           expires_in: 900,
         });
-      } catch (error) {
+      } catch {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
       }
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   };
 
-  const register = async (data: { email: string; password: string; password_confirm: string; full_name: string; role: string }) => {
+  const register = async (data: { email: string; password: string; password_confirm: string; full_name: string; role: UserRole }) => {
     const newTokens = await api.register(data);
     setTokens(newTokens);
     const userData = await api.getCurrentUser();
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await api.getCurrentUser();
       setUser(userData);
-    } catch (error) {
+    } catch {
       await logout();
     }
   };

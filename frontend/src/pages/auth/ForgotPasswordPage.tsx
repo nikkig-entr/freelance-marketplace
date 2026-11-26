@@ -29,7 +29,7 @@ export function ForgotPasswordPage() {
       await authService.forgotPassword(data.email);
       setIsSent(true);
       toast.success('If the email exists, a reset link has been sent');
-    } catch (error: any) {
+    } catch {
       // Don't reveal if email exists
       setIsSent(true);
       toast.success('If the email exists, a reset link has been sent');

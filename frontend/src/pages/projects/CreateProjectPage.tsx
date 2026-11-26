@@ -90,8 +90,8 @@ export function CreateProjectPage() {
       const project = await projectService.create<{ id: number }>(projectData);
       toast.success('Project created successfully!');
       navigate({ to: '/projects/$projectId', params: { projectId: String(project.id) }, search: { tab: 'details' } });
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to create project');
+    } catch {
+      toast.error('Failed to create project');
     } finally {
       setIsLoading(false);
     }

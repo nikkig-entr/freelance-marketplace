@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService, projectService } from '@/services/api';
@@ -204,43 +204,43 @@ export function ProfilePage() {
   const userId = parseInt(params.userId);
   const isOwnProfile = currentUser?.id === userId;
 
+  const fetchProfile = useCallback(async () => {
+    try {
+      const data = await userService.getProfile(userId) as User;
+      setProfile(data);
+    } catch {
+      toast.error('Failed to load profile');
+      navigate({ to: '/projects' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, navigate]);
+
+  const fetchPublicProjects = useCallback(async () => {
+    try {
+      const data = await projectService.list({ freelancer_id: userId, status: 'completed', page_size: 6 }) as PaginatedProjects;
+      setProjects(data.items || []);
+    } catch {
+      console.error('Failed to fetch projects');
+    }
+  }, [userId]);
+
+  const fetchReviews = useCallback(async () => {
+    try {
+      // In real app, would fetch reviews for this user
+      setReviews([]);
+    } catch {
+      console.error('Failed to fetch reviews');
+    }
+  }, []);
+
   useEffect(() => {
     fetchProfile();
     if (!isOwnProfile) {
       fetchPublicProjects();
       fetchReviews();
     }
-  }, [userId, isOwnProfile]);
-
-  const fetchProfile = async () => {
-    try {
-      const data = await userService.getProfile(userId) as User;
-      setProfile(data);
-    } catch (error) {
-      toast.error('Failed to load profile');
-      navigate({ to: '/projects' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchPublicProjects = async () => {
-    try {
-      const data = await projectService.list({ freelancer_id: userId, status: 'completed', page_size: 6 }) as PaginatedProjects;
-      setProjects(data.items || []);
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-    }
-  };
-
-  const fetchReviews = async () => {
-    try {
-      // In real app, would fetch reviews for this user
-      setReviews([]);
-    } catch (error) {
-      console.error('Failed to fetch reviews:', error);
-    }
-  };
+  }, [fetchProfile, fetchPublicProjects, fetchReviews, isOwnProfile]);
 
   const handleHire = () => {
     if (!currentUser) {

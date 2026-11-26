@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { projectService } from '@/services/api';
 import { Project, ProjectStatus } from '@/types';
@@ -77,49 +77,49 @@ export function ProjectsPage() {
   const filtersRef = useRef<HTMLDivElement>(null);
   const [filtersHeight, setFiltersHeight] = useState(0);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const newFilters = { ...filters, page, page_size: pageSize };
-    setFilters(newFilters);
-    navigate({ to: '/projects', search: newFilters as any });
-  }, [filters, page, pageSize, navigate]);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [search, page, pageSize]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await projectService.getCategories<{ items: Array<{id: number; name: string}> }>();
       setCategories(data.items || []);
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
+    } catch {
+      console.error('Failed to fetch categories');
     }
-  };
+  }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = { ...filters, page, page_size: pageSize };
       const data = await projectService.list<{ items: Project[]; total: number; total_pages: number }>(params);
       setProjects(data.items || []);
       setTotalPages(data.total_pages || 0);
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
+    } catch {
+      console.error('Failed to fetch projects');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters, page, pageSize]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    const newFilters = { ...filters, page, page_size: pageSize };
+    setFilters(newFilters);
+    navigate({ to: '/projects', search: newFilters as ProjectsSearch });
+  }, [filters, page, pageSize, navigate]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
   };
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: string, value: string | number | boolean | undefined) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     setPage(1);
   };

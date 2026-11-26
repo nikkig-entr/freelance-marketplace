@@ -7,13 +7,19 @@ import { EditorialText } from '@/components/ui/EditorialText';
 import { MagnifyingGlassIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { SparklesIcon } from '@heroicons/react/24/solid';
 
+interface Lenis {
+  raf: (time: number) => void;
+  on: (event: 'scroll', callback: (data: { scroll: number }) => void) => () => void;
+  destroy: () => void;
+}
+
 interface HeroSectionProps {
   isVisible?: boolean;
 }
 
 export function HeroSection({ isVisible = true }: HeroSectionProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const lenisRef = useRef<any>(null);
+  const lenisRef = useRef<Lenis | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {

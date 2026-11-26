@@ -81,8 +81,9 @@ export function AdminProjectsPage() {
       toast.success('Project updated!');
       setSelectedProject(null);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to update project');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to update project');
     },
   });
 
@@ -93,12 +94,13 @@ export function AdminProjectsPage() {
       toast.success('Project deleted!');
       setShowDeleteModal(false);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to delete project');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to delete project');
     },
   });
 
-  const handleFilterChange = (key: keyof typeof filters, value: any) => {
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 

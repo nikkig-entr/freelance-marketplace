@@ -37,8 +37,8 @@ export function LoginPage() {
       await login(data.email, data.password);
       toast.success('Welcome back!');
       navigate({ to: '/' });
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Invalid email or password';
+    } catch {
+      const message = 'Invalid email or password';
       toast.error(message);
     } finally {
       setIsLoading(false);

@@ -1,11 +1,19 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { TokenResponse, ApiError } from '@/types';
+import { TokenResponse, ApiError, User, Project, Bid, Message, Transaction, Withdrawal, PaginatedResponse, RegisterData, UserPlan } from '@/types';
 
-const VITE_API_URL = (import.meta as any).env?.VITE_API_URL;
+const VITE_API_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL;
 if (!VITE_API_URL) {
   throw new Error('VITE_API_URL environment variable is required. Please set it in your .env file.');
 }
 const API_BASE_URL = VITE_API_URL;
+
+interface GenericParams {
+  [key: string]: string | number | boolean | undefined | string[];
+}
+
+interface GenericData {
+  [key: string]: unknown;
+}
 
 class ApiService {
   private client: AxiosInstance;
@@ -109,14 +117,8 @@ class ApiService {
     return response.data;
   }
 
-  async register(data: {
-    email: string;
-    password: string;
-    password_confirm: string;
-    full_name: string;
-    role: string;
-  }): Promise<any> {
-    const response = await this.client.post('/auth/register', data);
+  async register(data: RegisterData): Promise<TokenResponse> {
+    const response = await this.client.post<TokenResponse>('/auth/register', data);
     return response.data;
   }
 
@@ -126,8 +128,8 @@ class ApiService {
     localStorage.removeItem('user');
   }
 
-  async getCurrentUser(): Promise<any> {
-    const response = await this.client.get('/auth/me');
+  async getCurrentUser(): Promise<User> {
+    const response = await this.client.get<User>('/auth/me');
     return response.data;
   }
 
@@ -151,22 +153,22 @@ class ApiService {
   }
 
   // Generic CRUD methods
-  async get<T>(url: string, params?: Record<string, any>): Promise<T> {
+  async get<T>(url: string, params?: GenericParams): Promise<T> {
     const response = await this.client.get<T>(url, { params });
     return response.data;
   }
 
-  async post<T>(url: string, data?: any): Promise<T> {
+  async post<T>(url: string, data?: GenericData): Promise<T> {
     const response = await this.client.post<T>(url, data);
     return response.data;
   }
 
-  async put<T>(url: string, data?: any): Promise<T> {
+  async put<T>(url: string, data?: GenericData): Promise<T> {
     const response = await this.client.put<T>(url, data);
     return response.data;
   }
 
-  async patch<T>(url: string, data?: any): Promise<T> {
+  async patch<T>(url: string, data?: GenericData): Promise<T> {
     const response = await this.client.patch<T>(url, data);
     return response.data;
   }
@@ -177,11 +179,11 @@ class ApiService {
   }
 
   // File upload
-  async uploadFile(url: string, file: File, onProgress?: (progress: number) => void): Promise<any> {
+  async uploadFile(url: string, file: File, onProgress?: (progress: number) => void): Promise<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await this.client.post(url, formData, {
+    const response = await this.client.post<{ url: string }>(url, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
@@ -198,7 +200,7 @@ export const api = new ApiService();
 // Export individual service modules
 export const authService = {
   login: (credentials: { email: string; password: string }) => api.login(credentials),
-  register: (data: any) => api.register(data),
+  register: (data: RegisterData) => api.register(data),
   logout: () => api.logout(),
   getCurrentUser: () => api.getCurrentUser(),
   refreshToken: () => api.refreshToken(),
@@ -208,73 +210,73 @@ export const authService = {
 };
 
 export const projectService = {
-  list: <T = any>(params?: any) => api.get<T>('/projects', params),
-  get: <T = any>(uuid: string) => api.get<T>(`/projects/${uuid}`),
-  create: <T = any>(data: any) => api.post<T>('/projects', data),
-  update: <T = any>(uuid: string, data: any) => api.patch<T>(`/projects/${uuid}`, data),
-  delete: <T = any>(uuid: string) => api.delete<T>(`/projects/${uuid}`),
-  publish: <T = any>(uuid: string) => api.post<T>(`/projects/${uuid}/publish`),
-  close: <T = any>(uuid: string) => api.post<T>(`/projects/${uuid}/close`),
-  parseProject: <T = any>(description: string) => api.post<T>('/projects/parse', { description }),
-  getCategories: <T = any>() => api.get<T>('/categories'),
+  list: <T = PaginatedResponse<Project>>(params?: GenericParams) => api.get<T>('/projects', params),
+  get: <T = Project>(uuid: string) => api.get<T>(`/projects/${uuid}`),
+  create: <T = Project>(data: GenericData) => api.post<T>('/projects', data),
+  update: <T = Project>(uuid: string, data: GenericData) => api.patch<T>(`/projects/${uuid}`, data),
+  delete: <T = void>(uuid: string) => api.delete<T>(`/projects/${uuid}`),
+  publish: <T = Project>(uuid: string) => api.post<T>(`/projects/${uuid}/publish`),
+  close: <T = Project>(uuid: string) => api.post<T>(`/projects/${uuid}/close`),
+  parseProject: <T = Project>(description: string) => api.post<T>('/projects/parse', { description }),
+  getCategories: <T = { items: Array<{ id: number; name: string }> }>() => api.get<T>('/categories'),
 };
 
 export const bidService = {
-  list: <T = any>(projectUuid: string, params?: any) => api.get<T>(`/projects/${projectUuid}/bids`, params),
-  create: <T = any>(projectUuid: string, data: any) => api.post<T>(`/projects/${projectUuid}/bids`, data),
-  get: <T = any>(uuid: string) => api.get<T>(`/bids/${uuid}`),
-  accept: <T = any>(uuid: string) => api.post<T>(`/bids/${uuid}/accept`),
-  reject: <T = any>(uuid: string) => api.post<T>(`/bids/${uuid}/reject`),
-  withdraw: <T = any>(uuid: string) => api.post<T>(`/bids/${uuid}/withdraw`),
-  shortlist: <T = any>(uuid: string) => api.post<T>(`/bids/${uuid}/shortlist`),
+  list: <T = PaginatedResponse<Bid>>(projectUuid: string, params?: GenericParams) => api.get<T>(`/projects/${projectUuid}/bids`, params),
+  create: <T = Bid>(projectUuid: string, data: GenericData) => api.post<T>(`/projects/${projectUuid}/bids`, data),
+  get: <T = Bid>(uuid: string) => api.get<T>(`/bids/${uuid}`),
+  accept: <T = Bid>(uuid: string) => api.post<T>(`/bids/${uuid}/accept`),
+  reject: <T = Bid>(uuid: string) => api.post<T>(`/bids/${uuid}/reject`),
+  withdraw: <T = Bid>(uuid: string) => api.post<T>(`/bids/${uuid}/withdraw`),
+  shortlist: <T = Bid>(uuid: string) => api.post<T>(`/bids/${uuid}/shortlist`),
 };
 
 export const messageService = {
-  list: <T = any>(projectUuid: string, params?: any) => api.get<T>(`/projects/${projectUuid}/messages`, params),
-  send: <T = any>(projectUuid: string, data: any) => api.post<T>(`/projects/${projectUuid}/messages`, data),
-  markRead: <T = any>(messageId: number) => api.post<T>(`/messages/${messageId}/read`),
+  list: <T = PaginatedResponse<Message>>(projectUuid: string, params?: GenericParams) => api.get<T>(`/projects/${projectUuid}/messages`, params),
+  send: <T = Message>(projectUuid: string, data: GenericData) => api.post<T>(`/projects/${projectUuid}/messages`, data),
+  markRead: <T = Message>(messageId: number) => api.post<T>(`/messages/${messageId}/read`),
 };
 
 export const balanceService = {
-  get: <T = any>() => api.get<T>('/balance'),
-  deposit: <T = any>(data: any) => api.post<T>('/balance/deposit', data),
-  withdraw: <T = any>(data: any) => api.post<T>('/balance/withdraw', data),
-  transactions: <T = any>(params?: any) => api.get<T>('/balance/transactions', params),
-  withdrawals: <T = any>(params?: any) => api.get<T>('/balance/withdrawals', params),
+  get: <T = { balance_cents: number; pending_balance_cents: number }>() => api.get<T>('/balance'),
+  deposit: <T = { checkout_url: string }>(data: GenericData) => api.post<T>('/balance/deposit', data),
+  withdraw: <T = Withdrawal>(data: GenericData) => api.post<T>('/balance/withdraw', data),
+  transactions: <T = PaginatedResponse<Transaction>>(params?: GenericParams) => api.get<T>('/balance/transactions', params),
+  withdrawals: <T = PaginatedResponse<Withdrawal>>(params?: GenericParams) => api.get<T>('/balance/withdrawals', params),
 };
 
 export const aiService = {
-  generateProposal: <T = any>(data: any) => api.post<T>('/ai/generate-proposal', data),
-  improveProfile: <T = any>(data: any) => api.post<T>('/ai/improve-profile', data),
-  matchProjects: <T = any>(data: any) => api.post<T>('/ai/match-projects', data),
-  analyzeProject: <T = any>(projectUuid: string) => api.post<T>(`/ai/analyze-project/${projectUuid}`),
+  generateProposal: <T = { proposal: string }>(data: GenericData) => api.post<T>('/ai/generate-proposal', data),
+  improveProfile: <T = { improved: string }>(data: GenericData) => api.post<T>('/ai/improve-profile', data),
+  matchProjects: <T = PaginatedResponse<Project>>(data: GenericData) => api.post<T>('/ai/match-projects', data),
+  analyzeProject: <T = { analysis: string }>(projectUuid: string) => api.post<T>(`/ai/analyze-project/${projectUuid}`),
 };
 
 export const billingService = {
-  getPlans: <T = any>() => api.get<T>('/billing/plans'),
-  subscribe: <T = any>(plan: string, interval: string) => api.post<T>('/billing/subscribe', { plan, interval }),
-  cancelSubscription: <T = any>() => api.post<T>('/billing/cancel'),
-  getPortalUrl: <T = any>() => api.get<T>('/billing/portal'),
-  getInvoices: <T = any>() => api.get<T>('/billing/invoices'),
+  getPlans: <T = Array<{ plan: UserPlan; price: number; features: string[] }>>() => api.get<T>('/billing/plans'),
+  subscribe: <T = { checkout_url: string }>(plan: string, interval: string) => api.post<T>('/billing/subscribe', { plan, interval }),
+  cancelSubscription: <T = void>() => api.post<T>('/billing/cancel'),
+  getPortalUrl: <T = { portal_url: string }>() => api.get<T>('/billing/portal'),
+  getInvoices: <T = Array<{ id: string; created_at: string; description: string | null; amount_cents: number; status: string }>>() => api.get<T>('/billing/invoices'),
 };
 
 export const userService = {
-  getProfile: <T = any>(id: number) => api.get<T>(`/users/${id}`),
-  updateProfile: <T = any>(id: number, data: any) => api.patch<T>(`/users/${id}`, data),
+  getProfile: <T = User>(id: number) => api.get<T>(`/users/${id}`),
+  updateProfile: <T = User>(id: number, data: GenericData) => api.patch<T>(`/users/${id}`, data),
   uploadAvatar: (file: File, onProgress?: (progress: number) => void) =>
     api.uploadFile('/users/avatar', file, onProgress),
-  deleteAccount: <T = any>() => api.delete<T>('/users/me'),
+  deleteAccount: <T = void>() => api.delete<T>('/users/me'),
 };
 
 export const adminService = {
-  getStats: <T = any>() => api.get<T>('/admin/stats'),
-  getUsers: <T = any>(params?: any) => api.get<T>('/admin/users', params),
-  getUser: <T = any>(id: number) => api.get<T>(`/admin/users/${id}`),
-  updateUser: <T = any>(id: number, data: any) => api.patch<T>(`/admin/users/${id}`, data),
-  deleteUser: <T = any>(id: number) => api.delete<T>(`/admin/users/${id}`),
-  getProjects: <T = any>(params?: any) => api.get<T>('/admin/projects', params),
-  getTransactions: <T = any>(params?: any) => api.get<T>('/admin/transactions', params),
-  getWithdrawals: <T = any>(params?: any) => api.get<T>('/admin/withdrawals', params),
-  approveWithdrawal: <T = any>(id: number) => api.post<T>(`/admin/withdrawals/${id}/approve`),
-  rejectWithdrawal: <T = any>(id: number, reason: string) => api.post<T>(`/admin/withdrawals/${id}/reject`, { reason }),
+  getStats: <T = { users: number; projects: number; revenue_cents: number }>() => api.get<T>('/admin/stats'),
+  getUsers: <T = PaginatedResponse<User>>(params?: GenericParams) => api.get<T>('/admin/users', params),
+  getUser: <T = User>(id: number) => api.get<T>(`/admin/users/${id}`),
+  updateUser: <T = User>(id: number, data: GenericData) => api.patch<T>(`/admin/users/${id}`, data),
+  deleteUser: <T = void>(id: number) => api.delete<T>(`/admin/users/${id}`),
+  getProjects: <T = PaginatedResponse<Project>>(params?: GenericParams) => api.get<T>('/admin/projects', params),
+  getTransactions: <T = PaginatedResponse<Transaction>>(params?: GenericParams) => api.get<T>('/admin/transactions', params),
+  getWithdrawals: <T = PaginatedResponse<Withdrawal>>(params?: GenericParams) => api.get<T>('/admin/withdrawals', params),
+  approveWithdrawal: <T = Withdrawal>(id: number) => api.post<T>(`/admin/withdrawals/${id}/approve`),
+  rejectWithdrawal: <T = Withdrawal>(id: number, reason: string) => api.post<T>(`/admin/withdrawals/${id}/reject`, { reason }),
 };

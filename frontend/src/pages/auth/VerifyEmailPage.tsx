@@ -26,8 +26,9 @@ export function VerifyEmailPage() {
         await authService.verifyEmail(token);
         setStatus('success');
         setMessage('Your email has been verified successfully!');
-      } catch (error: any) {
+      } catch (err: unknown) {
         setStatus('error');
+        const error = err as { response?: { data?: { error?: { message?: string } } } };
         const msg = error.response?.data?.error?.message || 'Verification failed';
         setMessage(msg);
       }
@@ -43,7 +44,8 @@ export function VerifyEmailPage() {
       toast.success('Verification email sent');
       setCanResend(false);
       setTimeout(() => setCanResend(true), 60000);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
       toast.error(error.response?.data?.error?.message || 'Failed to send email');
     } finally {
       setResendLoading(false);

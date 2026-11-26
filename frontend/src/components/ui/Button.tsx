@@ -111,7 +111,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         childProps.className as string | undefined
       );
 
-      return cloneElement(child as React.ReactElement<any>, {
+      return cloneElement(child as React.ReactElement, {
         ref,
         className: mergedClassName,
         disabled: disabled || loading,

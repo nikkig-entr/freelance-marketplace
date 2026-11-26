@@ -105,7 +105,7 @@ export function TalentPage() {
   useEffect(() => {
     const newFilters = { ...filters, page, page_size: pageSize };
     setFilters(newFilters);
-    navigate({ to: '/talent', search: newFilters as any });
+    navigate({ to: '/talent', search: newFilters as TalentSearch });
   }, [filters, page, pageSize, navigate]);
 
   useEffect(() => {
@@ -149,7 +149,7 @@ export function TalentPage() {
     setPage(1);
   };
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: string, value: string | number | string[] | undefined) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     setPage(1);
   };

@@ -206,6 +206,7 @@ export function DashboardPage() {
   const { user } = useAuth();
   const isFreelancer = user?.role === 'freelancer';
   const isClient = user?.role === 'client';
+  const [hoveredActivityId, setHoveredActivityId] = useState<string | null>(null);
 
   // Fetch data
   const { data: projectsData } = useQuery<PaginatedProjects>({
@@ -312,8 +313,6 @@ export function DashboardPage() {
     ? bidsData?.items.filter((b: Bid) => b.status === 'pending').length || 0
     : projectsData?.items.reduce((acc: number, p: Project) => acc + p.bids_count, 0) || 0;
   const unreadMessagesCount = messagesData?.items.filter((m: Message) => !m.is_read).length || 0;
-
-  const [hoveredActivityId, setHoveredActivityId] = useState<string | null>(null);
 
   return (
     <div className="space-y-24 lg:space-y-32">

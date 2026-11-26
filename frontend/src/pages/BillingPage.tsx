@@ -77,8 +77,9 @@ export function BillingPage() {
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
       }
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to create subscription');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to create subscription');
     },
   });
 
@@ -90,8 +91,9 @@ export function BillingPage() {
         setShowPortalModal(true);
       }
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to open billing portal');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to open billing portal');
     },
   });
 
@@ -102,8 +104,9 @@ export function BillingPage() {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       setShowCancelModal(false);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to cancel subscription');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to cancel subscription');
     },
   });
 

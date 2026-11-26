@@ -3,6 +3,10 @@
 import { useEffect } from 'react';
 import Lenis from 'lenis';
 
+interface WindowWithLenis extends Window {
+  __lenis?: Lenis;
+}
+
 export function useLenis() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -33,7 +37,7 @@ export function useLenis() {
 export function lenisScrollTo(target: string | number | HTMLElement, options?: { offset?: number; duration?: number }) {
   if (typeof window === 'undefined') return;
 
-  const lenis = (window as any).__lenis;
+  const lenis = (window as WindowWithLenis).__lenis;
   if (lenis) {
     lenis.scrollTo(target, options);
   }

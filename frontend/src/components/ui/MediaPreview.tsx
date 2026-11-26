@@ -96,7 +96,7 @@ export function MediaPreview({
       clipPath.set('inset(0% 0 0 0)');
       showTimeoutRef.current = undefined;
     }, showDelay);
-  }, [offset.x, offset.y, showDelay]);
+  }, [offset.x, offset.y, showDelay, x, y, opacity, scale, clipPath]);
 
   const hide = useCallback(() => {
     if (showTimeoutRef.current) {
@@ -114,14 +114,14 @@ export function MediaPreview({
       setIsVisible(false);
       hideTimeoutRef.current = undefined;
     }, hideDelay + 300);
-  }, [hideDelay]);
+  }, [hideDelay, opacity, scale, clipPath]);
 
   const setPosition = useCallback((clientX: number, clientY: number) => {
     if (followMouse && isVisible) {
       x.set(clientX + offset.x);
       y.set(clientY + offset.y);
     }
-  }, [followMouse, isVisible, offset.x, offset.y]);
+  }, [followMouse, isVisible, offset.x, offset.y, x, y]);
 
   // Expose controller via context or return
   useEffect(() => {

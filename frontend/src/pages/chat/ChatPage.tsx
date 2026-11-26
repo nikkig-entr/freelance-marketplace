@@ -57,7 +57,7 @@ export function ChatPage() {
         const data = await messageService.list(String(projectId)) as PaginatedMessages;
         setMessages(data.items || []);
         await messageService.markRead(projectId);
-      } catch (error) {
+      } catch {
         toast.error('Failed to load messages');
         navigate({ to: '/projects' });
       } finally {
@@ -118,8 +118,8 @@ export function ChatPage() {
 
     try {
       await messageService.send(String(projectId), { content, message_type: 'user' });
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to send message');
+    } catch {
+      toast.error('Failed to send message');
       setNewMessage(content);
     } finally {
       setIsSending(false);
@@ -146,8 +146,8 @@ export function ChatPage() {
       // File upload would need a specific endpoint
       // await api.uploadFile(projectId, file);
       toast.success('File upload coming soon');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to upload file');
+    } catch {
+      toast.error('Failed to upload file');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

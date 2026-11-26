@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { bidService } from '@/services/api';
 import { Bid, BidStatus, formatCurrency, formatDate } from '@/types';
@@ -59,11 +59,7 @@ export function MyBidsPage() {
   });
   const [withdrawingId, setWithdrawingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchBids();
-  }, [filters, page, pageSize]);
-
-  const fetchBids = async () => {
+  const fetchBids = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = { ...filters, page, page_size: pageSize };
@@ -71,12 +67,16 @@ export function MyBidsPage() {
       setBids(data.items || []);
       setTotal(data.total || 0);
       setTotalPages(data.total_pages || 0);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load bids');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters, page, pageSize]);
+
+  useEffect(() => {
+    fetchBids();
+  }, [fetchBids]);
 
   const handleWithdraw = async (id: number) => {
     if (!confirm('Are you sure you want to withdraw this bid?')) {
@@ -87,8 +87,8 @@ export function MyBidsPage() {
       await bidService.withdraw(String(id));
       toast.success('Bid withdrawn');
       fetchBids();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to withdraw bid');
+    } catch {
+      toast.error('Failed to withdraw bid');
     } finally {
       setWithdrawingId(null);
     }

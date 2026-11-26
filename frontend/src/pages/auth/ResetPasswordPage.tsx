@@ -41,8 +41,8 @@ export function ResetPasswordPage() {
       await authService.resetPassword(token, data.password);
       setIsSuccess(true);
       toast.success('Password has been reset');
-    } catch (error: any) {
-      const message = error.response?.data?.error?.message || 'Failed to reset password';
+    } catch {
+      const message = 'Failed to reset password';
       toast.error(message);
     } finally {
       setIsLoading(false);

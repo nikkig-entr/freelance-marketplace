@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { balanceService } from '@/services/api';
@@ -51,36 +51,16 @@ export function BalancePage() {
   const [depositAmount, setDepositAmount] = useState('');
   const [isDepositing, setIsDepositing] = useState(false);
 
-  useEffect(() => {
-    fetchBalance();
-    fetchTransactions();
-  }, [page, filters]);
-
-  interface BalanceResponse {
-  balance_cents: number;
-  pending_balance_cents: number;
-}
-
-interface PaginatedTransactions {
-  items: Transaction[];
-  total: number;
-  total_pages: number;
-}
-
-interface DepositResponse {
-  checkout_url?: string;
-}
-
-const fetchBalance = async () => {
+  const fetchBalance = useCallback(async () => {
     try {
       const data = await balanceService.get() as BalanceResponse;
       setBalance(data);
-    } catch (error) {
-      console.error('Failed to fetch balance:', error);
+    } catch {
+      console.error('Failed to fetch balance');
     }
-  };
+  }, []);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoadingTransactions(true);
     try {
       const params = { ...filters, page, page_size: pageSize };
@@ -88,12 +68,32 @@ const fetchBalance = async () => {
       setTransactions(data.items || []);
       setTotal(data.total || 0);
       setTotalPages(data.total_pages || 0);
-    } catch (error) {
-      console.error('Failed to fetch transactions:', error);
+    } catch {
+      console.error('Failed to fetch transactions');
     } finally {
       setIsLoadingTransactions(false);
     }
-  };
+  }, [filters, page, pageSize]);
+
+  interface BalanceResponse {
+    balance_cents: number;
+    pending_balance_cents: number;
+  }
+
+  interface PaginatedTransactions {
+    items: Transaction[];
+    total: number;
+    total_pages: number;
+  }
+
+  interface DepositResponse {
+    checkout_url?: string;
+  }
+
+  useEffect(() => {
+    fetchBalance();
+    fetchTransactions();
+  }, [page, filters, fetchBalance, fetchTransactions]);
 
   const handleDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,8 +110,8 @@ const fetchBalance = async () => {
       }
       setShowDepositModal(false);
       setDepositAmount('');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to create deposit');
+    } catch {
+      toast.error('Failed to create deposit');
     } finally {
       setIsDepositing(false);
     }

@@ -65,7 +65,6 @@ export function SettingsPage() {
   const {
     register: registerNotifications,
     handleSubmit: handleSubmitNotifications,
-    formState: { errors: _notificationErrors },
   } = useForm<NotificationForm>({
     defaultValues: {
       email_notifications: true,
@@ -108,8 +107,8 @@ export function SettingsPage() {
       await userService.updateProfile(user!.id, profileData);
       await refreshUser();
       toast.success('Profile updated successfully!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to update profile');
+    } catch {
+      toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);
     }
@@ -121,8 +120,8 @@ export function SettingsPage() {
       // This would call a password change endpoint
       // await api.changePassword(data.current_password, data.new_password);
       toast.success('Password changed successfully!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to change password');
+    } catch {
+      toast.error('Failed to change password');
     } finally {
       setIsSaving(false);
     }
@@ -133,8 +132,8 @@ export function SettingsPage() {
     try {
       // await api.updateNotifications(data);
       toast.success('Notification preferences saved!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to save preferences');
+    } catch {
+      toast.error('Failed to save preferences');
     } finally {
       setIsSaving(false);
     }

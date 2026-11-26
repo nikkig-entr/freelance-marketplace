@@ -74,8 +74,9 @@ export function AdminWithdrawalsPage() {
       toast.success('Withdrawal approved!');
       setSelectedWithdrawal(null);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to approve withdrawal');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to approve withdrawal');
     },
   });
 
@@ -87,8 +88,9 @@ export function AdminWithdrawalsPage() {
       setSelectedWithdrawal(null);
       setRejectReason('');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to reject withdrawal');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to reject withdrawal');
     },
   });
 
@@ -99,12 +101,13 @@ export function AdminWithdrawalsPage() {
       toast.success('Withdrawal marked as completed!');
       setSelectedWithdrawal(null);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Failed to complete withdrawal');
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || 'Failed to complete withdrawal');
     },
   });
 
-  const handleFilterChange = (key: keyof typeof filters, value: any) => {
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 

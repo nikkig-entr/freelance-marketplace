@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearch } from '@tanstack/react-router';
 import { projectService } from '@/services/api';
 import { Project, ProjectStatus, formatCurrency, formatDate, getStatusColor } from '@/types';
@@ -46,11 +46,7 @@ export function MyProjectsPage() {
   });
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchProjects();
-  }, [filters, page, pageSize]);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = { ...filters, page, page_size: pageSize };
@@ -58,12 +54,16 @@ export function MyProjectsPage() {
       setProjects(data.items || []);
       setTotal(data.total || 0);
       setTotalPages(data.total_pages || 0);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load projects');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters, page, pageSize]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
@@ -74,8 +74,8 @@ export function MyProjectsPage() {
       await projectService.delete(String(id));
       toast.success('Project deleted');
       fetchProjects();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to delete project');
+    } catch {
+      toast.error('Failed to delete project');
     } finally {
       setDeletingId(null);
     }
@@ -86,8 +86,8 @@ export function MyProjectsPage() {
       await projectService.publish(String(id));
       toast.success('Project published!');
       fetchProjects();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'Failed to publish project');
+    } catch {
+      toast.error('Failed to publish project');
     }
   };
 
