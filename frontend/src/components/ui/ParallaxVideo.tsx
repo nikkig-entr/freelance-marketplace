@@ -57,6 +57,7 @@ export function ParallaxVideo({
     offset: ['start end', 'end start'],
   });
 
+  // y and scale are used via motion values in the video style
   const y = useTransform(scrollYProgress, [0, 1], ['0%', `${speed * 30}%`]);
   const scale = useTransform(scrollYProgress, [0, 1], zoomRange);
   const clipPath = useTransform(scrollYProgress, [0, revealThreshold], ['inset(100% 0 0 0)', 'inset(0% 0 0 0)']);
@@ -93,17 +94,21 @@ export function ParallaxVideo({
     ...style,
   };
 
-  const videoStyle: React.CSSProperties = {
-    position: 'absolute',
+  const videoStyle = {
+    position: 'absolute' as const,
     top: '50%',
     left: '50%',
     width: '100%',
     height: '100%',
     minWidth: '100%',
     minHeight: '100%',
-    objectFit: 'cover',
+    objectFit: 'cover' as const,
     transformOrigin: 'center center',
     willChange: 'transform, clip-path',
+  };
+
+  const motionStyle = {
+    ...videoStyle,
     ...(prefersReducedMotion ? {} : { y, scale }),
     ...(revealOnScroll && !prefersReducedMotion ? { clipPath } : {}),
   };
@@ -125,7 +130,7 @@ export function ParallaxVideo({
           loop={loop}
           playsInline={playsInline}
           className="w-full h-full object-cover"
-          style={videoStyle}
+          style={motionStyle}
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           aria-hidden="true"
@@ -155,8 +160,6 @@ export function ParallaxVideo({
     </div>
   );
 }
-
-import { clsx } from 'clsx';
 
 interface ParallaxImageProps {
   src: string;
@@ -208,17 +211,21 @@ export function ParallaxImage({
     ...style,
   };
 
-  const imageStyle: React.CSSProperties = {
-    position: 'absolute',
+  const imageStyle = {
+    position: 'absolute' as const,
     top: '50%',
     left: '50%',
     width: '100%',
     height: '100%',
     minWidth: '100%',
     minHeight: '100%',
-    objectFit: 'cover',
+    objectFit: 'cover' as const,
     transformOrigin: 'center center',
     willChange: 'transform, clip-path',
+  };
+
+  const imageMotionStyle = {
+    ...imageStyle,
     ...(prefersReducedMotion ? {} : { y, scale }),
     ...(revealOnScroll && !prefersReducedMotion ? { clipPath } : {}),
   };
@@ -236,7 +243,7 @@ export function ParallaxImage({
           alt={alt}
           loading={priority ? 'eager' : loading}
           className="w-full h-full object-cover"
-          style={imageStyle}
+          style={imageMotionStyle}
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           aria-hidden="true"

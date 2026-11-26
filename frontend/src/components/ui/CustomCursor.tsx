@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 interface CustomCursorProps {
@@ -83,24 +83,6 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
     };
   }, [enabled, prefersReducedMotion, isCoarsePointer, cursorX, cursorY, cursorScale]);
 
-  const setCursorLabel = useCallback((label: string, options?: { isMedia?: boolean; mediaType?: 'video' | 'image' }) => {
-    setCursorState(prev => ({
-      ...prev,
-      label,
-      labelVisible: !!label,
-      isMedia: options?.isMedia ?? false,
-      mediaType: options?.mediaType ?? null,
-    }));
-  }, []);
-
-  const clearCursorLabel = useCallback(() => {
-    setCursorState(prev => ({ ...prev, label: '', labelVisible: false, isMedia: false, mediaType: null }));
-  }, []);
-
-  const setClickable = useCallback((clickable: boolean) => {
-    setCursorState(prev => ({ ...prev, isClickable: clickable }));
-  }, []);
-
   if (!enabled || prefersReducedMotion || isCoarsePointer) {
     return <>{children}</>;
   }
@@ -159,26 +141,14 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
           </motion.div>
         )}
       </motion.div>
-      <style jsx global>{`
-        * {
-          cursor: none !important;
-        }
-        a, button, input, textarea, select, [role="button"], [tabindex] {
-          cursor: none !important;
-        }
-      `}</style>
     </>
   );
 }
 
 export function useCustomCursor() {
-  const [label, setLabel] = useState('');
-  const [labelOptions, setLabelOptions] = useState<{ isMedia?: boolean; mediaType?: 'video' | 'image' }>({});
-  const [clickable, setClickableState] = useState(false);
-
   // This would need to be connected via context in a real implementation
   // For now, we'll use a simpler approach with data attributes
-  return { setLabel, setLabelOptions, setClickable: setClickableState };
+  return { setLabel: () => {}, setLabelOptions: () => {}, setClickable: () => {} };
 }
 
 // Hook for elements to register cursor behavior

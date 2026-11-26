@@ -1,292 +1,203 @@
-import { MagnifyingGlassIcon, ShieldCheckIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { Badge } from '@/components/ui/Badge';
-import { Briefcase, Code, Zap, Users, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+'use client';
 
-const skillTags = [
-  { name: 'React', icon: Code },
-  { name: 'FastAPI', icon: Zap },
-  { name: 'UI/UX', icon: Briefcase },
-  { name: 'AI/ML', icon: Users },
-  { name: 'Node.js', icon: Code },
-  { name: 'Python', icon: Zap },
-  { name: 'TypeScript', icon: Code },
-  { name: 'PostgreSQL', icon: Shield },
-];
-
-const stats = [
-  { value: '50K+', label: 'Active Freelancers' },
-  { value: '12K+', label: 'Projects Completed' },
-  { value: '$5M+', label: 'Paid to Freelancers' },
-  { value: '98%', label: 'Client Satisfaction' },
-];
+import { useEffect, useRef, useState } from 'react';
+import { MagneticButton } from '@/components/ui/MagneticButton';
+import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
+import { EditorialText } from '@/components/ui/EditorialText';
+import { MagnifyingGlassIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon } from '@heroicons/react/24/solid';
 
 interface HeroSectionProps {
   isVisible?: boolean;
 }
 
 export function HeroSection({ isVisible = true }: HeroSectionProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const lenisRef = useRef<any>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const initLenis = async () => {
+      if (typeof window !== 'undefined') {
+        const { default: Lenis } = await import('lenis');
+        const lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          touchMultiplier: 2,
+        });
+
+        lenisRef.current = lenis;
+
+        function raf(time: number) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Track scroll progress for parallax
+        lenis.on('scroll', ({ scroll }: { scroll: number }) => {
+          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+          setScrollProgress(scroll / maxScroll);
+        });
+
+        return () => {
+          lenis.destroy();
+        };
+      }
+    };
+
+    initLenis();
+
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        videoRef.current!.muted = true;
+        videoRef.current!.play();
+      });
+    }
+
+    return () => {
+      if (lenisRef.current) {
+        lenisRef.current.destroy();
+      }
+    };
+  }, []);
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Subtle ambient depth - single radial gradient */}
-      <motion.div
-        className="absolute inset-0 -z-10 pointer-events-none hero-gradient-mesh"
-        initial={isVisible ? { scale: 1.12 } : { scale: 1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
-        style={{ transformOrigin: 'center center' }}
-      >
-        <div className="hero-glow" />
-      </motion.div>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden" data-lenis-prevent>
+      {/* Video Background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/media/hero/hero-bg-poster.jpg"
+          className="w-full h-full object-cover"
+          aria-hidden="true"
+          style={{
+            transform: `translateY(${scrollProgress * 100}px)`,
+            willChange: 'transform',
+          }}
+        >
+          <source src="/media/hero/hero-bg.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay for text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/70 via-[var(--color-bg)]/40 to-[var(--color-bg)]/90" />
+        {/* Subtle accent glow - moves with scroll */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[var(--color-accent)]/5 blur-[200px] pointer-events-none"
+          style={{
+            transform: `translate(-50%, -50%) translateY(${scrollProgress * 50}px)`,
+            willChange: 'transform',
+          }}
+        />
+        {/* Noise texture */}
+        <div className="absolute inset-0 noise-overlay opacity-[0.015]" />
+      </div>
 
-      {/* Noise texture - subtle */}
-      <div className="noise-overlay" />
-
-      <motion.div
-        className="relative container py-20 sm:py-28 lg:py-40"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-      >
+      <div className="relative container py-20 sm:py-28 lg:py-40" data-lenis-prevent>
         <div className="max-w-4xl">
           {/* Badge - minimal */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-            className="mb-8"
-          >
-            <Badge variant="primary" size="md" className="inline-flex" dot>
-              <SparklesIcon className="w-3.5 h-3.5" />
-              New: AI-Powered Tools for Pro & Agency Plans
-            </Badge>
-          </motion.div>
+          <div className="mb-10" style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s'
+          }}>
+            <span className="inline-flex items-center gap-2 glass-card px-5 py-2.5 rounded-xl border-[var(--color-accent)]/30 backdrop-blur-[20px]">
+              <SparklesIcon className="w-4 h-4 text-[var(--color-accent)]" aria-hidden="true" />
+              <span className="text-sm font-medium text-[var(--color-text)] tracking-wide uppercase">New: AI-Powered Matching for Pro & Agency</span>
+            </span>
+          </div>
 
-          {/* Main Headline - typography driven */}
-          <motion.h1
-            className="text-display-sm font-extrabold text-[var(--color-text)] tracking-[-0.02em] leading-[1.05]"
-            initial={{ opacity: 0, y: 30, clipPath: 'inset(100% 0 0 0)' }}
-            animate={{ opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)' }}
-            transition={{
-              duration: 1.0,
-              ease: [0.76, 0, 0.24, 1],
-              delay: isVisible ? 0.3 : 0,
-            }}
+          {/* Main Headline - Monumental with mask reveal */}
+          <MonumentalHeadline
+            splitBy="lines"
+            delay={0.3}
+            stagger={0.1}
+            duration={1.4}
+            ease="cubic-bezier(0.76, 0, 0.24, 1)"
+            parallax={true}
+            parallaxStrength={0.08}
+            maskAnimation={true}
+            className="mb-6"
           >
             Find Work.
-            <br />
-            <span className="text-gradient-accent">Build Your Career.</span>
-          </motion.h1>
+            Build Your Career.
+          </MonumentalHeadline>
 
-          {/* Subheadline - restrained */}
-          <motion.p
-            className="mt-6 text-body-lg text-[var(--color-text-muted)] max-w-2xl leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+          {/* Editorial subheadline with italic serif */}
+          <EditorialText
+            size="lg"
+            animated={true}
+            hoverReroll={true}
+            rerollText="Secure escrow. Zero hassle. Pure craft."
+            className="max-w-2xl mb-12"
           >
             The modern freelance marketplace connecting talented professionals with great clients.
-            Secure escrow payments, AI-powered matching, and zero hassle.
-          </motion.p>
+          </EditorialText>
 
-          {/* Search + Skill Tags */}
-          <motion.div
-            className="mt-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
-          >
-            <div className="glass-card p-3 mb-6 max-w-2xl">
+          {/* Search + CTA */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-16" style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.4s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.4s'
+          }}>
+            <div className="glass-card p-2 flex-1 max-w-2xl backdrop-blur-[20px] border-[var(--color-border)]">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" />
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" aria-hidden="true" />
                 <input
                   type="search"
-                  placeholder="Search projects, skills, or freelancers..."
-                  className="w-full pl-12 pr-4 py-3.5 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-base focus:outline-none"
+                  placeholder="Search projects, skills, or freelancers…"
+                  className="w-full pl-12 pr-4 py-3.5 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-base focus:outline-none font-sans"
                   aria-label="Search projects"
                 />
               </div>
             </div>
-
-            {/* Clickable Skill Tags - minimal */}
-            <div className="flex flex-wrap items-center gap-2 max-w-3xl" role="list" aria-label="Popular skills">
-              {skillTags.map((skill, index) => (
-                <motion.button
-                  key={skill.name}
-                  className="glass-card-hover px-4 py-2 rounded-xl text-sm font-medium text-[var(--color-text-muted)] transition-all duration-300 flex items-center gap-2"
-                  role="listitem"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 1.0 + index * 0.03 }}
-                >
-                  <skill.icon className="w-4 h-4 text-[var(--color-text-subtle)] hover:text-[var(--color-accent)] transition-colors" aria-hidden="true" />
-                  {skill.name}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
+            <MagneticButton
+              variant="primary"
+              size="lg"
+              leftIcon={<SparklesIcon className="w-5 h-5" />}
+              rightIcon={<ArrowRightIcon className="w-5 h-5" />}
+              strength={0.35}
+              className="whitespace-nowrap"
+            >
+              Explore Projects
+            </MagneticButton>
+          </div>
 
           {/* Trust Indicators - minimal */}
-          <motion.div
-            className="mt-10 flex flex-wrap items-center gap-6 text-sm text-[var(--color-text-subtle)]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 1.2 }}
-          >
+          <div className="flex flex-wrap items-center gap-6 text-sm text-[var(--color-text-subtle)]" style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.6s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.6s'
+          }}>
             <span className="flex items-center gap-1.5">
-              <ShieldCheckIcon className="w-4 h-4 text-[var(--color-accent)]" />
+              <svg className="w-4 h-4 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
               No credit card required
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckIcon className="w-4 h-4 text-[var(--color-gray-500)]" />
+              <svg className="w-4 h-4 text-[var(--color-gray-500)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               Cancel anytime
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckIcon className="w-4 h-4 text-[var(--color-gray-500)]" />
+              <svg className="w-4 h-4 text-[var(--color-gray-500)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               14-day free trial on Pro
             </span>
-          </motion.div>
-
-          {/* Stats Row - clean typography */}
-          <motion.div
-            className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 1.4 }}
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 1.4 + index * 0.08 }}
-              >
-                <p className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[var(--color-text)] tracking-tight leading-none">{stat.value}</p>
-                <p className="mt-2 text-sm text-[var(--color-text-muted)] leading-normal">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Floating Preview Card - refined */}
-        <motion.div
-          className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block max-w-xl"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1.6 }}
-        >
-          <div className="relative">
-            <div className="glass-card overflow-hidden">
-              {/* Top bar - minimal */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                <div className="flex-1 text-center text-xs text-[var(--color-text-subtle)] font-mono">dashboard.freelancehub.com</div>
-              </div>
-              {/* Dashboard preview */}
-              <div className="p-6 space-y-5">
-                {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
-                  {[
-                    { label: 'Active Bids', value: '3/50', color: 'text-[var(--color-accent)]' },
-                    { label: 'Earnings', value: '$2,847', color: 'text-[var(--color-gray-400)]' },
-                    { label: 'Rating', value: '4.9★', color: 'text-[var(--color-gray-400)]' },
-                    { label: 'Projects', value: '12', color: 'text-[var(--color-gray-400)]' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center p-4 glass-subtle rounded-xl">
-                      <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-                      <div className="text-xs text-[var(--color-text-subtle)] mt-1">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Recent activity */}
-                <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-text-muted)]">Recent Activity</span>
-                    <span className="text-xs text-[var(--color-text-subtle)]">This Week</span>
-                  </div>
-                  {[
-                    { project: 'React Dashboard Redesign', status: 'Interviewing' },
-                    { project: 'Mobile App - Fitness Tracker', status: 'Submitted' },
-                    { project: 'E-commerce API Integration', status: 'Hired' },
-                    { project: 'Brand Identity Package', status: 'New Match' },
-                  ].map((activity, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 glass-subtle rounded-xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[var(--glass-bg)] flex items-center justify-center">
-                          <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[var(--color-text)]">{activity.project}</p>
-                          <p className="text-xs text-[var(--color-text-muted)]">{activity.status}</p>
-                        </div>
-                      </div>
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full glass text-[var(--color-text-muted)]">
-                        {activity.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* AI suggestion - accent highlighted */}
-                <div className="pt-4 border-t border-[var(--color-border)]">
-                  <div className="flex items-center gap-3 p-4 bg-[var(--color-accent-muted)] border border-[var(--color-accent)]/30 rounded-xl">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/20 flex items-center justify-center">
-                      <SparklesIcon className="w-5 h-5 text-[var(--color-accent)]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[var(--color-text)]">AI Suggestion</p>
-                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">3 new projects match your skills. <span className="text-[var(--color-accent)]">View matches →</span></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating badges - minimal */}
-            <div className="absolute -top-4 -right-4 w-56">
-              <div className="glass-card p-4">
-                <p className="text-xs text-[var(--color-text-subtle)] mb-1 tracking-wide">WEEKLY PROGRESS</p>
-                <p className="text-3xl font-extrabold text-[var(--color-text)]">78%</p>
-                <p className="text-xs text-[var(--color-text-subtle)]">Bid limit used</p>
-                <div className="mt-3 h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
-                  <div className="h-full bg-[var(--color-accent)] rounded-full" style={{ width: '78%' }} />
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute bottom-4 -left-4 w-48">
-              <div className="glass-card p-4">
-                <p className="text-xs text-[var(--color-text-subtle)] mb-1 tracking-wide">AI PROPOSALS</p>
-                <p className="text-3xl font-extrabold text-[var(--color-text)]">12/50</p>
-                <p className="text-xs text-[var(--color-text-subtle)]">Used this month</p>
-                <div className="mt-3 h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
-                  <div className="h-full bg-[var(--color-gray-600)] rounded-full" style={{ width: '24%' }} />
-                </div>
-              </div>
-            </div>
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* Scroll indicator - minimal */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 2.2 }}
-      >
-        <div className="w-5 h-9 border-1.5 border-[var(--color-border)] rounded-full flex justify-center pt-1.5">
-          <motion.div
-            className="w-1 h-1 rounded-full bg-[var(--color-text-muted)]"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          {/* Scroll indicator - minimal */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2" style={{
+            opacity: isVisible ? 1 : 0,
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 2.2s'
+          }}>
+            <div className="w-5 h-9 border-1.5 border-[var(--color-border)] rounded-full flex justify-center pt-1.5">
+              <div className="w-1 h-1 rounded-full bg-[var(--color-text-muted)] animate-bounce" style={{ animationDuration: '1.5s', animationTimingFunction: 'ease-in-out', animationIterationCount: 'infinite' }} aria-hidden="true" />
+            </div>
+            <p className="text-xs text-[var(--color-text-subtle)] text-center mt-2 font-mono tracking-wider uppercase">Scroll</p>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

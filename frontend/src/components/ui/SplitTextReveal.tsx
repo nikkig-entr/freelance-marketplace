@@ -1,212 +1,131 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { SplitText } from 'split-type';
+import { forwardRef, useRef, useEffect, useState, useImperativeHandle, ElementType, ComponentRef } from 'react';
 
-interface SplitTextRevealProps {
+interface SplitTextRevealProps<C extends ElementType = 'div'> {
   children: React.ReactNode;
-  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'div';
+  splitBy?: 'chars' | 'words' | 'lines';
   className?: string;
-  splitBy?: 'lines' | 'words' | 'chars';
   delay?: number;
-  stagger?: number;
   duration?: number;
-  ease?: [number, number, number, number];
-  fromY?: number;
-  opacity?: [number, number];
+  stagger?: number;
+  ease?: string;
   threshold?: number;
   rootMargin?: string;
   once?: boolean;
+  as?: C;
 }
 
-export function SplitTextReveal({
+interface SplitTextRevealRef<C extends ElementType = 'div'> {
+  element: ComponentRef<C> | null;
+}
+
+const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRevealProps<ElementType>>(({
   children,
+  splitBy = 'words',
+  className = '',
+  delay = 0,
+  duration = 0.8,
+  stagger = 0.05,
+  ease = 'cubic-bezier(0.16, 1, 0.3, 1)',
+  threshold = 0.1,
+  rootMargin = '0px',
+  once = true,
   as: Component = 'div',
-  className = '',
-  splitBy = 'lines',
-  delay = 0,
-  stagger = 0.08,
-  duration = 1.0,
-  ease = [0.16, 1, 0.3, 1],
-  fromY = 100,
-  opacity = [0, 1],
-  threshold = 0.1,
-  rootMargin = '0px',
-  once = true,
-}: SplitTextRevealProps) {
-  const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once, amount: threshold, margin: rootMargin });
-  const [splitText, setSplitText] = useState<SplitText | null>(null);
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}, ref) => {
+  const internalRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    element: internalRef.current,
+  }));
 
   useEffect(() => {
-    if (!ref.current || prefersReducedMotion) return;
+    const element = internalRef.current;
+    if (!element) return;
 
-    const st = new SplitText(ref.current, { types: splitBy });
-    setSplitText(st);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          if (once) {
+            observer.unobserve(element);
+          }
+        } else if (!once) {
+          setIsVisible(false);
+        }
+      },
+      { threshold, rootMargin }
+    );
 
-    return () => {
-      st.revert();
-    };
-  }, [splitBy, prefersReducedMotion]);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [threshold, rootMargin, once]);
 
-  const elements = splitBy === 'lines' ? splitText?.lines : splitBy === 'words' ? splitText?.words : splitText?.chars;
+  useEffect(() => {
+    if (isVisible && !hasAnimated) {
+      setHasAnimated(true);
+    }
+  }, [isVisible, hasAnimated]);
 
-  if (prefersReducedMotion || !elements || elements.length === 0) {
-    return <Component ref={ref} className={className}>{children}</Component>;
+  const splitText = (text: string) => {
+    switch (splitBy) {
+      case 'chars':
+        return text.split('');
+      case 'words':
+        return text.split(/(\s+)/).filter((s) => s.length > 0);
+      case 'lines':
+        return text.split('\n');
+      default:
+        return [text];
+    }
+  };
+
+  const textContent = typeof children === 'string' ? children : '';
+  const segments = splitText(textContent);
+
+  if (!textContent || typeof children !== 'string') {
+    return (
+      <Component
+        ref={internalRef}
+        className={className}
+        style={{
+          opacity: isVisible || hasAnimated ? 1 : 0,
+          transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(20px)',
+          transition: `opacity ${duration}s ${ease} ${delay}s, transform ${duration}s ${ease} ${delay}s`,
+        }}
+      >
+        {children}
+      </Component>
+    );
   }
 
   return (
-    <Component ref={ref} className={className} style={{ overflow: 'hidden' }}>
-      <motion.div
-        style={{ display: 'flex', flexDirection: 'column', gap: splitBy === 'lines' ? '0' : '0' }}
-        aria-hidden="true"
-      >
-        {elements.map((el, i) => (
-          <motion.span
-            key={i}
-            style={{
-              display: splitBy === 'chars' ? 'inline-block' : 'block',
-              overflow: 'hidden',
-              willChange: 'transform, opacity',
-            }}
-            initial={{ y: `${fromY}%`, opacity: opacity[0] }}
-            animate={isInView ? { y: '0%', opacity: opacity[1] } : { y: `${fromY}%`, opacity: opacity[0] }}
-            transition={{
-              delay: delay + i * stagger,
-              duration,
-              ease,
-            }}
-          >
-            {el.textContent}
-          </motion.span>
-        ))}
-      </motion.div>
+    <Component
+      ref={internalRef}
+      className={className}
+      aria-hidden={!isVisible && !hasAnimated}
+    >
+      {segments.map((segment, index) => (
+        <span
+          key={index}
+          style={{
+            display: splitBy === 'chars' ? 'inline-block' : 'inline',
+            opacity: isVisible || hasAnimated ? 1 : 0,
+            transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
+            transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
+            willChange: 'opacity, transform',
+          }}
+        >
+          {segment}
+        </span>
+      ))}
     </Component>
   );
-}
+});
 
-interface SplitTextRevealLinesProps extends Omit<SplitTextRevealProps, 'splitBy'> {
-  lineClassName?: string;
-}
+SplitTextReveal.displayName = 'SplitTextReveal';
 
-export function SplitTextRevealLines({
-  children,
-  as: Component = 'h1',
-  className = '',
-  lineClassName = '',
-  delay = 0,
-  stagger = 0.1,
-  duration = 1.0,
-  ease = [0.16, 1, 0.3, 1],
-  fromY = 110,
-  opacity = [0, 1],
-  threshold = 0.1,
-  rootMargin = '0px',
-  once = true,
-}: SplitTextRevealLinesProps) {
-  const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once, amount: threshold, margin: rootMargin });
-  const [splitText, setSplitText] = useState<SplitText | null>(null);
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  useEffect(() => {
-    if (!ref.current || prefersReducedMotion) return;
-    const st = new SplitText(ref.current, { types: 'lines' });
-    setSplitText(st);
-    return () => st.revert();
-  }, [prefersReducedMotion]);
-
-  if (prefersReducedMotion || !splitText?.lines || splitText.lines.length === 0) {
-    return <Component ref={ref} className={className}>{children}</Component>;
-  }
-
-  return (
-    <Component ref={ref} className={className} style={{ overflow: 'hidden' }}>
-      <motion.div
-        style={{ display: 'flex', flexDirection: 'column', gap: '0' }}
-        aria-hidden="true"
-      >
-        {splitText.lines.map((line, i) => (
-          <motion.div
-            key={i}
-            className={lineClassName}
-            style={{ overflow: 'hidden', willChange: 'transform, opacity' }}
-            initial={{ y: `${fromY}%`, opacity: opacity[0] }}
-            animate={isInView ? { y: '0%', opacity: opacity[1] } : { y: `${fromY}%`, opacity: opacity[0] }}
-            transition={{
-              delay: delay + i * stagger,
-              duration,
-              ease,
-            }}
-          >
-            <span style={{ display: 'block', whiteSpace: 'pre-wrap' }}>{line.textContent}</span>
-          </motion.div>
-        ))}
-      </motion.div>
-    </Component>
-  );
-}
-
-interface SplitTextRevealWordsProps extends Omit<SplitTextRevealProps, 'splitBy'> {
-  wordClassName?: string;
-}
-
-export function SplitTextRevealWords({
-  children,
-  as: Component = 'p',
-  className = '',
-  wordClassName = '',
-  delay = 0,
-  stagger = 0.04,
-  duration = 0.7,
-  ease = [0.16, 1, 0.3, 1],
-  fromY = 50,
-  opacity = [0, 1],
-  threshold = 0.1,
-  rootMargin = '0px',
-  once = true,
-}: SplitTextRevealWordsProps) {
-  const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once, amount: threshold, margin: rootMargin });
-  const [splitText, setSplitText] = useState<SplitText | null>(null);
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  useEffect(() => {
-    if (!ref.current || prefersReducedMotion) return;
-    const st = new SplitText(ref.current, { types: 'words' });
-    setSplitText(st);
-    return () => st.revert();
-  }, [prefersReducedMotion]);
-
-  if (prefersReducedMotion || !splitText?.words || splitText.words.length === 0) {
-    return <Component ref={ref} className={className}>{children}</Component>;
-  }
-
-  return (
-    <Component ref={ref} className={className} style={{ overflow: 'hidden' }}>
-      <motion.div
-        style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', alignItems: 'center' }}
-        aria-hidden="true"
-      >
-        {splitText.words.map((word, i) => (
-          <motion.span
-            key={i}
-            className={wordClassName}
-            style={{ overflow: 'hidden', willChange: 'transform, opacity', display: 'inline-block' }}
-            initial={{ y: `${fromY}%`, opacity: opacity[0] }}
-            animate={isInView ? { y: '0%', opacity: opacity[1] } : { y: `${fromY}%`, opacity: opacity[0] }}
-            transition={{
-              delay: delay + i * stagger,
-              duration,
-              ease,
-            }}
-          >
-            {word.textContent}
-          </motion.span>
-        ))}
-      </motion.div>
-    </Component>
-  );
-}
+export { SplitTextReveal };
+export { SplitTextReveal as default };

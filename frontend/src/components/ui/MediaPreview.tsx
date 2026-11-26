@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
 
 interface MediaPreviewProps {
   /** The trigger element ref or selector */
@@ -36,12 +37,6 @@ interface MediaPreviewProps {
   aspectRatio?: number;
 }
 
-interface MediaPreviewController {
-  show: (x?: number, y?: number) => void;
-  hide: () => void;
-  setPosition: (x: number, y: number) => void;
-}
-
 export function MediaPreview({
   triggerRef,
   src,
@@ -57,14 +52,13 @@ export function MediaPreview({
   hideDelay = 120,
   followMouse = false,
   className = '',
-  aspectRatio = 16 / 9,
 }: MediaPreviewProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [mediaError, setMediaError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const showTimeoutRef = useRef<NodeJS.Timeout>();
-  const hideTimeoutRef = useRef<NodeJS.Timeout>();
+  const showTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -221,8 +215,6 @@ export function MediaPreview({
   );
 }
 
-import { clsx } from 'clsx';
-
 interface MediaPreviewListProps {
   /** Array of items with media */
   items: Array<{
@@ -293,8 +285,6 @@ export function MediaPreviewList({
     }
   }, [isControlled]);
 
-  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   return (
     <div className="relative" ref={listRef} onMouseLeave={handleListLeave}>
       <div className="relative z-10" style={{ display: 'flex', flexDirection: 'column', gap }}>
@@ -337,14 +327,6 @@ export function MediaPreviewList({
               scale: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
               y: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
               clipPath: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-            }}
-            style={{
-              ...(prefersReducedMotion ? {} : {
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                clipPath: 'inset(0% 0 0 0)',
-              }),
             }}
           >
             {previewMedia.type === 'video' ? (

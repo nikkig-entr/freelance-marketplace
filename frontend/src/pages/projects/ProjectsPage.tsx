@@ -1,17 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearch, useNavigate } from '@tanstack/react-router';
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useSearch, useNavigate } from '@tanstack/react-router';
 import { projectService } from '@/services/api';
-import { Project, ProjectStatus, formatCurrency, getStatusColor } from '@/types';
+import { Project, ProjectStatus } from '@/types';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  MapPinIcon,
   XMarkIcon,
-  PlusIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
-import { BriefcaseIcon } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Input, Select } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
+import { EditorialText } from '@/components/ui/EditorialText';
+import { ProjectPreviewList } from '@/components/ui/ProjectPreviewCard';
 
 interface ProjectFilters {
   search?: string;
@@ -37,6 +42,22 @@ interface ProjectsSearch {
   page_size?: number;
 }
 
+const sortOptions = [
+  { value: 'created_at:desc', label: 'Newest First' },
+  { value: 'budget_min:asc', label: 'Budget: Low to High' },
+  { value: 'budget_max:desc', label: 'Budget: High to Low' },
+  { value: 'deadline_days:asc', label: 'Deadline: Soonest' },
+  { value: 'bids_count:desc', label: 'Most Bids' },
+];
+
+const statusOptions = [
+  { value: '', label: 'All Statuses' },
+  { value: 'open', label: 'Open' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in_review', label: 'In Review' },
+  { value: 'completed', label: 'Completed' },
+];
+
 export function ProjectsPage() {
   const search = useSearch({ from: '/projects' }) as ProjectsSearch;
   const navigate = useNavigate();
@@ -53,6 +74,8 @@ export function ProjectsPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [categories, setCategories] = useState<Array<{id: number; name: string}>>([]);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const [filtersHeight, setFiltersHeight] = useState(0);
 
   useEffect(() => {
     fetchCategories();
@@ -62,7 +85,7 @@ export function ProjectsPage() {
     const newFilters = { ...filters, page, page_size: pageSize };
     setFilters(newFilters);
     navigate({ to: '/projects', search: newFilters as any });
-  }, [filters, page, pageSize]);
+  }, [filters, page, pageSize, navigate]);
 
   useEffect(() => {
     fetchProjects();
@@ -117,276 +140,323 @@ export function ProjectsPage() {
     ([key, value]) => value && key !== 'page' && key !== 'page_size' && key !== 'sort_by' && key !== 'sort_order'
   );
 
+  // Measure filters panel height for smooth animation
+  useEffect(() => {
+    if (filtersRef.current) {
+      setFiltersHeight(filtersRef.current.scrollHeight);
+    }
+  }, [showFilters, filters, categories]);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="mt-1 text-gray-600">Find your next project</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Link to="/projects/create" className="btn-primary flex items-center justify-center gap-2">
-              <PlusIcon className="w-5 h-5" />
-              Post Project
-            </Link>
-          </div>
+    <div className="min-h-screen bg-[var(--color-bg)]">
+      {/* Hero Header */}
+      <header className="relative pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden">
+        <div className="absolute inset-0 -z-10" aria-hidden="true">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[var(--color-accent)]/3 blur-[150px] pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[var(--color-accent)]/2 blur-[120px] pointer-events-none" />
         </div>
 
-        {/* Search & Filters */}
-        <div className="card p-4 mb-6">
-          <form onSubmit={handleSearch} className="flex flex-col lg:flex-row gap-4">
-            <div className="relative flex-1">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="search"
-                value={filters.search || ''}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                placeholder="Search projects..."
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
-            <div className="flex items-center gap-3 lg:hidden">
-              <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`btn-secondary flex items-center gap-2 ${showFilters ? 'ring-2 ring-primary-500' : ''}`}
-              >
-                <FunnelIcon className="w-5 h-5" />
-                Filters
-              </button>
-            </div>
-          </form>
-
-          {/* Desktop Filters */}
-          <div className={`lg:flex lg:items-center lg:justify-between mt-4 ${showFilters ? 'block' : 'hidden'} lg:block`}>
-            <div className="flex flex-wrap items-center gap-4">
-              <select
-                value={filters.status || ''}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="input w-auto py-2"
-              >
-                <option value="">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="in_review">In Review</option>
-                <option value="completed">Completed</option>
-              </select>
-
-              <select
-                value={filters.category_id || ''}
-                onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="input w-auto py-2"
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-
-              <select
-                value={filters.sort_by || 'created_at'}
-                onChange={(e) => handleFilterChange('sort_by', e.target.value)}
-                className="input w-auto py-2"
-              >
-                <option value="created_at">Newest First</option>
-                <option value="budget_min">Budget: Low to High</option>
-                <option value="budget_max">Budget: High to Low</option>
-                <option value="deadline_days">Deadline: Soonest</option>
-                <option value="bid_count">Most Bids</option>
-              </select>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.is_fixed_price || false}
-                  onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <span className="text-sm text-gray-600">Fixed Price Only</span>
-              </label>
+        <div className="container relative">
+          <div className="max-w-3xl">
+            {/* Section label */}
+            <div className="mb-6" style={{ opacity: 1, transform: 'translateY(0)', transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              <span className="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-xl border-[var(--color-accent)]/30 text-sm font-medium tracking-wide uppercase">
+                <svg className="w-3.5 h-3.5 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                Projects Catalog
+              </span>
             </div>
 
-            {hasActiveFilters && (
-              <button onClick={clearFilters} className="btn-ghost text-sm flex items-center gap-1">
-                <XMarkIcon className="w-4 h-4" />
-                Clear Filters
-              </button>
-            )}
-          </div>
-        </div>
+            {/* Monumental Headline */}
+            <MonumentalHeadline
+              splitBy="lines"
+              delay={0.1}
+              stagger={0.12}
+              duration={1.3}
+              parallax={true}
+              parallaxStrength={0.06}
+              maskAnimation={true}
+              className="mb-6"
+            >
+              Discover
+              Projects
+            </MonumentalHeadline>
 
-        {/* Results */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Mobile Filters Sidebar */}
-          {showFilters && (
-            <aside className="lg:hidden w-64 flex-shrink-0">
-              <div className="card p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900">Filters</h3>
-                  <button onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-600">
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
+            {/* Editorial subheadline */}
+            <EditorialText
+              size="lg"
+              animated={true}
+              hoverReroll={true}
+              rerollText="Filter by skill, budget, timeline. Find your match."
+              className="max-w-2xl mb-10"
+            >
+              Browse thousands of open projects. Filter by expertise, budget, and timeline.
+            </EditorialText>
+
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="relative max-w-2xl">
+              <div className="glass-card p-1.5 backdrop-blur-[20px] border-[var(--color-border)]">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={filters.search || ''}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    placeholder="Search projects, skills, technologies…"
+                    className="w-full pl-12 pr-4 py-4 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-lg focus:outline-none font-sans"
+                    aria-label="Search projects"
+                  />
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="label">Status</label>
-                    <select
-                      value={filters.status || ''}
-                      onChange={(e) => handleFilterChange('status', e.target.value)}
-                      className="input"
-                    >
-                      <option value="">All Statuses</option>
-                      <option value="open">Open</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="in_review">In Review</option>
-                      <option value="completed">Completed</option>
-                    </select>
+              </div>
+            </form>
+
+            {/* Filter Toggle + Stats */}
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
+                <span className="font-mono text-[var(--color-accent)] text-lg">{projects.length || 0}</span>
+                <span>projects found</span>
+                {hasActiveFilters && (
+                  <span className="flex items-center gap-1.5 px-3 py-1 glass-card rounded-xl border-[var(--color-accent)]/30">
+                    <span className="text-[var(--color-accent)] font-medium">Active filters</span>
+                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]" aria-label="Clear filters">
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  </span>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                leftIcon={<FunnelIcon className="w-4 h-4" />}
+                className="hidden sm:flex"
+              >
+                Filters
+                <ChevronDownIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Filters Panel - Collapsible */}
+      <div className="container pb-8">
+        <div
+          ref={filtersRef}
+          className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showFilters ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 pointer-events-none'}`}
+          style={{ maxHeight: showFilters ? `${filtersHeight}px` : '0' }}
+        >
+          <Card className="glass-card border-[var(--color-border)] backdrop-blur-[20px]" padding="none">
+            <div className="p-6 lg:p-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
+                {/* Status Filter */}
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Status</label>
+                  <Select
+                    value={filters.status || ''}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    options={statusOptions}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Category</label>
+                  <Select
+                    value={filters.category_id || ''}
+                    onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
+                    options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                {/* Sort Filter */}
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <Select
+                    value={`${filters.sort_by}:${filters.sort_order}`}
+                    onChange={(e) => {
+                      const [sort_by, sort_order] = e.target.value.split(':');
+                      handleFilterChange('sort_by', sort_by);
+                      handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
+                    }}
+                    options={sortOptions}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                {/* Budget Range */}
+                <div className="lg:col-span-2">
+                  <label className="label text-[var(--color-text-muted)]">Budget Range</label>
+                  <div className="mt-1.5 flex items-center gap-3">
+                    <Input
+                      type="number"
+                      placeholder="Min"
+                      value={filters.budget_min || ''}
+                      onChange={(e) => handleFilterChange('budget_min', e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-1/2 text-sm"
+                    />
+                    <span className="text-[var(--color-text-subtle)]">—</span>
+                    <Input
+                      type="number"
+                      placeholder="Max"
+                      value={filters.budget_max || ''}
+                      onChange={(e) => handleFilterChange('budget_max', e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-1/2 text-sm"
+                    />
                   </div>
-                  <div>
-                    <label className="label">Category</label>
-                    <select
-                      value={filters.category_id || ''}
-                      onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="input"
-                    >
-                      <option value="">All Categories</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="label">Sort By</label>
-                    <select
-                      value={filters.sort_by || 'created_at'}
-                      onChange={(e) => handleFilterChange('sort_by', e.target.value)}
-                      className="input"
-                    >
-                      <option value="created_at">Newest First</option>
-                      <option value="budget_min">Budget: Low to High</option>
-                      <option value="budget_max">Budget: High to Low</option>
-                      <option value="deadline_days">Deadline: Soonest</option>
-                      <option value="bid_count">Most Bids</option>
-                    </select>
-                  </div>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                </div>
+
+                {/* Fixed Price Checkbox */}
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 cursor-pointer w-full">
                     <input
                       type="checkbox"
                       checked={filters.is_fixed_price || false}
                       onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                      className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                      className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
                     />
-                    <span className="text-sm text-gray-600">Fixed Price Only</span>
+                    <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
                   </label>
                 </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Results Section */}
+      <main className="container pb-16 lg:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+          {/* Mobile Filters Sidebar */}
+          <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start hidden lg:block">
+            <Card className="glass-card border-[var(--color-border)] backdrop-blur-[20px]" padding="none">
+              <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between">
+                <h3 className="font-semibold text-[var(--color-text)]">Filters</h3>
+                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] p-1">
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-6">
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Status</label>
+                  <Select
+                    value={filters.status || ''}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    options={statusOptions}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Category</label>
+                  <Select
+                    value={filters.category_id || ''}
+                    onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
+                    options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <Select
+                    value={`${filters.sort_by}:${filters.sort_order}`}
+                    onChange={(e) => {
+                      const [sort_by, sort_order] = e.target.value.split(':');
+                      handleFilterChange('sort_by', sort_by);
+                      handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
+                    }}
+                    options={sortOptions}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <label className="label text-[var(--color-text-muted)]">Budget</label>
+                  <div className="mt-1.5 flex items-center gap-3">
+                    <Input
+                      type="number"
+                      placeholder="Min"
+                      value={filters.budget_min || ''}
+                      onChange={(e) => handleFilterChange('budget_min', e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-1/2 text-sm"
+                    />
+                    <span className="text-[var(--color-text-subtle)]">—</span>
+                    <Input
+                      type="number"
+                      placeholder="Max"
+                      value={filters.budget_max || ''}
+                      onChange={(e) => handleFilterChange('budget_max', e.target.value ? parseInt(e.target.value) : undefined)}
+                      className="w-1/2 text-sm"
+                    />
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={filters.is_fixed_price || false}
+                    onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
+                    className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
+                  />
+                  <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
+                </label>
                 {hasActiveFilters && (
-                  <button onClick={clearFilters} className="w-full btn-danger text-sm">
+                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-[var(--color-border)]">
                     Clear All Filters
-                  </button>
+                  </Button>
                 )}
               </div>
-            </aside>
-          )}
+            </Card>
+          </aside>
 
           {/* Projects Grid */}
-          <main className="flex-1">
+          <section className="lg:col-span-9">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="card p-6 animate-pulse space-y-4">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-4 bg-gray-200 rounded w-1/2" />
-                    <div className="h-4 bg-gray-200 rounded w-full" />
-                    <div className="h-4 bg-gray-200 rounded w-full" />
-                    <div className="flex gap-4">
-                      <div className="h-6 bg-gray-200 rounded w-20" />
-                      <div className="h-6 bg-gray-200 rounded w-24" />
+                  <div key={i} className="glass-card p-6 animate-pulse space-y-4">
+                    <div className="h-8 bg-[var(--color-border)] rounded w-3/4" />
+                    <div className="h-6 bg-[var(--color-border)] rounded w-1/2" />
+                    <div className="h-6 bg-[var(--color-border)] rounded w-full" />
+                    <div className="h-6 bg-[var(--color-border)] rounded w-full" />
+                    <div className="flex gap-4 pt-4 border-t border-[var(--color-border)]">
+                      <div className="h-6 bg-[var(--color-border)] rounded w-20" />
+                      <div className="h-6 bg-[var(--color-border)] rounded w-24" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : projects.length === 0 ? (
-              <div className="text-center py-16">
-                <BriefcaseIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900">No projects found</h3>
-                <p className="mt-1 text-gray-500">Try adjusting your search or filters</p>
-                <button onClick={clearFilters} className="mt-4 btn-secondary">
-                  Clear Filters
-                </button>
+              <div className="text-center py-16 lg:py-24">
+                <svg className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No projects found</h3>
+                <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
+                  {hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}
+                </p>
+                {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projects.map((project) => (
-                    <Link
-                      key={project.id}
-                      to="/projects/$projectId"
-                      params={{ projectId: String(project.id) }}
-                      search={{ tab: 'details' }}
-                      className="card-hover p-6"
-                    >
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 flex-1">{project.title}</h3>
-                        <span className={`badge ${getStatusColor(project.status)} flex-shrink-0`}>
-                          {project.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm line-clamp-3 mb-4">{project.description}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {(project.skills || []).slice(0, 4).map((skill) => (
-                          <span key={skill} className="badge badge-gray">{skill}</span>
-                        ))}
-                        {(project.skills || []).length > 4 && (
-                          <span className="badge badge-gray">+{(project.skills || []).length - 4}</span>
-                        )}
-                      </div>
-                      <div className="border-t border-gray-200 pt-4 space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">{project.budget_min !== null ? formatCurrency(project.budget_min) : 'N/A'}</span>
-                          {project.budget_max !== null && (
-                            <span className="text-gray-500">- {formatCurrency(project.budget_max)}</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            {project.is_fixed_price ? (
-                              <CurrencyDollarIcon className="w-4 h-4" />
-                            ) : (
-                              <ClockIcon className="w-4 h-4" />
-                            )}
-                            {project.is_fixed_price ? 'Fixed Price' : 'Hourly'}
-                          </span>
-                          {project.deadline_days && (
-                            <span className="flex items-center gap-1">
-                              <ClockIcon className="w-4 h-4" />
-                              {project.deadline_days} days
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 pt-2 border-t border-gray-100">
-                          <span className="flex items-center gap-1">
-                            <MapPinIcon className="w-4 h-4" />
-                            {project.bids_count ?? project.bid_count ?? 0} bids
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                {/* Desktop Results Count */}
+                <div className="hidden lg:flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    Showing <span className="font-mono text-[var(--color-text)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-text)] font-medium">{Math.min(page * pageSize, projects.length)}</span> of <span className="font-mono text-[var(--color-text)] font-medium">{projects.length}</span> projects
+                  </p>
                 </div>
+
+                {/* Project Preview List with Hover Tooltips */}
+                <ProjectPreviewList projects={projects} />
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <nav className="mt-8 flex items-center justify-center gap-2" aria-label="Pagination">
-                    <button
+                  <nav className="mt-10 lg:mt-12 flex items-center justify-center gap-2" aria-label="Pagination">
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="btn-secondary px-3 py-2"
+                      leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
                     >
                       Previous
-                    </button>
-                    <div className="flex items-center gap-1">
+                    </Button>
+                    <div className="flex items-center gap-1 hidden sm:flex">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         let pageNum: number;
                         if (totalPages <= 5) {
@@ -399,33 +469,71 @@ export function ProjectsPage() {
                           pageNum = page - 2 + i;
                         }
                         return (
-                          <button
+                          <Button
                             key={pageNum}
+                            variant={page === pageNum ? 'primary' : 'ghost'}
+                            size="sm"
                             onClick={() => setPage(pageNum)}
-                            className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                              page === pageNum
-                                ? 'bg-primary-600 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            className="w-10 h-10 text-sm font-mono"
                           >
                             {pageNum}
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="btn-secondary px-3 py-2"
+                      rightIcon={<ChevronDownIcon className="w-4 h-4" />}
                     >
                       Next
-                    </button>
+                    </Button>
                   </nav>
                 )}
+
+                {/* Mobile Pagination */}
+                <div className="lg:hidden mt-8 flex items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm font-mono text-[var(--color-text-muted)] px-4">
+                    {page} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    rightIcon={<ChevronDownIcon className="w-4 h-4" />}
+                  >
+                    Next
+                  </Button>
+                </div>
               </>
             )}
-          </main>
+          </section>
         </div>
+      </main>
+
+      {/* Mobile Filters Button */}
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={() => setShowFilters(true)}
+          leftIcon={<FunnelIcon className="w-5 h-5" />}
+          className="shadow-xl"
+        >
+          Filters {hasActiveFilters && <Badge variant="primary" size="sm" className="ml-2">Active</Badge>}
+        </Button>
       </div>
     </div>
   );

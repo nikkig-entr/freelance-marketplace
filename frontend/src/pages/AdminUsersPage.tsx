@@ -17,6 +17,7 @@ import { api, adminService } from '@/services/api';
 import { User, UserRole, UserPlan } from '@/types';
 import { formatDate, formatCurrency } from '@/utils/format';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PaginatedUsers {
   items: User[];
@@ -80,6 +81,7 @@ const planBadgeVariants: Record<UserPlan, 'primary' | 'secondary' | 'outline'> =
 
 export function AdminUsersPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [filters, setFilters] = useState({
     page: 1,
     page_size: 20,
@@ -305,7 +307,7 @@ export function AdminUsersPage() {
                           <Button variant="ghost" size="sm" onClick={() => openEditModal(userItem)}>
                             <PencilIcon className="w-4 h-4" />
                           </Button>
-                          {userItem.id !== user.id && (
+                          {user && userItem.id !== user.id && (
                             <Button
                               variant="ghost"
                               size="sm"
