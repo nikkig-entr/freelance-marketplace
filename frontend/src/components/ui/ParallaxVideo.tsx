@@ -57,7 +57,6 @@ export function ParallaxVideo({
     offset: ['start end', 'end start'],
   });
 
-  // y and scale are used via motion values in the video style
   const y = useTransform(scrollYProgress, [0, 1], ['0%', `${speed * 30}%`]);
   const scale = useTransform(scrollYProgress, [0, 1], zoomRange);
   const clipPath = useTransform(scrollYProgress, [0, revealThreshold], ['inset(100% 0 0 0)', 'inset(0% 0 0 0)']);
@@ -72,7 +71,6 @@ export function ParallaxVideo({
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('error', handleError);
 
-    // Attempt to play
     if (autoPlay) {
       video.play().catch(() => {
         // Autoplay prevented, that's fine
@@ -90,7 +88,7 @@ export function ParallaxVideo({
     width: '100%',
     aspectRatio,
     overflow: 'hidden',
-    borderRadius: 'inherit',
+    borderRadius: 0,
     ...style,
   };
 
@@ -129,7 +127,7 @@ export function ParallaxVideo({
           muted={muted}
           loop={loop}
           playsInline={playsInline}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover grayscale"
           style={motionStyle}
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
@@ -138,13 +136,13 @@ export function ParallaxVideo({
       )}
 
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-obsidian/80 flex items-center justify-center">
-          <div className="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-[var(--color-bg)]/80 flex items-center justify-center">
+          <div className="w-10 h-10 border-2 border-[var(--color-border)] border-t-[var(--color-text)] rounded-full animate-spin" />
         </div>
       )}
 
       {hasError && (
-        <div className="absolute inset-0 bg-graphite-900 flex items-center justify-center text-muted">
+        <div className="absolute inset-0 bg-[var(--color-bg-elevated)] flex items-center justify-center text-[var(--color-text-muted)]">
           <p className="font-mono text-sm">Unable to load video</p>
         </div>
       )}
@@ -153,7 +151,7 @@ export function ParallaxVideo({
         <img
           src={poster}
           alt={alt}
-          className="absolute inset-0 w-full h-full object-cover opacity-50"
+          className="absolute inset-0 w-full h-full object-cover grayscale opacity-50"
           aria-hidden="true"
         />
       )}
@@ -207,7 +205,7 @@ export function ParallaxImage({
     width: '100%',
     aspectRatio,
     overflow: 'hidden',
-    borderRadius: 'inherit',
+    borderRadius: 0,
     ...style,
   };
 
@@ -242,7 +240,7 @@ export function ParallaxImage({
           src={src}
           alt={alt}
           loading={priority ? 'eager' : loading}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover grayscale"
           style={imageMotionStyle}
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
@@ -251,13 +249,13 @@ export function ParallaxImage({
       )}
 
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-obsidian/80 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-[var(--color-bg)]/80 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-text)] rounded-full animate-spin" />
         </div>
       )}
 
       {hasError && (
-        <div className="absolute inset-0 bg-graphite-900 flex items-center justify-center text-muted">
+        <div className="absolute inset-0 bg-[var(--color-bg-elevated)] flex items-center justify-center text-[var(--color-text-muted)]">
           <p className="font-mono text-sm">Unable to load image</p>
         </div>
       )}

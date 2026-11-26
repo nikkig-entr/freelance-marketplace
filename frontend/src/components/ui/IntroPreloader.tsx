@@ -11,9 +11,7 @@ interface IntroPreloaderProps {
 const PANEL_COUNT = 5;
 const CURTAIN_DURATION = 520;
 const STAGGER_DELAY = 45;
-const BRASS_LINE_DURATION = 220;
-const POINTER_BLOCK_DURATION = 250;
-const TOTAL_DURATION = 850;
+const TOTAL_DURATION = 800;
 
 export function IntroPreloader({
   children,
@@ -21,7 +19,6 @@ export function IntroPreloader({
   const context = useContext(PreloaderContext) as PreloaderContextValue;
   const { setPreloaderComplete } = context;
   const [isUnmounted, setIsUnmounted] = useState(false);
-  const brassLineRef = useRef<HTMLDivElement>(null);
   const panelsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -41,17 +38,7 @@ export function IntroPreloader({
     // Block pointer events initially
     document.body.style.pointerEvents = 'none';
 
-    // Animate brass line
-    const brassLine = brassLineRef.current;
-    if (brassLine) {
-      brassLine.style.width = '0%';
-      brassLine.style.transition = `width ${BRASS_LINE_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-      requestAnimationFrame(() => {
-        brassLine.style.width = '100%';
-      });
-    }
-
-    // Cascade panels up
+    // Cascade panels up (black curtain effect)
     const panels = panelsRef.current;
     panels.forEach((panel, index) => {
       if (panel) {
@@ -67,14 +54,14 @@ export function IntroPreloader({
     // Re-enable pointer events after 250ms
     const pointerTimer = setTimeout(() => {
       document.body.style.pointerEvents = '';
-    }, POINTER_BLOCK_DURATION);
+    }, 250);
 
-    // Complete unmount after 850ms
+    // Complete unmount after TOTAL_DURATION
     const completeTimer = setTimeout(() => {
       setTimeout(() => {
         setIsUnmounted(true);
         setPreloaderComplete?.(true);
-      }, 300);
+      }, 150);
     }, TOTAL_DURATION);
 
     return () => {
@@ -93,13 +80,13 @@ export function IntroPreloader({
       <motion.div
         key="preloader"
         initial={{ opacity: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
+        exit={{ opacity: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
         className="fixed inset-0 z-[99999] pointer-events-none"
         role="status"
         aria-label="Loading"
         aria-busy="true"
       >
-        <div className="grid grid-cols-5 h-full w-full bg-[#0B0B0C]">
+        <div className="grid grid-cols-5 h-full w-full bg-[#050505]">
           {Array.from({ length: PANEL_COUNT }).map((_, i) => (
             <motion.div
               key={`panel-${i}`}
@@ -111,21 +98,7 @@ export function IntroPreloader({
                 willChange: 'transform',
                 transformOrigin: 'center center',
               }}
-            >
-              {i === 0 && (
-                <motion.div
-                  ref={brassLineRef}
-                  className="absolute top-1/2 left-0 h-[1px] w-0 bg-[#C5A572]/70"
-                  style={{
-                    transform: 'translateY(-50%)',
-                    transformOrigin: 'left center',
-                    willChange: 'width',
-                  }}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '0%' }}
-                />
-              )}
-            </motion.div>
+            />
           ))}
         </div>
       </motion.div>

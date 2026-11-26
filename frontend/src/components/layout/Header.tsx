@@ -1,28 +1,24 @@
+'use client';
+
 import { Link, useLocation } from '@tanstack/react-router';
 import { Transition } from '@headlessui/react';
 import { clsx } from 'clsx';
 import {
   Bars3Icon,
   XMarkIcon,
-  MagnifyingGlassIcon,
-  BellIcon,
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  SparklesIcon,
 } from '@heroicons/react/24/outline';
-import { Briefcase, Cpu, Layers } from 'lucide-react';
 import { UserMenu } from '@/components/ui/Dropdown';
-import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/contexts/AuthContext';
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 type NavItem = {
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
   roles: string[];
-  badge?: string;
+  index: string;
 };
 
 type UserNavItem = {
@@ -35,11 +31,83 @@ type UserNavItem = {
 };
 
 const navigation: NavItem[] = [
-  { name: 'Projects', href: '/projects', icon: Briefcase, roles: ['freelancer', 'client', 'admin'] },
-  { name: 'Talent', href: '/talent', icon: UserCircleIcon, roles: ['freelancer', 'client', 'admin'] },
-  { name: 'AI Tools', href: '/ai-tools', icon: Cpu, roles: ['freelancer', 'client', 'admin'] },
-  { name: 'Pricing', href: '/pricing', icon: Layers, roles: ['freelancer', 'client', 'admin'] },
+  { name: 'Projects', href: '/projects', roles: ['freelancer', 'client', 'admin'], index: '01' },
+  { name: 'Talent', href: '/talent', roles: ['freelancer', 'client', 'admin'], index: '02' },
+  { name: 'AI Tools', href: '/ai-tools', roles: ['freelancer', 'client', 'admin'], index: '03' },
+  { name: 'Pricing', href: '/pricing', roles: ['freelancer', 'client', 'admin'], index: '04' },
 ];
+
+function DualLayerTextRoll({
+  children,
+  index,
+}: {
+  children: React.ReactNode;
+  index: string;
+}) {
+  const [isHovering, setIsHovering] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => setIsHovering(false);
+
+    element.addEventListener('mouseenter', handleMouseEnter);
+    element.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      element.removeEventListener('mouseenter', handleMouseEnter);
+      element.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="relative overflow-hidden inline-block"
+      style={{ perspective: '400px' }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Layer 1 - Default text */}
+      <div
+        className="flex items-center gap-3 transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
+        style={{
+          transform: isHovering ? 'translateY(-100%) rotateX(-90deg)' : 'translateY(0) rotateX(0)',
+          transformOrigin: 'center bottom',
+          opacity: isHovering ? 0 : 1,
+        }}
+      >
+        <span className="font-mono text-[var(--color-text-subtle)] text-sm tracking-wider">
+          {index}
+        </span>
+        <span className="font-heading font-medium text-[var(--color-text)]">
+          {children}
+        </span>
+      </div>
+
+      {/* Layer 2 - Hover text (same content, comes from top) */}
+      <div
+        className="absolute left-0 top-full flex items-center gap-3 transition-transform duration-300 ease-[cubic-bezier(0.76,0,0.24,1)]"
+        style={{
+          transform: isHovering ? 'translateY(-100%) rotateX(0)' : 'translateY(0) rotateX(90deg)',
+          transformOrigin: 'center top',
+          opacity: isHovering ? 1 : 0,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <span className="font-mono text-[var(--color-white)] text-sm tracking-wider">
+          {index}
+        </span>
+        <span className="font-heading font-medium text-[var(--color-white)]">
+          {children}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -64,12 +132,9 @@ export function Header() {
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2" aria-label="FreelanceHub Home">
-              <div className="w-9 h-9 rounded-xl bg-[var(--color-accent)] flex items-center justify-center">
-                <SparklesIcon className="w-5 h-5 text-[var(--color-text-inverse)]" />
-              </div>
-              <span className="font-heading font-bold text-xl text-[var(--color-text)] hidden sm:block">
-                FreelanceHub
+            <Link to="/" className="flex items-center gap-2" aria-label="Home">
+              <span className="font-heading font-extrabold text-xl text-[var(--color-text)] tracking-[-0.02em]">
+                FREELANCE
               </span>
             </Link>
 
@@ -79,57 +144,33 @@ export function Header() {
                 .filter((item) => !user || item.roles.includes(user.role))
                 .map((item) => {
                   const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
-                  const Icon = item.icon;
                   return (
                     <Link
                       key={item.name}
                       to={item.href}
                       className={clsx(
-                        'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                        'flex items-center gap-3 px-4 py-2.5 rounded-none text-sm font-medium transition-all duration-200',
                         isActive
-                          ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] border border-[var(--color-accent)]/30'
-                          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                          ? 'text-[var(--color-white)]'
+                          : 'text-[var(--color-text-muted)] hover:text-[var(--color-white)]'
                       )}
                       aria-current={isActive ? 'page' : undefined}
                     >
-                      <Icon className="w-5 h-5" aria-hidden="true" />
-                      {item.name}
-                      {item.badge && (
-                        <Badge variant="danger" size="sm">{item.badge}</Badge>
-                      )}
+                      <DualLayerTextRoll index={item.index}>
+                        {item.name}
+                      </DualLayerTextRoll>
                     </Link>
                   );
                 })}
             </nav>
           </div>
 
-          {/* Right Side */}
+          {/* Right Side - Minimal */}
           <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="hidden lg:block relative">
-              <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" />
-              <input
-                type="search"
-                placeholder="Search projects, skills..."
-                className="w-72 pl-11 pr-4 py-2.5 rounded-xl glass text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] transition-all duration-200"
-                aria-label="Search"
-              />
-            </div>
-
-            {/* Notifications */}
-            <button
-              type="button"
-              className="p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] transition-colors"
-              aria-label="Notifications"
-            >
-              <BellIcon className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--color-accent)] rounded-full" />
-            </button>
-
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="md:hidden p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] transition-colors"
+              className="md:hidden p-2.5 rounded-none text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
@@ -180,35 +221,26 @@ export function Header() {
         >
           <div id="mobile-menu" className="md:hidden border-t border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-[40px] animate-slide-down">
             <div className="px-4 py-4 space-y-2">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <MagnifyingGlassIcon className="w-5 h-5 text-[var(--color-text-subtle)]" />
-                <input
-                  type="search"
-                  placeholder="Search projects, skills..."
-                  className="flex-1 py-2.5 rounded-xl glass text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-sm border-0 focus:outline-none"
-                />
-              </div>
               {navigation
                 .filter((item) => !user || item.roles.includes(user.role))
-                .map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={clsx(
-                        'flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors',
-                        location.pathname === item.href
-                          ? 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] border border-[var(--color-accent)]/30'
-                          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+                .map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={clsx(
+                      'flex items-center gap-3 px-3 py-3 rounded-none text-base font-medium transition-colors',
+                      location.pathname === item.href
+                        ? 'text-[var(--color-white)] bg-[var(--glass-bg)]'
+                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-white)] hover:bg-[var(--glass-bg)]'
+                    )}
+                  >
+                    <span className="font-mono text-[var(--color-text-subtle)] text-sm tracking-wider">
+                      {item.index}
+                    </span>
+                    {item.name}
+                  </Link>
+                ))}
               {!isAuthenticated && (
                 <div className="pt-4 space-y-2 border-t border-[var(--color-border)]">
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="btn-secondary btn-lg w-full">
@@ -226,7 +258,7 @@ export function Header() {
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <span className="text-[var(--color-accent)] font-medium">
+                        <span className="text-[var(--color-white)] font-medium">
                           {user.full_name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                         </span>
                       )}
@@ -250,8 +282,8 @@ export function Header() {
                               else setMobileMenuOpen(false);
                             }}
                             className={clsx(
-                              'w-full flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium transition-colors',
-                              item.danger ? 'text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                              'w-full flex items-center gap-3 px-3 py-3 rounded-none text-base font-medium transition-colors',
+                              item.danger ? 'text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-white)] hover:bg-[var(--glass-bg)]'
                             )}
                           >
                             <Icon className="w-5 h-5" />

@@ -46,7 +46,7 @@ export function MediaPreview({
   position = 'fixed',
   offset = { x: 24, y: -24 },
   size = { width: 400, height: 225 },
-  radius = 12,
+  radius = 0,
   zIndex = 9990,
   showDelay = 80,
   hideDelay = 120,
@@ -123,7 +123,6 @@ export function MediaPreview({
     }
   }, [followMouse, isVisible, offset.x, offset.y, x, y]);
 
-  // Expose controller via context or return
   useEffect(() => {
     if (triggerRef?.current) {
       const trigger = triggerRef.current;
@@ -186,7 +185,7 @@ export function MediaPreview({
             muted
             loop
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
             onLoad={() => setIsLoaded(true)}
             onError={() => setMediaError(true)}
             aria-hidden="true"
@@ -196,7 +195,7 @@ export function MediaPreview({
           <img
             src={src}
             alt={alt}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover grayscale"
             onLoad={() => setIsLoaded(true)}
             onError={() => setMediaError(true)}
             aria-hidden="true"
@@ -205,11 +204,11 @@ export function MediaPreview({
           />
         )}
         {!isLoaded && (
-          <div className="absolute inset-0 bg-obsidian/80 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-[var(--color-bg)]/80 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-text)] rounded-full animate-spin" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-obsidian/60 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/60 via-transparent to-transparent pointer-events-none" />
       </motion.div>
     </AnimatePresence>
   );
@@ -314,7 +313,7 @@ export function MediaPreviewList({
               zIndex: 9995,
               width: previewSize.width,
               height: previewSize.height,
-              borderRadius: 12,
+              borderRadius: 0,
               left: previewPositionState.x + 24,
               top: previewPositionState.y - previewSize.height - 24,
               pointerEvents: 'none',
@@ -337,18 +336,18 @@ export function MediaPreviewList({
                 muted
                 loop
                 playsInline
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover grayscale"
                 aria-hidden="true"
               />
             ) : (
               <img
                 src={previewMedia.src}
                 alt={previewMedia.alt || ''}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover grayscale"
                 aria-hidden="true"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-obsidian/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/60 via-transparent to-transparent" />
           </motion.div>
         )}
       </AnimatePresence>
