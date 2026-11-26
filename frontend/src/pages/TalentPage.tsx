@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearch, useNavigate, Link } from '@tanstack/react-router';
+import { useSearch, useNavigate } from '@tanstack/react-router';
 import { userService } from '@/services/api';
 import { User, UserRole } from '@/types';
 import {
@@ -10,17 +10,13 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   UserIcon,
-  StarIcon,
-  BriefcaseIcon,
-  MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Avatar } from '@/components/ui/Avatar';
 import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
 import { EditorialText } from '@/components/ui/EditorialText';
+import { IndexList, IndexListSkeleton } from '@/components/ui/IndexList';
 
 interface TalentFilters {
   search?: string;
@@ -66,19 +62,6 @@ const availabilityOptions = [
   { value: 'open', label: 'Open to Work' },
 ];
 
-const freelancerImages = [
-  '/media/hero/hero-main.jpg',
-  '/media/hero/hero-code.jpg',
-  '/media/projects/projects-code.jpg',
-  '/media/projects/projects-design.jpg',
-  '/media/bento/bento-remote-work.jpg',
-  '/media/bento/bento-escrow.jpg',
-  '/media/remote/remote-cafe.jpg',
-  '/media/remote/remote-beach.jpg',
-  '/media/community/community-team.jpg',
-  '/media/community/community-handshake.jpg',
-];
-
 export function TalentPage() {
   const search = useSearch({ from: '/talent' }) as TalentSearch;
   const navigate = useNavigate();
@@ -114,9 +97,7 @@ export function TalentPage() {
 
   const fetchSkills = async () => {
     try {
-      // Fetch unique skills from API or use predefined
-      await userService.getProfile(0); // placeholder
-      // In real app, there would be a skills endpoint
+      await userService.getProfile(0);
       setSkills([
         'React', 'TypeScript', 'Node.js', 'Python', 'Vue.js',
         'UI/UX Design', 'Figma', 'Graphic Design', 'Mobile Development',
@@ -133,9 +114,8 @@ export function TalentPage() {
   const fetchTalent = async () => {
     setIsLoading(true);
     try {
-      await userService.getProfile(0); // placeholder - would be a list endpoint
-      // Simulate paginated response for now
-      setTalent([]); // Will be replaced with real API call
+      await userService.getProfile(0);
+      setTalent([]);
       setTotalPages(0);
     } catch (error) {
       console.error('Failed to fetch talent:', error);
@@ -170,12 +150,20 @@ export function TalentPage() {
     ([key, value]) => value && key !== 'page' && key !== 'page_size' && key !== 'sort_by' && key !== 'sort_order' && key !== 'role'
   );
 
-  // Measure filters panel height for smooth animation
   useEffect(() => {
     if (filtersRef.current) {
       setFiltersHeight(filtersRef.current.scrollHeight);
     }
   }, [showFilters, filters]);
+
+  // Transform talent for IndexList
+  const indexListItems = talent.map((freelancer, i) => ({
+    id: freelancer.id,
+    index: (page - 1) * pageSize + i + 1,
+    title: freelancer.full_name || 'Freelancer',
+    subtitle: freelancer.skills?.slice(0, 3).join(', ') || 'No skills listed',
+    href: `/profile/${freelancer.id}`,
+  }));
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -274,12 +262,12 @@ export function TalentPage() {
           className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showFilters ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 pointer-events-none'}`}
           style={{ maxHeight: showFilters ? `${filtersHeight}px` : '0' }}
         >
-          <Card className="glass-card border-[var(--color-border)] backdrop-blur-[20px]" padding="none">
+          <div className="border border-[var(--color-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]">
             <div className="p-6 lg:p-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
                 {/* Role Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Role</label>
+                  <label className="input-label">Role</label>
                   <Select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
@@ -290,7 +278,7 @@ export function TalentPage() {
 
                 {/* Skills Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Skills</label>
+                  <label className="input-label">Skills</label>
                   <Select
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
@@ -302,7 +290,7 @@ export function TalentPage() {
 
                 {/* Sort Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <label className="input-label">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -317,7 +305,7 @@ export function TalentPage() {
 
                 {/* Hourly Rate Range */}
                 <div className="lg:col-span-2">
-                  <label className="label text-[var(--color-text-muted)]">Hourly Rate (USD)</label>
+                  <label className="input-label">Hourly Rate (USD)</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
@@ -339,7 +327,7 @@ export function TalentPage() {
 
                 {/* Availability Filter */}
                 <div className="flex items-end">
-                  <label className="label text-[var(--color-text-muted)] block w-full">Availability</label>
+                  <label className="input-label block w-full">Availability</label>
                   <Select
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
@@ -349,7 +337,7 @@ export function TalentPage() {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
 
@@ -358,7 +346,7 @@ export function TalentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Mobile Filters Sidebar */}
           <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start hidden lg:block">
-            <Card className="glass-card border-[var(--color-border)] backdrop-blur-[20px]" padding="none">
+            <div className="border border-[var(--color-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]">
               <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--color-text)]">Filters</h3>
                 <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] p-1">
@@ -367,7 +355,7 @@ export function TalentPage() {
               </div>
               <div className="p-6 space-y-6">
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Role</label>
+                  <label className="input-label">Role</label>
                   <Select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
@@ -376,7 +364,7 @@ export function TalentPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Skills</label>
+                  <label className="input-label">Skills</label>
                   <Select
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
@@ -386,7 +374,7 @@ export function TalentPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <label className="input-label">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -399,7 +387,7 @@ export function TalentPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Hourly Rate</label>
+                  <label className="input-label">Hourly Rate</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
@@ -419,7 +407,7 @@ export function TalentPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Availability</label>
+                  <label className="input-label">Availability</label>
                   <Select
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
@@ -433,30 +421,13 @@ export function TalentPage() {
                   </Button>
                 )}
               </div>
-            </Card>
+            </div>
           </aside>
 
-          {/* Talent Grid */}
+          {/* Talent List */}
           <section className="lg:col-span-9">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="glass-card p-6 animate-pulse space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-[var(--color-border)]" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-5 bg-[var(--color-border)] rounded w-1/3" />
-                        <div className="h-4 bg-[var(--color-border)] rounded w-1/4" />
-                      </div>
-                    </div>
-                    <div className="h-4 bg-[var(--color-border)] rounded w-full" />
-                    <div className="flex gap-4 pt-4 border-t border-[var(--color-border)]">
-                      <div className="h-6 bg-[var(--color-border)] rounded w-20" />
-                      <div className="h-6 bg-[var(--color-border)] rounded w-24" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <IndexListSkeleton count={6} />
             ) : talent.length === 0 ? (
               <div className="text-center py-16 lg:py-24">
                 <UserIcon className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" />
@@ -475,16 +446,12 @@ export function TalentPage() {
                   </p>
                 </div>
 
-                {/* Talent Grid with Hover Previews */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {talent.map((freelancer, index) => (
-                    <TalentPreviewCard
-                      key={freelancer.id}
-                      freelancer={freelancer}
-                      index={index}
-                    />
-                  ))}
-                </div>
+                {/* Index-style Talent List */}
+                <IndexList
+                  items={indexListItems}
+                  emptyMessage="No freelancers found"
+                  emptyDescription={hasActiveFilters ? 'Try adjusting your search or filters to find more talent' : 'No freelancers available at the moment. Check back soon!'}
+                />
 
                 {/* Pagination */}
                 {totalPages > 1 && (
@@ -578,127 +545,5 @@ export function TalentPage() {
         </Button>
       </div>
     </div>
-  );
-}
-
-interface TalentPreviewCardProps {
-  freelancer: User;
-  index: number;
-}
-
-function TalentPreviewCard({ freelancer, index }: TalentPreviewCardProps) {
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const previewImage = freelancerImages[index % freelancerImages.length];
-
-  return (
-    <Link
-      ref={cardRef}
-      to="/profile/$userId"
-      params={{ userId: String(freelancer.id) }}
-      className={`
-        relative group glass-card-hover p-6 transition-all duration-300
-        ${isHovered ? 'ring-1 ring-[var(--color-accent)]/30 scale-[1.01] z-10' : ''}
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      aria-label={`View profile: ${freelancer.full_name || 'Freelancer'}`}
-    >
-      <div className="flex items-start gap-4 mb-4">
-        <Avatar
-          name={freelancer.full_name || 'Freelancer'}
-          src={freelancer.avatar_url}
-          size="lg"
-          className="flex-shrink-0 transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-headline-6 font-bold text-[var(--color-text)] truncate transition-colors duration-300 group-hover:text-[var(--color-accent)]">
-              {freelancer.full_name || 'Freelancer'}
-            </h3>
-            {freelancer.is_verified && (
-              <span className="flex items-center gap-1 text-xs font-medium text-[var(--color-accent)]" title="Verified">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-[var(--color-text-muted)] truncate">@{freelancer.email?.split('@')[0] || 'user'}</p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {(freelancer.skills || []).slice(0, 4).map((skill) => (
-          <span key={skill} className="badge badge-outline text-xs">
-            {skill}
-          </span>
-        ))}
-        {(freelancer.skills || []).length > 4 && (
-          <span className="badge badge-outline text-xs text-[var(--color-text-subtle)]">
-            +{(freelancer.skills || []).length - 4}
-          </span>
-        )}
-      </div>
-
-      <div className="border-t border-[var(--color-border)] pt-4 space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-[var(--color-text-muted)] flex items-center gap-1">
-            <StarIcon className="w-4 h-4" />
-            {freelancer.rating?.toFixed(1) || '—'}
-          </span>
-          {freelancer.hourly_rate && (
-            <span className="font-medium text-[var(--color-text)] font-mono">
-              ${freelancer.hourly_rate}/hr
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
-          <span className="flex items-center gap-1">
-            <BriefcaseIcon className="w-4 h-4" />
-            {freelancer.completed_projects || 0} completed
-          </span>
-          {freelancer.location && (
-            <span className="flex items-center gap-1">
-              <MapPinIcon className="w-4 h-4" />
-              {freelancer.location}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Hover Preview Tooltip */}
-      {isHovered && (
-        <div
-          className="fixed z-50 pointer-events-none animate-in animate-slide-up duration-200"
-          style={{
-            left: cardRef.current?.getBoundingClientRect().right ? cardRef.current.getBoundingClientRect().right + 24 : 0,
-            top: cardRef.current?.getBoundingClientRect().top ? cardRef.current.getBoundingClientRect().top : 0,
-            width: 320,
-            height: 200,
-          }}
-          aria-hidden="true"
-        >
-          <div className="glass-strong rounded-2xl overflow-hidden shadow-xl border border-[var(--color-accent)]/20 w-full h-full">
-            <div className="aspect-video relative overflow-hidden">
-              <img
-                src={previewImage}
-                alt=""
-                className="w-full h-full object-cover transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/90 via-[var(--color-bg)]/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p className="font-semibold text-[var(--color-text)] text-sm line-clamp-1">{freelancer.full_name || 'Freelancer'}</p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1 font-mono flex items-center gap-2">
-                  <span>{freelancer.hourly_rate ? `$${freelancer.hourly_rate}/hr` : 'Rate on request'}</span>
-                  <span>·</span>
-                  <span>{freelancer.completed_projects || 0} projects</span>
-                  <span>·</span>
-                  <span>{freelancer.rating?.toFixed(1) || '—'} ⭐</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </Link>
   );
 }

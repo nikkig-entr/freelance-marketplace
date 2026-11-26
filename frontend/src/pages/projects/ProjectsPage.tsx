@@ -4,19 +4,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { projectService } from '@/services/api';
 import { Project, ProjectStatus } from '@/types';
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  XMarkIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
 import { EditorialText } from '@/components/ui/EditorialText';
-import { ProjectPreviewList } from '@/components/ui/ProjectPreviewCard';
+import { IndexList, IndexListSkeleton } from '@/components/ui/IndexList';
 
 interface ProjectFilters {
   search?: string;
@@ -147,6 +142,16 @@ export function ProjectsPage() {
     }
   }, [showFilters, filters, categories]);
 
+  // Transform projects for IndexList
+  const indexListItems = projects.map((project, i) => ({
+    id: project.id,
+    index: (page - 1) * pageSize + i + 1,
+    title: project.title,
+    subtitle: project.description?.slice(0, 120),
+    href: `/projects/${project.id}`,
+    search: { tab: 'details' },
+  }));
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Hero Header */}
@@ -249,7 +254,7 @@ export function ProjectsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
                 {/* Status Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Status</label>
+                  <label className="input-label">Status</label>
                   <Select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -260,7 +265,7 @@ export function ProjectsPage() {
 
                 {/* Category Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Category</label>
+                  <label className="input-label">Category</label>
                   <Select
                     value={filters.category_id || ''}
                     onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -271,7 +276,7 @@ export function ProjectsPage() {
 
                 {/* Sort Filter */}
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <label className="input-label">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -286,7 +291,7 @@ export function ProjectsPage() {
 
                 {/* Budget Range */}
                 <div className="lg:col-span-2">
-                  <label className="label text-[var(--color-text-muted)]">Budget Range</label>
+                  <label className="input-label">Budget Range</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
@@ -313,7 +318,7 @@ export function ProjectsPage() {
                       type="checkbox"
                       checked={filters.is_fixed_price || false}
                       onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                      className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
+                      className="w-4 h-4 rounded-none border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
                     />
                     <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
                   </label>
@@ -338,7 +343,7 @@ export function ProjectsPage() {
               </div>
               <div className="p-6 space-y-6">
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Status</label>
+                  <label className="input-label">Status</label>
                   <Select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -347,7 +352,7 @@ export function ProjectsPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Category</label>
+                  <label className="input-label">Category</label>
                   <Select
                     value={filters.category_id || ''}
                     onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
@@ -356,7 +361,7 @@ export function ProjectsPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Sort By</label>
+                  <label className="input-label">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -369,7 +374,7 @@ export function ProjectsPage() {
                   />
                 </div>
                 <div>
-                  <label className="label text-[var(--color-text-muted)]">Budget</label>
+                  <label className="input-label">Budget</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
@@ -393,7 +398,7 @@ export function ProjectsPage() {
                     type="checkbox"
                     checked={filters.is_fixed_price || false}
                     onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                    className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
+                    className="w-4 h-4 rounded-none border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-bg)]"
                   />
                   <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
                 </label>
@@ -406,32 +411,10 @@ export function ProjectsPage() {
             </Card>
           </aside>
 
-          {/* Projects Grid */}
+          {/* Projects List */}
           <section className="lg:col-span-9">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="glass-card p-6 animate-pulse space-y-4">
-                    <div className="h-8 bg-[var(--color-border)] rounded w-3/4" />
-                    <div className="h-6 bg-[var(--color-border)] rounded w-1/2" />
-                    <div className="h-6 bg-[var(--color-border)] rounded w-full" />
-                    <div className="h-6 bg-[var(--color-border)] rounded w-full" />
-                    <div className="flex gap-4 pt-4 border-t border-[var(--color-border)]">
-                      <div className="h-6 bg-[var(--color-border)] rounded w-20" />
-                      <div className="h-6 bg-[var(--color-border)] rounded w-24" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : projects.length === 0 ? (
-              <div className="text-center py-16 lg:py-24">
-                <svg className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No projects found</h3>
-                <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
-                  {hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}
-                </p>
-                {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
-              </div>
+              <IndexListSkeleton count={6} />
             ) : (
               <>
                 {/* Desktop Results Count */}
@@ -441,8 +424,12 @@ export function ProjectsPage() {
                   </p>
                 </div>
 
-                {/* Project Preview List with Hover Tooltips */}
-                <ProjectPreviewList projects={projects} />
+                {/* Index-style Project List */}
+                <IndexList
+                  items={indexListItems}
+                  emptyMessage="No projects found"
+                  emptyDescription={hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}
+                />
 
                 {/* Pagination */}
                 {totalPages > 1 && (

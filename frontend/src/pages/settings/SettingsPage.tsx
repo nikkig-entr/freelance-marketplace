@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/api';
-import {
-  UserCircleIcon,
-  BellIcon,
-  ShieldCheckIcon,
-  PaintBrushIcon,
-  TrashIcon,
-  ArrowLeftIcon,
-} from '@heroicons/react/24/outline';
+import { UserCircleIcon, ShieldCheckIcon, BanknotesIcon, ArrowLeftIcon, PencilIcon, KeyIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 interface ProfileForm {
@@ -30,17 +23,9 @@ interface PasswordForm {
   confirm_password: string;
 }
 
-interface NotificationForm {
-  email_notifications: boolean;
-  bid_notifications: boolean;
-  message_notifications: boolean;
-  payment_notifications: boolean;
-  marketing_emails: boolean;
-}
-
 export function SettingsPage() {
   const { user, refreshUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'billing'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -61,19 +46,6 @@ export function SettingsPage() {
     watch: watchPassword,
     formState: { errors: passwordErrors },
   } = useForm<PasswordForm>();
-
-  const {
-    register: registerNotifications,
-    handleSubmit: handleSubmitNotifications,
-  } = useForm<NotificationForm>({
-    defaultValues: {
-      email_notifications: true,
-      bid_notifications: true,
-      message_notifications: true,
-      payment_notifications: true,
-      marketing_emails: false,
-    },
-  });
 
   const newPassword = watchPassword('new_password');
 
@@ -127,18 +99,6 @@ export function SettingsPage() {
     }
   };
 
-  const onSubmitNotifications = async (_data: NotificationForm) => {
-    setIsSaving(true);
-    try {
-      // await api.updateNotifications(data);
-      toast.success('Notification preferences saved!');
-    } catch {
-      toast.error('Failed to save preferences');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -158,326 +118,398 @@ export function SettingsPage() {
   };
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: UserCircleIcon },
-    { id: 'notifications', label: 'Notifications', icon: BellIcon },
-    { id: 'security', label: 'Security', icon: ShieldCheckIcon },
-    { id: 'appearance', label: 'Appearance', icon: PaintBrushIcon },
+    { id: 'profile' as const, label: 'Profile', icon: UserCircleIcon },
+    { id: 'security' as const, label: 'Security', icon: ShieldCheckIcon },
+    { id: 'billing' as const, label: 'Billing', icon: BanknotesIcon },
   ];
 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
+        <div className="text-center text-[var(--color-text-muted)]">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-[var(--color-bg)]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/projects" className="text-gray-500 hover:text-gray-700">
+        <div className="flex items-center gap-4 mb-12">
+          <Link to="/" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-            <p className="mt-1 text-gray-600">Manage your account settings and preferences</p>
+            <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-[var(--color-text)]">Account</h1>
+            <p className="mt-1 text-[var(--color-text-muted)]">Manage your profile, security, and billing</p>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="card overflow-hidden">
-          <nav className="border-b border-gray-200" aria-label="Settings tabs">
-            <ul className="flex flex-wrap -mb-px" role="tablist">
-              {tabs.map((tab) => (
-                <li key={tab.id} role="presentation">
-                  <button
-                    onClick={() => setActiveTab(tab.id)}
-                    role="tab"
-                    aria-selected={activeTab === tab.id}
-                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-primary-600 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <tab.icon className="w-5 h-5" />
-                    {tab.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        {/* User Header Card */}
+        <div className="border border-[var(--color-border)] mb-8 overflow-hidden">
+          <div className="p-8 flex flex-col sm:flex-row items-start sm:items-center gap-8">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 overflow-hidden rounded-none bg-[var(--color-gray-100)]">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt={`${user.full_name || 'User'}'s avatar`} className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <UserCircleIcon className="w-full h-full text-[var(--color-text-subtle)]" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--color-text)]">
+                    {user.full_name || 'Unnamed User'}
+                  </h2>
+                  <p className="mt-1 text-[var(--color-text-muted)] font-mono text-sm">{user.email}</p>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="px-3 py-1 text-xs font-mono font-medium border border-[var(--color-border)] text-[var(--color-text)]">
+                    {user.role}
+                  </span>
+                  <span className="px-3 py-1 text-xs font-mono font-medium border border-[var(--color-border)] text-[var(--color-text)]">
+                    {user.plan}
+                  </span>
+                  {user.is_verified && (
+                    <span className="px-3 py-1 text-xs font-mono font-medium border border-[var(--color-border)] text-[var(--color-text)]">
+                      Verified
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-6 flex flex-wrap gap-8 text-sm">
+                <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                  <ChartBarIcon className="w-4 h-4" />
+                  <span>{user.completed_projects} projects completed</span>
+                </div>
+                <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                  <UserCircleIcon className="w-4 h-4" />
+                  <span>{user.reviews_count} reviews</span>
+                </div>
+                {user.role === 'freelancer' && user.hourly_rate && (
+                  <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                    <BanknotesIcon className="w-4 h-4" />
+                    <span className="font-mono">${user.hourly_rate}/hr</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <div className="p-6">
-            {/* Profile Tab */}
-            {activeTab === 'profile' && (
-              <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-6">
-                {/* Avatar */}
+        {/* Tabs Navigation */}
+        <nav className="border-b border-[var(--color-border)] mb-8" aria-label="Account tabs">
+          <ul className="flex flex-wrap -mb-px" role="tablist">
+            {tabs.map((tab) => (
+              <li key={tab.id} role="presentation">
+                <button
+                  onClick={() => setActiveTab(tab.id)}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-[var(--color-text)] text-[var(--color-text)]'
+                      : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'
+                  }`}
+                >
+                  <tab.icon className="w-5 h-5" />
+                  {tab.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Tab Content */}
+        <div className="pt-8">
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-8">
+              {/* Avatar Section */}
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <UserCircleIcon className="w-5 h-5" />
+                  Profile Picture
+                </h3>
                 <div className="flex items-center gap-6">
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
+                    <div className="w-24 h-24 bg-[var(--color-gray-100)] flex items-center justify-center overflow-hidden rounded-none">
                       {avatarPreview ? (
                         <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
                       ) : (
-                        <UserCircleIcon className="w-12 h-12 text-primary-600" />
+                        <UserCircleIcon className="w-12 h-12 text-[var(--color-text-subtle)]" />
                       )}
                     </div>
-                    <label className="absolute bottom-0 right-0 bg-primary-600 text-white p-2 rounded-full cursor-pointer hover:bg-primary-700 transition-colors">
-                      <input type="file" accept="image/*" onChange={handleAvatarChange} className="sr-only" />
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <label className="absolute bottom-0 right-0 bg-[var(--color-text)] text-[var(--color-bg)] p-2 cursor-pointer hover:bg-[var(--color-text-muted)] transition-colors">
+                      <input type="file" accept="image/*" onChange={handleAvatarChange} className="sr-only" aria-label="Change avatar" />
+                      <PencilIcon className="w-5 h-5" />
                     </label>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Profile Picture</p>
-                    <p className="text-sm text-gray-500">JPG, PNG or GIF. Max 2MB.</p>
+                    <p className="font-medium text-[var(--color-text)]">Profile Picture</p>
+                    <p className="text-sm text-[var(--color-text-muted)]">JPG, PNG or GIF. Max 2MB.</p>
                   </div>
                 </div>
+              </div>
 
-                <div className="border-t border-gray-200 pt-6 space-y-6">
-                  <div>
-                    <label htmlFor="full_name" className="label">Full Name *</label>
-                    <input
-                      id="full_name"
-                      type="text"
-                      className={`input ${profileErrors.full_name ? 'input-error' : ''}`}
-                      {...registerProfile('full_name', { required: 'Full name is required' })}
-                    />
-                    {profileErrors.full_name && <p className="mt-1 text-sm text-red-600">{profileErrors.full_name.message}</p>}
-                  </div>
-
-                  <div>
-                    <label htmlFor="bio" className="label">Bio</label>
-                    <textarea
-                      id="bio"
-                      rows={4}
-                      className="input resize-none"
-                      placeholder="Tell others about yourself..."
-                      {...registerProfile('bio')}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="location" className="label">Location</label>
-                      <input
-                        id="location"
-                        type="text"
-                        className="input"
-                        placeholder="City, Country"
-                        {...registerProfile('location')}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="website" className="label">Website</label>
-                      <input
-                        id="website"
-                        type="url"
-                        className="input"
-                        placeholder="https://example.com"
-                        {...registerProfile('website')}
-                      />
-                    </div>
-                  </div>
-
-                  {user?.role === 'freelancer' && (
-                    <>
-                      <div>
-                        <label htmlFor="skills" className="label">Skills (comma separated)</label>
-                        <input
-                          id="skills"
-                          type="text"
-                          className="input"
-                          placeholder="React, TypeScript, Node.js, Python"
-                          {...registerProfile('skills')}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label htmlFor="hourly_rate" className="label">Hourly Rate (USD)</label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                            <input
-                              id="hourly_rate"
-                              type="number"
-                              min="0"
-                              step="1"
-                              className="input pl-8"
-                              placeholder="75"
-                              {...registerProfile('hourly_rate', { valueAsNumber: true })}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label htmlFor="availability" className="label">Availability</label>
-                          <select
-                            id="availability"
-                            className="input"
-                            {...registerProfile('availability')}
-                          >
-                            <option value="available">Available for work</option>
-                            <option value="busy">Busy / Limited availability</option>
-                            <option value="unavailable">Not available</option>
-                          </select>
-                        </div>
-                      </div>
-                    </>
+              {/* Profile Fields */}
+              <div className="border-t border-[var(--color-border)] pt-8 space-y-6">
+                <div>
+                  <label htmlFor="full_name" className="block text-sm font-medium text-[var(--color-text)] mb-2">Full Name *</label>
+                  <input
+                    id="full_name"
+                    type="text"
+                    className={`w-full input ${profileErrors.full_name ? 'border-[var(--color-gray-500)]' : ''}`}
+                    {...registerProfile('full_name', { required: 'Full name is required' })}
+                    aria-invalid={profileErrors.full_name ? 'true' : 'false'}
+                    aria-describedby={profileErrors.full_name ? 'full_name-error' : undefined}
+                  />
+                  {profileErrors.full_name && (
+                    <p id="full_name-error" className="mt-1 text-sm text-[var(--color-gray-500)]" role="alert">{profileErrors.full_name.message}</p>
                   )}
                 </div>
 
-                <div className="pt-6 border-t border-gray-200 flex justify-end">
-                  <button type="submit" disabled={isSaving} className="btn-primary">
-                    {isSaving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && (
-              <form onSubmit={handleSubmitNotifications(onSubmitNotifications)} className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Email Notifications</h3>
-                  <div className="space-y-4">
-                    {[
-                      { key: 'email_notifications', label: 'All Email Notifications', desc: 'Master toggle for all email notifications' },
-                      { key: 'bid_notifications', label: 'Bid Updates', desc: 'When someone bids on your projects or your bid status changes' },
-                      { key: 'message_notifications', label: 'New Messages', desc: 'When you receive a new chat message' },
-                      { key: 'payment_notifications', label: 'Payment Updates', desc: 'Deposits, withdrawals, and project payments' },
-                      { key: 'marketing_emails', label: 'Marketing Emails', desc: 'Product updates, tips, and promotional offers' },
-                    ].map((item) => (
-                      <label key={item.key} className="flex items-center justify-between py-3">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.label}</p>
-                          <p className="text-sm text-gray-500">{item.desc}</p>
+                  <label htmlFor="bio" className="block text-sm font-medium text-[var(--color-text)] mb-2">Bio</label>
+                  <textarea
+                    id="bio"
+                    rows={4}
+                    className="w-full input resize-none"
+                    placeholder="Tell others about yourself..."
+                    {...registerProfile('bio')}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="location" className="block text-sm font-medium text-[var(--color-text)] mb-2">Location</label>
+                    <input
+                      id="location"
+                      type="text"
+                      className="w-full input"
+                      placeholder="City, Country"
+                      {...registerProfile('location')}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-[var(--color-text)] mb-2">Website</label>
+                    <input
+                      id="website"
+                      type="url"
+                      className="w-full input"
+                      placeholder="https://example.com"
+                      {...registerProfile('website')}
+                    />
+                  </div>
+                </div>
+
+                {user.role === 'freelancer' && (
+                  <>
+                    <div>
+                      <label htmlFor="skills" className="block text-sm font-medium text-[var(--color-text)] mb-2">Skills (comma separated)</label>
+                      <input
+                        id="skills"
+                        type="text"
+                        className="w-full input"
+                        placeholder="React, TypeScript, Node.js, Python"
+                        {...registerProfile('skills')}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="hourly_rate" className="block text-sm font-medium text-[var(--color-text)] mb-2">Hourly Rate (USD)</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] font-mono">$</span>
+                          <input
+                            id="hourly_rate"
+                            type="number"
+                            min="0"
+                            step="1"
+                            className="w-full input pl-8"
+                            placeholder="75"
+                            {...registerProfile('hourly_rate', { valueAsNumber: true })}
+                          />
                         </div>
-                        <input
-                          type="checkbox"
-                          className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                          {...registerNotifications(item.key as keyof NotificationForm)}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                      </div>
+                      <div>
+                        <label htmlFor="availability" className="block text-sm font-medium text-[var(--color-text)] mb-2">Availability</label>
+                        <select
+                          id="availability"
+                          className="w-full input appearance-none bg-[var(--glass-bg)]"
+                          {...registerProfile('availability')}
+                        >
+                          <option value="available">Available for work</option>
+                          <option value="busy">Busy / Limited availability</option>
+                          <option value="unavailable">Not available</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
-                <div className="pt-6 border-t border-gray-200 flex justify-end">
+              <div className="border-t border-[var(--color-border)] pt-8 flex justify-end">
+                <button type="submit" disabled={isSaving} className="btn-primary">
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Security Tab */}
+          {activeTab === 'security' && (
+            <div className="space-y-12">
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <KeyIcon className="w-5 h-5" />
+                  Change Password
+                </h3>
+                <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-4 max-w-md">
+                  <div>
+                    <label htmlFor="current_password" className="block text-sm font-medium text-[var(--color-text)] mb-2">Current Password</label>
+                    <input
+                      id="current_password"
+                      type="password"
+                      className={`w-full input ${passwordErrors.current_password ? 'border-[var(--color-gray-500)]' : ''}`}
+                      {...registerPassword('current_password', { required: 'Current password is required' })}
+                      aria-invalid={passwordErrors.current_password ? 'true' : 'false'}
+                    />
+                    {passwordErrors.current_password && (
+                      <p className="mt-1 text-sm text-[var(--color-gray-500)]" role="alert">{passwordErrors.current_password.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="new_password" className="block text-sm font-medium text-[var(--color-text)] mb-2">New Password</label>
+                    <input
+                      id="new_password"
+                      type="password"
+                      className={`w-full input ${passwordErrors.new_password ? 'border-[var(--color-gray-500)]' : ''}`}
+                      {...registerPassword('new_password', {
+                        required: 'New password is required',
+                        minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                      })}
+                      aria-invalid={passwordErrors.new_password ? 'true' : 'false'}
+                    />
+                    {passwordErrors.new_password && (
+                      <p className="mt-1 text-sm text-[var(--color-gray-500)]" role="alert">{passwordErrors.new_password.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="confirm_password" className="block text-sm font-medium text-[var(--color-text)] mb-2">Confirm New Password</label>
+                    <input
+                      id="confirm_password"
+                      type="password"
+                      className={`w-full input ${passwordErrors.confirm_password ? 'border-[var(--color-gray-500)]' : ''}`}
+                      {...registerPassword('confirm_password', {
+                        required: 'Please confirm your password',
+                        validate: (value) => value === newPassword || 'Passwords do not match',
+                      })}
+                      aria-invalid={passwordErrors.confirm_password ? 'true' : 'false'}
+                    />
+                    {passwordErrors.confirm_password && (
+                      <p className="mt-1 text-sm text-[var(--color-gray-500)]" role="alert">{passwordErrors.confirm_password.message}</p>
+                    )}
+                  </div>
                   <button type="submit" disabled={isSaving} className="btn-primary">
-                    {isSaving ? 'Saving...' : 'Save Preferences'}
+                    {isSaving ? 'Saving...' : 'Update Password'}
                   </button>
-                </div>
-              </form>
-            )}
+                </form>
+              </div>
 
-            {/* Security Tab */}
-            {activeTab === 'security' && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
-                  <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-4 max-w-md">
-                    <div>
-                      <label htmlFor="current_password" className="label">Current Password</label>
-                      <input
-                        id="current_password"
-                        type="password"
-                        className={`input ${passwordErrors.current_password ? 'input-error' : ''}`}
-                        {...registerPassword('current_password', { required: 'Current password is required' })}
-                      />
-                      {passwordErrors.current_password && <p className="mt-1 text-sm text-red-600">{passwordErrors.current_password.message}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="new_password" className="label">New Password</label>
-                      <input
-                        id="new_password"
-                        type="password"
-                        className={`input ${passwordErrors.new_password ? 'input-error' : ''}`}
-                        {...registerPassword('new_password', {
-                          required: 'New password is required',
-                          minLength: { value: 8, message: 'Password must be at least 8 characters' },
-                        })}
-                      />
-                      {passwordErrors.new_password && <p className="mt-1 text-sm text-red-600">{passwordErrors.new_password.message}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="confirm_password" className="label">Confirm New Password</label>
-                      <input
-                        id="confirm_password"
-                        type="password"
-                        className={`input ${passwordErrors.confirm_password ? 'input-error' : ''}`}
-                        {...registerPassword('confirm_password', {
-                          required: 'Please confirm your password',
-                          validate: (value) => value === newPassword || 'Passwords do not match',
-                        })}
-                      />
-                      {passwordErrors.confirm_password && <p className="mt-1 text-sm text-red-600">{passwordErrors.confirm_password.message}</p>}
-                    </div>
-                    <button type="submit" disabled={isSaving} className="btn-primary">
-                      {isSaving ? 'Saving...' : 'Update Password'}
-                    </button>
-                  </form>
-                </div>
-
-                <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h3>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600">Social login connections are managed during login. This feature will be available soon.</p>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Two-Factor Authentication</h3>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600">Add an extra layer of security to your account.</p>
-                    <button className="btn-secondary mt-3">Enable 2FA</button>
-                  </div>
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <ShieldCheckIcon className="w-5 h-5" />
+                  Two-Factor Authentication
+                </h3>
+                <div className="p-6 border border-[var(--color-border)] max-w-md">
+                  <p className="text-[var(--color-text-muted)] mb-4">Add an extra layer of security to your account.</p>
+                  <button className="btn-secondary">Enable 2FA</button>
                 </div>
               </div>
-            )}
 
-            {/* Appearance Tab */}
-            {activeTab === 'appearance' && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Theme</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { value: 'light', label: 'Light', icon: '☀️' },
-                      { value: 'dark', label: 'Dark', icon: '🌙' },
-                      { value: 'system', label: 'System', icon: '💻' },
-                    ].map((theme) => (
-                      <button
-                        key={theme.value}
-                        className={`p-4 border-2 rounded-xl transition-all flex flex-col items-center gap-2 ${
-                          theme.value === 'system' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <span className="text-3xl">{theme.icon}</span>
-                        <span className="font-medium text-gray-900">{theme.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Language</h3>
-                  <select className="input w-full max-w-xs">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="zh">Chinese</option>
-                  </select>
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <UserCircleIcon className="w-5 h-5" />
+                  Connected Accounts
+                </h3>
+                <div className="p-6 border border-[var(--color-border)] max-w-md">
+                  <p className="text-[var(--color-text-muted)]">Social login connections are managed during login. This feature will be available soon.</p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Billing Tab */}
+          {activeTab === 'billing' && (
+            <div className="space-y-12">
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <BanknotesIcon className="w-5 h-5" />
+                  Account Balance
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+                  <div className="p-6 border border-[var(--color-border)]">
+                    <p className="text-sm text-[var(--color-text-muted)] mb-1">Available Balance</p>
+                    <p className="text-3xl font-heading font-bold font-mono text-[var(--color-text)]">
+                      ${(user.balance_cents / 100).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="p-6 border border-[var(--color-border)]">
+                    <p className="text-sm text-[var(--color-text-muted)] mb-1">Pending Balance</p>
+                    <p className="text-3xl font-heading font-bold font-mono text-[var(--color-text)]">
+                      ${(user.pending_balance_cents / 100).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 flex gap-4 flex-wrap">
+                  <button className="btn-primary">Add Funds</button>
+                  <button className="btn-secondary">Withdraw</button>
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <ChartBarIcon className="w-5 h-5" />
+                  Transaction History
+                </h3>
+                <div className="p-6 border border-[var(--color-border)]">
+                  <p className="text-[var(--color-text-muted)]">Transaction history will be available here. Connect to the transactions API to display recent deposits, withdrawals, and project payments.</p>
+                </div>
+              </div>
+
+              <div className="border-t border-[var(--color-border)] pt-8">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+                  <UserCircleIcon className="w-5 h-5" />
+                  Subscription Plan
+                </h3>
+                <div className="p-6 border border-[var(--color-border)] max-w-md">
+                  <p className="text-sm text-[var(--color-text-muted)] mb-2">Current Plan</p>
+                  <p className="text-xl font-heading font-bold font-mono text-[var(--color-text)] capitalize">{user.plan}</p>
+                  <p className="mt-4 text-sm text-[var(--color-text-muted)]">Subscription management will be available soon.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Danger Zone */}
+          <div className="border-t border-[var(--color-border)] pt-8 mt-12">
+            <h3 className="text-lg font-medium text-[var(--color-text)] mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Danger Zone
+            </h3>
+            <div className="p-6 border border-[var(--color-border)] max-w-md bg-[var(--color-gray-100)]">
+              <p className="text-[var(--color-text-muted)] mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+              <button
+                onClick={() => { if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) { /* logout(); */ }}}
+                className="btn-secondary border-[var(--color-gray-500)] text-[var(--color-text)] hover:bg-[var(--color-gray-200)]"
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="card p-6 mt-8 border-red-200 bg-red-50">
-          <h3 className="text-lg font-medium text-red-900 mb-4 flex items-center gap-2">
-            <TrashIcon className="w-5 h-5" />
-            Danger Zone
-          </h3>
-          <p className="text-red-700 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-          <button className="btn-danger">Delete Account</button>
         </div>
       </div>
     </div>

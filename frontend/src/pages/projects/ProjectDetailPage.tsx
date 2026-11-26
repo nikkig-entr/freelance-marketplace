@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useNavigate, useSearch } from '@tanstack/react-router';
-import { useAuth } from '../../contexts/AuthContext';
-import { projectService, bidService } from '../../services/api';
-import { Project, Bid, ProjectStatus, formatCurrency, formatDate } from '../../types';
+import { useAuth } from '@/contexts/AuthContext';
+import { projectService, bidService } from '@/services/api';
+import { Project, Bid, ProjectStatus, formatCurrency, formatDate } from '@/types';
 import {
   ArrowLeftIcon,
   UserCircleIcon,
@@ -10,12 +10,40 @@ import {
   ChatBubbleLeftRightIcon,
   ShareIcon,
   FlagIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
 
 interface ProjectDetailSearch {
   tab?: string;
+}
+
+const projectImages = [
+  '/media/projects/projects-code.jpg',
+  '/media/projects/projects-design.jpg',
+  '/media/hero/hero-main.jpg',
+  '/media/hero/hero-code.jpg',
+  '/media/bento/bento-remote-work.jpg',
+  '/media/bento/bento-escrow.jpg',
+];
+
+function getStatusBadge(status: ProjectStatus) {
+  const labels: Record<ProjectStatus, string> = {
+    open: 'Open',
+    in_progress: 'In Progress',
+    in_review: 'In Review',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    disputed: 'Disputed',
+    draft: 'Draft',
+  };
+  return (
+    <span className="inline-flex items-center px-3 py-1 text-sm font-medium border border-[var(--color-border)]">
+      {labels[status] || status}
+    </span>
+  );
 }
 
 export function ProjectDetailPage() {
@@ -132,15 +160,15 @@ export function ProjectDetailPage() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-8">
-          <div className="h-8 bg-[var(--color-border)] rounded w-1/4" />
+          <div className="h-8 bg-[var(--color-border)] rounded-none w-1/4" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="h-64 bg-[var(--color-border)] rounded-xl" />
-              <div className="h-32 bg-[var(--color-border)] rounded-xl" />
+              <div className="h-64 bg-[var(--color-border)] rounded-none" />
+              <div className="h-32 bg-[var(--color-border)] rounded-none" />
             </div>
             <div className="space-y-6">
-              <div className="h-48 bg-[var(--color-border)] rounded-xl" />
-              <div className="h-48 bg-[var(--color-border)] rounded-xl" />
+              <div className="h-48 bg-[var(--color-border)] rounded-none" />
+              <div className="h-48 bg-[var(--color-border)] rounded-none" />
             </div>
           </div>
         </div>
@@ -159,20 +187,7 @@ export function ProjectDetailPage() {
     );
   }
 
-  const getStatusBadge = (status: ProjectStatus) => {
-    switch (status) {
-      case 'open':
-        return <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">Open</span>;
-      case 'in_progress':
-        return <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">In Progress</span>;
-      case 'completed':
-        return <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">Completed</span>;
-      case 'cancelled':
-        return <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">Cancelled</span>;
-      default:
-        return <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">Draft</span>;
-    }
-  };
+  const previewImage = projectImages[project.id % projectImages.length];
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -195,17 +210,33 @@ export function ProjectDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Hero Image */}
+            <div className="aspect-video relative overflow-hidden bg-[var(--color-border)]">
+              <img
+                src={previewImage}
+                alt={`${project.title} project preview`}
+                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/60 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium border border-[var(--color-border)]">
+                  {project.is_fixed_price ? 'Fixed Price' : 'Hourly'}
+                </span>
+              </div>
+            </div>
+
             {/* Description */}
-            <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4">Description</h2>
-              <div className="prose prose-invert max-w-none text-[var(--color-text)]">
+            <div className="border border-[var(--color-border)] p-6">
+              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Description</h2>
+              <div className="prose prose-invert max-w-none text-[var(--color-text)] whitespace-pre-wrap">
                 {project.description}
               </div>
               {project.requirements && (
-                <div className="mt-6">
+                <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
                   <h3 className="text-lg font-medium text-[var(--color-text)] mb-3">Requirements</h3>
-                  <div className="prose prose-invert max-w-none text-[var(--color-text-muted)]">
+                  <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] whitespace-pre-wrap">
                     {project.requirements}
                   </div>
                 </div>
@@ -214,9 +245,9 @@ export function ProjectDetailPage() {
 
             {/* Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4">Budget</h3>
-                <div className="space-y-3">
+              <div className="border border-[var(--color-border)] p-6">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Budget</h3>
+                <div className="space-y-4">
                   {project.is_fixed_price ? (
                     <div>
                       <p className="text-sm text-[var(--color-text-muted)]">Fixed Price</p>
@@ -239,9 +270,9 @@ export function ProjectDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4">Timeline</h3>
-                <div className="space-y-3">
+              <div className="border border-[var(--color-border)] p-6">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Timeline</h3>
+                <div className="space-y-4">
                   <div>
                     <p className="text-sm text-[var(--color-text-muted)]">Delivery Time</p>
                     <p className="text-2xl font-bold text-[var(--color-text)]">
@@ -258,11 +289,14 @@ export function ProjectDetailPage() {
 
             {/* Skills */}
             {(project.required_skills?.length || 0) > 0 && (
-              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4">Required Skills</h3>
+              <div className="border border-[var(--color-border)] p-6">
+                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Required Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.required_skills.map((skill) => (
-                    <span key={skill} className="px-3 py-1 bg-[var(--color-accent-muted)] text-[var(--color-accent)] rounded-full text-sm font-medium">
+                    <span
+                      key={skill}
+                      className="px-3 py-1 text-sm font-mono text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)] transition-colors"
+                    >
                       {skill}
                     </span>
                   ))}
@@ -272,17 +306,17 @@ export function ProjectDetailPage() {
 
             {/* Bids Tab Content */}
             {activeTab === 'bids' && (
-              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
+              <div className="border border-[var(--color-border)] p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-[var(--color-text)]">Bids ({bids.length})</h2>
                   {canBid && (
-                    <button
+                    <Button
                       onClick={() => setShowBidModal(true)}
-                      className="w-full btn-primary flex items-center justify-center gap-2"
+                      className="flex items-center justify-center gap-2"
                     >
                       <CurrencyDollarIcon className="w-5 h-5" />
                       Place a Bid
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {bids.length === 0 ? (
@@ -293,11 +327,11 @@ export function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     {bids.map((bid) => (
-                      <div key={bid.id} className="border border-[var(--color-border)] rounded-xl p-4">
+                      <div key={bid.id} className="border border-[var(--color-border)] p-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
-                              <UserCircleIcon className="w-6 h-6 text-[var(--color-accent)]" />
+                            <div className="w-12 h-12 rounded-full bg-[var(--color-border)] flex items-center justify-center">
+                              <UserCircleIcon className="w-6 h-6 text-[var(--color-text-muted)]" />
                             </div>
                             <div>
                               <p className="font-medium text-[var(--color-text)]">{bid.freelancer?.full_name || 'Unknown'}</p>
@@ -314,28 +348,19 @@ export function ProjectDetailPage() {
                         </div>
                         {isOwner && bid.status === 'pending' && (
                           <div className="mt-4 flex gap-2">
-                            <button
-                              onClick={() => handleAcceptBid(bid.id)}
-                              className="btn-primary text-sm"
-                            >
+                            <Button onClick={() => handleAcceptBid(bid.id)} size="sm">
                               Accept
-                            </button>
-                            <button
-                              onClick={() => handleRejectBid(bid.id)}
-                              className="btn-secondary text-sm"
-                            >
+                            </Button>
+                            <Button variant="secondary" onClick={() => handleRejectBid(bid.id)} size="sm">
                               Reject
-                            </button>
+                            </Button>
                           </div>
                         )}
                         {bid.freelancer_id === user?.id && bid.status === 'pending' && (
                           <div className="mt-4">
-                            <button
-                              onClick={() => handleWithdrawBid(bid.id)}
-                              className="btn-secondary text-sm text-red-600 hover:bg-red-50"
-                            >
+                            <Button variant="secondary" onClick={() => handleWithdrawBid(bid.id)} size="sm" className="text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]">
                               Withdraw Bid
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -349,14 +374,14 @@ export function ProjectDetailPage() {
           {/* Sidebar */}
           <aside className="space-y-6">
             {/* Client Info */}
-            <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4">Client</h3>
+            <div className="border border-[var(--color-border)] p-6">
+              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Client</h3>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-[var(--color-border)] flex items-center justify-center overflow-hidden">
                   {project.client?.avatar_url ? (
-                    <img src={project.client.avatar_url} alt={project.client.full_name ?? 'Unknown'} className="w-16 h-16 rounded-full" />
+                    <img src={project.client.avatar_url} alt={project.client.full_name ?? 'Unknown'} className="w-16 h-16 rounded-full" loading="lazy" />
                   ) : (
-                    <UserCircleIcon className="w-8 h-8 text-[var(--color-accent)]" />
+                    <UserCircleIcon className="w-8 h-8 text-[var(--color-text-muted)]" />
                   )}
                 </div>
                 <div>
@@ -366,37 +391,73 @@ export function ProjectDetailPage() {
               </div>
             </div>
 
+            {/* Project Meta */}
+            <div className="border border-[var(--color-border)] p-6">
+              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Details</h3>
+              <dl className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-[var(--color-text-muted)]">Category</dt>
+                  <dd className="font-mono text-[var(--color-text)]">{project.category}</dd>
+                </div>
+                {project.subcategory && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-[var(--color-text-muted)]">Subcategory</dt>
+                    <dd className="font-mono text-[var(--color-text)]">{project.subcategory}</dd>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-[var(--color-text-muted)]">Experience Level</dt>
+                  <dd className="font-mono text-[var(--color-text)]">{project.experience_level}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-[var(--color-text-muted)]">English Level</dt>
+                  <dd className="font-mono text-[var(--color-text)]">{project.english_level}</dd>
+                </div>
+                {project.bids_count && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-[var(--color-text-muted)]">Bids Received</dt>
+                    <dd className="font-mono text-[var(--color-text)]">{project.bids_count}</dd>
+                  </div>
+                )}
+                {project.views_count && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-[var(--color-text-muted)]">Views</dt>
+                    <dd className="font-mono text-[var(--color-text)]">{project.views_count}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
             {/* Actions */}
-            <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-6">
-              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4">Actions</h3>
+            <div className="border border-[var(--color-border)] p-6">
+              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Actions</h3>
               <div className="space-y-3">
                 {canBid && (
-                  <button
-                    onClick={() => setShowBidModal(true)}
-                    className="w-full btn-primary flex items-center justify-center gap-2"
-                  >
+                  <Button onClick={() => setShowBidModal(true)} fullWidth className="flex items-center justify-center gap-2">
                     <CurrencyDollarIcon className="w-5 h-5" />
                     Place a Bid
-                  </button>
+                  </Button>
                 )}
                 {user && (
                   <Link
                     to="/chat/$projectId"
                     params={{ projectId: String(projectId) }}
-                    className="w-full btn-secondary flex items-center justify-center gap-2"
+                    className="w-full"
                   >
-                    <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                    Chat
+                    <Button variant="secondary" fullWidth className="flex items-center justify-center gap-2">
+                      <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                      Chat
+                    </Button>
                   </Link>
                 )}
-                <button className="w-full btn-ghost flex items-center justify-center gap-2">
+                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2">
                   <ShareIcon className="w-5 h-5" />
                   Share Project
-                </button>
-                <button className="w-full btn-ghost flex items-center justify-center gap-2 text-red-600 hover:bg-red-50">
+                </Button>
+                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2 text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]">
                   <FlagIcon className="w-5 h-5" />
                   Report Project
-                </button>
+                </Button>
               </div>
             </div>
           </aside>
@@ -404,80 +465,75 @@ export function ProjectDetailPage() {
 
         {/* Bid Modal */}
         {showBidModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-            <div className="bg-[var(--color-surface)] rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-[var(--color-text)]">Place Your Bid</h2>
-                <button onClick={() => setShowBidModal(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
-                  <XMarkIcon className="w-6 h-6" />
-                </button>
-              </div>
-              <form onSubmit={handleBidSubmit} className="p-6 space-y-4">
-                <div>
-                  <label htmlFor="bid-price" className="label">Your Price (USD)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
-                    <input
-                      id="bid-price"
-                      type="number"
-                      min="1"
-                      step="1"
-                      className="input pl-8"
-                      placeholder="500"
-                      value={bidForm.price_cents}
-                      onChange={(e) => setBidForm({ ...bidForm, price_cents: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="bid-delivery" className="label">Delivery Time (days)</label>
-                  <input
-                    id="bid-delivery"
+          <Modal
+            isOpen={showBidModal}
+            onClose={() => setShowBidModal(false)}
+            title="Place Your Bid"
+            size="md"
+          >
+            <form onSubmit={handleBidSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="bid-price" className="input-label">Your Price (USD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
+                  <Input
+                    id="bid-price"
                     type="number"
                     min="1"
-                    max="365"
-                    className="input"
-                    placeholder="7"
-                    value={bidForm.delivery_days}
-                    onChange={(e) => setBidForm({ ...bidForm, delivery_days: e.target.value })}
+                    step="1"
+                    className="pl-8"
+                    placeholder="500"
+                    value={bidForm.price_cents}
+                    onChange={(e) => setBidForm({ ...bidForm, price_cents: e.target.value })}
                     required
                   />
                 </div>
-                <div>
-                  <label htmlFor="bid-cover" className="label">Cover Letter</label>
-                  <textarea
-                    id="bid-cover"
-                    rows={4}
-                    className="input resize-none"
-                    placeholder="Explain why you're the best fit for this project..."
-                    value={bidForm.cover_letter}
-                    onChange={(e) => setBidForm({ ...bidForm, cover_letter: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="bid-portfolio" className="label">Portfolio URLs (comma separated)</label>
-                  <input
-                    id="bid-portfolio"
-                    type="text"
-                    className="input"
-                    placeholder="https://example.com/project1, https://example.com/project2"
-                    value={bidForm.portfolio_urls}
-                    onChange={(e) => setBidForm({ ...bidForm, portfolio_urls: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="button" onClick={() => setShowBidModal(false)} className="flex-1 btn-secondary">
-                    Cancel
-                  </button>
-                  <button type="submit" disabled={isSubmittingBid} className="flex-1 btn-primary">
-                    {isSubmittingBid ? 'Submitting...' : 'Submit Bid'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+              </div>
+              <div>
+                <label htmlFor="bid-delivery" className="input-label">Delivery Time (days)</label>
+                <Input
+                  id="bid-delivery"
+                  type="number"
+                  min="1"
+                  max="365"
+                  placeholder="7"
+                  value={bidForm.delivery_days}
+                  onChange={(e) => setBidForm({ ...bidForm, delivery_days: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="bid-cover" className="input-label">Cover Letter</label>
+                <textarea
+                  id="bid-cover"
+                  rows={4}
+                  className="input resize-none"
+                  placeholder="Explain why you're the best fit for this project..."
+                  value={bidForm.cover_letter}
+                  onChange={(e) => setBidForm({ ...bidForm, cover_letter: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="bid-portfolio" className="input-label">Portfolio URLs (comma separated)</label>
+                <Input
+                  id="bid-portfolio"
+                  type="text"
+                  placeholder="https://example.com/project1, https://example.com/project2"
+                  value={bidForm.portfolio_urls}
+                  onChange={(e) => setBidForm({ ...bidForm, portfolio_urls: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button type="button" variant="secondary" onClick={() => setShowBidModal(false)} fullWidth>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmittingBid} fullWidth>
+                  {isSubmittingBid ? 'Submitting...' : 'Submit Bid'}
+                </Button>
+              </div>
+            </form>
+          </Modal>
         )}
       </div>
     </div>
