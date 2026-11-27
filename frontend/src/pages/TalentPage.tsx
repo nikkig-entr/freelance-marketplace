@@ -156,7 +156,6 @@ export function TalentPage() {
     }
   }, [showFilters, filters]);
 
-  // Transform talent for IndexList
   const indexListItems = talent.map((freelancer, i) => ({
     id: freelancer.id,
     index: (page - 1) * pageSize + i + 1,
@@ -167,20 +166,14 @@ export function TalentPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      {/* Hero Header */}
-      <header className="relative pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden">
-        <div className="absolute inset-0 -z-10" aria-hidden="true">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[var(--color-accent)]/3 blur-[150px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[var(--color-accent)]/2 blur-[120px] pointer-events-none" />
-        </div>
-
+      {/* Hero Header - Monochrome Swiss Grid */}
+      <header className="relative pt-16 pb-20 lg:pt-24 lg:pb-28 overflow-hidden border-b border-white/15">
         <div className="container relative">
           <div className="max-w-3xl">
             {/* Section label */}
             <div className="mb-6" style={{ opacity: 1, transform: 'translateY(0)', transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-              <span className="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-xl border-[var(--color-accent)]/30 text-sm font-medium tracking-wide uppercase">
-                <UserIcon className="w-3.5 h-3.5 text-[var(--color-accent)]" aria-hidden="true" />
-                Talent Catalog
+              <span className="font-mono text-xs text-[var(--color-text-subtle)] tracking-wider uppercase">
+                [ 02 / TALENT ARCHIVE ]
               </span>
             </div>
 
@@ -210,9 +203,9 @@ export function TalentPage() {
               Browse vetted freelancers across every specialization. Filter by skill, rate, and availability.
             </EditorialText>
 
-            {/* Search Bar */}
+            {/* Search Bar - Minimal border-bottom style */}
             <form onSubmit={handleSearch} className="relative max-w-2xl">
-              <div className="glass-card p-1.5 backdrop-blur-[20px] border-[var(--color-border)]">
+              <div className="bg-transparent border-b border-white/30 focus-within:border-white transition-colors">
                 <div className="relative">
                   <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" aria-hidden="true" />
                   <input
@@ -230,12 +223,12 @@ export function TalentPage() {
             {/* Filter Toggle + Stats */}
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
-                <span className="font-mono text-[var(--color-accent)] text-lg">{talent.length || 0}</span>
+                <span className="font-mono text-[var(--color-white)] text-lg">{talent.length || 0}</span>
                 <span>freelancers available</span>
                 {hasActiveFilters && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 glass-card rounded-xl border-[var(--color-accent)]/30">
-                    <span className="text-[var(--color-accent)] font-medium">Active filters</span>
-                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]" aria-label="Clear filters">
+                  <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent">
+                    <span className="text-[var(--color-white)] font-medium text-xs">Active filters</span>
+                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-white)]" aria-label="Clear filters">
                       <XMarkIcon className="w-4 h-4" />
                     </button>
                   </span>
@@ -245,7 +238,7 @@ export function TalentPage() {
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
                 leftIcon={<FunnelIcon className="w-4 h-4" />}
-                className="hidden sm:flex"
+                className="hidden sm:flex border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
               >
                 Filters
                 <ChevronDownIcon className="w-4 h-4" />
@@ -262,35 +255,35 @@ export function TalentPage() {
           className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${showFilters ? 'opacity-100 max-h-96' : 'opacity-0 max-h-0 pointer-events-none'}`}
           style={{ maxHeight: showFilters ? `${filtersHeight}px` : '0' }}
         >
-          <div className="border border-[var(--color-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]">
+          <div className="border border-white/15 bg-[var(--color-surface)]">
             <div className="p-6 lg:p-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
                 {/* Role Filter */}
                 <div>
-                  <label className="input-label">Role</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Role</label>
                   <Select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
                     options={roleOptions}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
 
                 {/* Skills Filter */}
                 <div>
-                  <label className="input-label">Skills</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Skills</label>
                   <Select
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
                     options={[{ value: '', label: 'All Skills' }, ...skills.map(s => ({ value: s, label: s }))]}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     multiple
                   />
                 </div>
 
                 {/* Sort Filter */}
                 <div>
-                  <label className="input-label">Sort By</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -299,20 +292,20 @@ export function TalentPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
 
                 {/* Hourly Rate Range */}
                 <div className="lg:col-span-2">
-                  <label className="input-label">Hourly Rate (USD)</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Hourly Rate (USD)</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.hourly_rate_min || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm"
+                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -320,19 +313,19 @@ export function TalentPage() {
                       placeholder="Max"
                       value={filters.hourly_rate_max || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm"
+                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     />
                   </div>
                 </div>
 
                 {/* Availability Filter */}
                 <div className="flex items-end">
-                  <label className="input-label block w-full">Availability</label>
+                  <label className="input-label text-[var(--color-text-muted)] block w-full">Availability</label>
                   <Select
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
                     options={availabilityOptions}
-                    className="mt-1.5 w-full"
+                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
               </div>
@@ -346,35 +339,35 @@ export function TalentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Mobile Filters Sidebar */}
           <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start hidden lg:block">
-            <div className="border border-[var(--color-border)] bg-[var(--glass-bg)] backdrop-blur-[20px]">
-              <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between">
+            <div className="border border-white/15 bg-[var(--color-surface)]">
+              <div className="p-6 border-b border-white/15 flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--color-text)]">Filters</h3>
-                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] p-1">
+                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)] p-1">
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
               <div className="p-6 space-y-6">
                 <div>
-                  <label className="input-label">Role</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Role</label>
                   <Select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
                     options={roleOptions}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
                 <div>
-                  <label className="input-label">Skills</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Skills</label>
                   <Select
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
                     options={[{ value: '', label: 'All Skills' }, ...skills.map(s => ({ value: s, label: s }))]}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     multiple
                   />
                 </div>
                 <div>
-                  <label className="input-label">Sort By</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Sort By</label>
                   <Select
                     value={`${filters.sort_by}:${filters.sort_order}`}
                     onChange={(e) => {
@@ -383,18 +376,18 @@ export function TalentPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
                 <div>
-                  <label className="input-label">Hourly Rate</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Hourly Rate</label>
                   <div className="mt-1.5 flex items-center gap-3">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.hourly_rate_min || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm"
+                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -402,21 +395,21 @@ export function TalentPage() {
                       placeholder="Max"
                       value={filters.hourly_rate_max || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm"
+                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="input-label">Availability</label>
+                  <label className="input-label text-[var(--color-text-muted)]">Availability</label>
                   <Select
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
                     options={availabilityOptions}
-                    className="mt-1.5 w-full"
+                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   />
                 </div>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-[var(--color-border)]">
+                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-white/15 border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black">
                     Clear All Filters
                   </Button>
                 )}
@@ -435,14 +428,14 @@ export function TalentPage() {
                 <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
                   {hasActiveFilters ? 'Try adjusting your search or filters to find more talent' : 'No freelancers available at the moment. Check back soon!'}
                 </p>
-                {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>}
+                {hasActiveFilters && <Button variant="outline" onClick={clearFilters} className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black">Clear Filters</Button>}
               </div>
             ) : (
               <>
                 {/* Desktop Results Count */}
-                <div className="hidden lg:flex items-center justify-between mb-6 pb-4 border-b border-[var(--color-border)]">
+                <div className="hidden lg:flex items-center justify-between mb-6 pb-4 border-b border-white/15">
                   <p className="text-sm text-[var(--color-text-muted)]">
-                    Showing <span className="font-mono text-[var(--color-text)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-text)] font-medium">{Math.min(page * pageSize, talent.length)}</span> of <span className="font-mono text-[var(--color-text)] font-medium">{talent.length}</span> freelancers
+                    Showing <span className="font-mono text-[var(--color-white)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-white)] font-medium">{Math.min(page * pageSize, talent.length)}</span> of <span className="font-mono text-[var(--color-white)] font-medium">{talent.length}</span> freelancers
                   </p>
                 </div>
 
@@ -462,6 +455,7 @@ export function TalentPage() {
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
                     >
                       Previous
                     </Button>
@@ -496,6 +490,7 @@ export function TalentPage() {
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       rightIcon={<ChevronDownIcon className="w-4 h-4" />}
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
                     >
                       Next
                     </Button>
@@ -510,6 +505,7 @@ export function TalentPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                     leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
                   >
                     Previous
                   </Button>
@@ -522,6 +518,7 @@ export function TalentPage() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     rightIcon={<ChevronDownIcon className="w-4 h-4" />}
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
                   >
                     Next
                   </Button>
@@ -539,9 +536,9 @@ export function TalentPage() {
           size="lg"
           onClick={() => setShowFilters(true)}
           leftIcon={<FunnelIcon className="w-5 h-5" />}
-          className="shadow-xl"
+          className="shadow-xl border-white bg-white text-black hover:bg-white/90"
         >
-          Filters {hasActiveFilters && <Badge variant="primary" size="sm" className="ml-2">Active</Badge>}
+          Filters {hasActiveFilters && <Badge className="ml-2 border-white bg-white text-black">Active</Badge>}
         </Button>
       </div>
     </div>

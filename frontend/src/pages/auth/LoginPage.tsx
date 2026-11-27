@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { AuthLayout } from '@/components/layout/Layout';
+import { CinemaMedia } from '@/components/ui/CinemaMedia';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -46,68 +46,90 @@ export function LoginPage() {
   };
 
   return (
-    <AuthLayout>
-      <div className="w-full max-w-md mx-auto">
-        <div className="text-center mb-16">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-[var(--color-text)] rounded-none flex items-center justify-center">
-              <svg className="w-6 h-6 text-[var(--color-bg)]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
-            </div>
-            <span className="font-heading font-bold text-xl text-[var(--color-text)]">FreelanceHub</span>
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-[var(--color-text)]">Sign in</h1>
-          <p className="mt-4 text-lg text-[var(--color-text-muted)]">Enter your credentials to access your account</p>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            error={errors.email?.message}
-            className="text-lg py-4"
-            {...register('email')}
-          />
-
-          <div className="relative">
-            <Input
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              autoComplete="current-password"
-              error={errors.password?.message}
-              rightIcon={
-                <button
-                  type="button"
-                  className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-                </button>
-              }
-              className="text-lg py-4 pr-12"
-              {...register('password')}
-            />
-          </div>
-
-          <Button type="submit" fullWidth size="xl" loading={isLoading} className="mt-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
+      {/* Left Side - Image + Headline */}
+      <div className="relative hidden lg:block bg-[var(--color-bg)] overflow-hidden">
+        <CinemaMedia
+          src="/media/arch-02.jpg"
+          aspectRatio={1}
+          className="w-full h-full"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/60 via-transparent to-[var(--color-bg)]/90" />
+        <div className="absolute bottom-12 left-12 right-12 z-10">
+          <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-4">
             Sign In
-          </Button>
-        </form>
-
-        <div className="mt-12 text-center">
-          <p className="text-[var(--color-text-muted)]">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] font-medium">
-              Sign up
-            </Link>
-          </p>
+          </span>
+          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(2.5rem,5vw,4rem)] max-w-xl">
+            Welcome back to the archive
+          </h1>
         </div>
       </div>
-    </AuthLayout>
+
+      {/* Right Side - Form */}
+      <div className="flex items-center justify-center p-8 lg:p-16 bg-[var(--color-bg)]">
+        <div className="w-full max-w-md">
+          <div className="mb-12">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8">
+              <span className="font-mono text-xs tracking-[0.25em] uppercase text-[var(--color-text)]">
+                FREELANCEHUB
+              </span>
+            </Link>
+            <h1 className="font-heading font-bold text-[var(--color-text)] uppercase tracking-[-0.02em] text-[clamp(2rem,4vw,3rem)] mb-4">
+              Sign in
+            </h1>
+            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em]">
+              Enter your credentials to access the archive
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <Input
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              error={errors.email?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              {...register('email')}
+            />
+
+            <div className="relative">
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                error={errors.password?.message}
+                rightIcon={
+                  <button
+                    type="button"
+                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  </button>
+                }
+                className="border-0 border-b border-white/30 bg-transparent px-0 py-3 pr-12 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+                {...register('password')}
+              />
+            </div>
+
+            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors">
+              Sign In
+            </Button>
+          </form>
+
+          <div className="mt-12 text-center">
+            <p className="text-[var(--color-text-muted)]">
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="font-medium text-[var(--color-text)] hover:underline transition-colors">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   ClockIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
 interface MessageWithMeta extends Message {
@@ -143,8 +142,6 @@ export function ChatPage() {
 
     setIsUploading(true);
     try {
-      // File upload would need a specific endpoint
-      // await api.uploadFile(projectId, file);
       toast.success('File upload coming soon');
     } catch {
       toast.error('Failed to upload file');
@@ -173,21 +170,21 @@ export function ChatPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
-        <header className="bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="border-b border-white/15">
+          <div className="container">
             <div className="flex items-center gap-4 h-16">
-              <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
+              <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors">
                 <ArrowLeftIcon className="w-6 h-6" />
               </Link>
               <div className="animate-pulse space-y-1">
-                <div className="h-4 bg-[var(--color-border)] rounded w-48" />
-                <div className="h-3 bg-[var(--color-border)] rounded w-32" />
+                <div className="h-4 bg-white/10 w-48" />
+                <div className="h-3 bg-white/10 w-32" />
               </div>
             </div>
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-accent)] border-t-transparent" />
+          <div className="w-12 h-12 border-4 border-white border-t-transparent animate-spin" />
         </main>
       </div>
     );
@@ -196,19 +193,19 @@ export function ChatPage() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
       {/* Header */}
-      <header className="bg-[var(--color-surface)] border-b border-[var(--color-border)] sticky top-16 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="border-b border-white/15 sticky top-16 z-30 bg-[var(--color-bg)]">
+        <div className="container">
           <div className="flex items-center gap-4 h-16">
-            <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
+            <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors">
               <ArrowLeftIcon className="w-6 h-6" />
             </Link>
             <div className="flex-1">
-              <h1 className="font-semibold text-[var(--color-text)]">Project Chat</h1>
-              <p className="text-sm text-[var(--color-text-muted)]">Real-time communication</p>
+              <h1 className="font-heading font-semibold text-[var(--color-text)] text-xl">Project Chat</h1>
+              <p className="font-mono text-xs text-[var(--color-text-muted)]">Real-time communication</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-[var(--color-success-muted)] text-[var(--color-success)]">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
+              <div className="flex items-center gap-2 px-3 py-1.5 font-mono text-xs text-[var(--color-text)] border border-white/15">
+                <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-white' : 'bg-[var(--color-gray-500)]'}`} />
                 {isConnected ? 'Connected' : 'Disconnected'}
               </div>
             </div>
@@ -222,11 +219,11 @@ export function ChatPage() {
         <div className="flex-1 overflow-y-auto space-y-6 pb-6" role="log" aria-live="polite">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center text-[var(--color-text-muted)]">
-              <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-16 h-16 mb-4 text-[var(--color-text-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <p className="text-lg font-medium">No messages yet</p>
-              <p className="text-sm">Start the conversation!</p>
+              <p className="font-heading font-medium text-[var(--color-text)] text-xl">No messages yet</p>
+              <p className="font-mono text-xs text-[var(--color-text-muted)]">Start the conversation!</p>
             </div>
           ) : (
             messages.map((message) => {
@@ -236,7 +233,7 @@ export function ChatPage() {
               if (isSystem) {
                 return (
                   <div key={message.id} className="flex justify-center">
-                    <div className="px-4 py-1.5 text-xs text-[var(--color-text-muted)] bg-[var(--color-surface-muted)] rounded-full">
+                    <div className="px-4 py-1.5 font-mono text-xs text-[var(--color-text-muted)] bg-white/5 border border-white/15">
                       {getSystemMessageText(message)}
                     </div>
                   </div>
@@ -249,26 +246,26 @@ export function ChatPage() {
                   className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
                 >
                   {!isOwn && (
-                    <div className="w-8 h-8 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-8 h-8 border border-white/15 flex items-center justify-center flex-shrink-0 mt-1">
                       {message.sender?.avatar_url ? (
-                        <img src={message.sender.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                        <img src={message.sender.avatar_url} alt="" className="w-8 h-8" />
                       ) : (
-                        <UserCircleIcon className="w-5 h-5 text-[var(--color-accent)]" />
+                        <UserCircleIcon className="w-5 h-5 text-[var(--color-text-muted)]" />
                       )}
                     </div>
                   )}
 
                   <div className={`max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
                     {!isOwn && (
-                      <p className="text-xs font-medium text-[var(--color-text-muted)] mb-1 ml-1">
+                      <p className="font-mono text-xs text-[var(--color-text-muted)] mb-1 ml-1">
                         {message.sender?.full_name || 'Unknown'}
                       </p>
                     )}
                     <div
-                      className={`inline-block px-4 py-2 rounded-2xl ${
+                      className={`inline-block px-4 py-2 ${
                         isOwn
-                          ? 'bg-[var(--color-accent)] text-white rounded-tr-sm'
-                          : 'bg-[var(--color-surface)] text-[var(--color-text)] rounded-tl-sm shadow-sm border border-[var(--color-border)]'
+                          ? 'bg-white text-black rounded-tr-none'
+                          : 'bg-white/5 text-white rounded-tl-none border border-white/15'
                       }`}
                     >
                       {message.attachments && message.attachments.length > 0 && (
@@ -279,12 +276,12 @@ export function ChatPage() {
                               href={att.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-sm font-medium text-[var(--color-accent)] hover:underline"
+                              className="flex items-center gap-2 font-mono text-xs text-white hover:underline"
                             >
-                              <PaperClipIcon className="w-5 h-5" />
+                              <PaperClipIcon className="w-4 h-4" />
                               {att.name}
                               {att.size && (
-                                <span className="text-xs text-[var(--color-text-muted)]">
+                                <span className="text-[var(--color-text-muted)]">
                                   ({formatFileSize(att.size)})
                                 </span>
                               )}
@@ -294,11 +291,11 @@ export function ChatPage() {
                       )}
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     </div>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-[var(--color-text-subtle)]">
+                    <div className="flex items-center gap-2 mt-1 font-mono text-xs text-[var(--color-text-subtle)]">
                       {isOwn && (
                         <>
                           {message.is_read ? (
-                            <CheckIcon className="w-4 h-4 text-[var(--color-accent)]" />
+                            <CheckIcon className="w-4 h-4 text-white" />
                           ) : (
                             <ClockIcon className="w-4 h-4" />
                           )}
@@ -319,11 +316,11 @@ export function ChatPage() {
           {/* Typing Indicator */}
           {typingUsers.size > 0 && (
             <div className="flex justify-center px-4">
-              <div className="flex items-center gap-1 px-3 py-1.5 bg-[var(--color-surface-muted)] rounded-full text-sm text-[var(--color-text-muted)]">
+              <div className="flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/15 font-mono text-xs text-[var(--color-text-muted)]">
                 <span className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-[var(--color-text-subtle)] animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
                 <span>typing...</span>
               </div>
@@ -334,7 +331,7 @@ export function ChatPage() {
         </div>
 
         {/* Message Input */}
-        <div className="bg-[var(--color-surface)] border-t border-[var(--color-border)] p-4">
+        <div className="border-t border-white/15 p-4 bg-[var(--color-bg)]">
           <form onSubmit={handleSendMessage} className="flex items-end gap-3">
             <div className="relative flex-1">
               <input
@@ -347,7 +344,7 @@ export function ChatPage() {
               />
               <label
                 htmlFor="file-upload"
-                className="absolute left-3 top-3 text-[var(--color-text-subtle)] hover:text-[var(--color-text)] cursor-pointer"
+                className="absolute left-3 top-3 text-[var(--color-text-subtle)] hover:text-white cursor-pointer transition-colors"
               >
                 <PaperClipIcon className="w-6 h-6" />
               </label>
@@ -362,15 +359,14 @@ export function ChatPage() {
                 }}
                 placeholder="Type a message..."
                 rows={1}
-                className="w-full pl-12 pr-12 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] placeholder-[var(--color-text-subtle)] resize-none focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent max-h-32"
+                className="w-full pl-12 pr-12 py-3 bg-white/5 border border-white/15 text-white placeholder-[var(--color-text-subtle)] resize-none focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent max-h-32"
                 disabled={isSending}
               />
             </div>
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
               disabled={!newMessage.trim() || isSending}
+              className="border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               aria-label="Send message"
             >
               {isSending ? (
@@ -381,10 +377,10 @@ export function ChatPage() {
               ) : (
                 <PaperAirplaneIcon className="w-5 h-5" />
               )}
-            </Button>
+            </button>
           </form>
           {isUploading && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+            <div className="mt-2 flex items-center gap-2 font-mono text-xs text-[var(--color-text-muted)]">
               <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />

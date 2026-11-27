@@ -21,12 +21,10 @@ interface ProjectDetailSearch {
 }
 
 const projectImages = [
-  '/media/projects/projects-code.jpg',
-  '/media/projects/projects-design.jpg',
-  '/media/hero/hero-main.jpg',
-  '/media/hero/hero-code.jpg',
-  '/media/bento/bento-remote-work.jpg',
-  '/media/bento/bento-escrow.jpg',
+  '/media/arch-01.jpg',
+  '/media/arch-02.jpg',
+  '/media/arch-03.jpg',
+  '/media/arch-04.jpg',
 ];
 
 function getStatusBadge(status: ProjectStatus) {
@@ -40,7 +38,7 @@ function getStatusBadge(status: ProjectStatus) {
     draft: 'Draft',
   };
   return (
-    <span className="inline-flex items-center px-3 py-1 text-sm font-medium border border-[var(--color-border)]">
+    <span className="inline-flex items-center px-3 py-1 text-sm font-medium border border-white/15">
       {labels[status] || status}
     </span>
   );
@@ -159,16 +157,16 @@ export function ProjectDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse space-y-8">
-          <div className="h-8 bg-[var(--color-border)] rounded-none w-1/4" />
+        <div className="container py-8 animate-pulse space-y-8">
+          <div className="h-8 bg-[var(--color-border)] w-1/4" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div className="h-64 bg-[var(--color-border)] rounded-none" />
-              <div className="h-32 bg-[var(--color-border)] rounded-none" />
+              <div className="h-64 bg-[var(--color-border)]" />
+              <div className="h-32 bg-[var(--color-border)]" />
             </div>
             <div className="space-y-6">
-              <div className="h-48 bg-[var(--color-border)] rounded-none" />
-              <div className="h-48 bg-[var(--color-border)] rounded-none" />
+              <div className="h-48 bg-[var(--color-border)]" />
+              <div className="h-48 bg-[var(--color-border)]" />
             </div>
           </div>
         </div>
@@ -181,7 +179,9 @@ export function ProjectDetailPage() {
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-[var(--color-text)]">Project not found</h2>
-          <Link to="/projects" className="btn-primary mt-4 inline-block">Back to Projects</Link>
+          <Link to="/projects" className="inline-flex items-center justify-center gap-2 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors mt-4">
+            Back to Projects
+          </Link>
         </div>
       </div>
     );
@@ -191,15 +191,15 @@ export function ProjectDetailPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
+          <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)]">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-[var(--color-text)]">{project.title}</h1>
+              <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(1.5rem,3vw,2.5rem)] tracking-tight">{project.title}</h1>
               {getStatusBadge(project.status)}
             </div>
             <p className="mt-2 text-[var(--color-text-muted)]">
@@ -221,21 +221,21 @@ export function ProjectDetailPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/60 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium border border-[var(--color-border)]">
+                <span className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium border border-white/15">
                   {project.is_fixed_price ? 'Fixed Price' : 'Hourly'}
                 </span>
               </div>
             </div>
 
             {/* Description */}
-            <div className="border border-[var(--color-border)] p-6">
-              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Description</h2>
+            <div className="border border-white/15 p-6">
+              <h2 className="font-heading font-semibold text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Description</h2>
               <div className="prose prose-invert max-w-none text-[var(--color-text)] whitespace-pre-wrap">
                 {project.description}
               </div>
               {project.requirements && (
-                <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-                  <h3 className="text-lg font-medium text-[var(--color-text)] mb-3">Requirements</h3>
+                <div className="mt-6 pt-6 border-t border-white/15">
+                  <h3 className="font-heading font-medium text-[var(--color-text)] mb-3">Requirements</h3>
                   <div className="prose prose-invert max-w-none text-[var(--color-text-muted)] whitespace-pre-wrap">
                     {project.requirements}
                   </div>
@@ -245,24 +245,24 @@ export function ProjectDetailPage() {
 
             {/* Details Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Budget</h3>
+              <div className="border border-white/15 p-6">
+                <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Budget</h3>
                 <div className="space-y-4">
                   {project.is_fixed_price ? (
                     <div>
                       <p className="text-sm text-[var(--color-text-muted)]">Fixed Price</p>
-                      <p className="text-2xl font-bold text-[var(--color-text)]">{formatCurrency(project.budget_min ?? 0)}</p>
+                      <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatCurrency(project.budget_min ?? 0)}</p>
                     </div>
                   ) : (
                     <>
                       <div>
                         <p className="text-sm text-[var(--color-text-muted)]">Min Budget</p>
-                        <p className="text-2xl font-bold text-[var(--color-text)]">{formatCurrency(project.budget_min ?? 0)}</p>
+                        <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatCurrency(project.budget_min ?? 0)}</p>
                       </div>
                       {project.budget_max && (
                         <div>
                           <p className="text-sm text-[var(--color-text-muted)]">Max Budget</p>
-                          <p className="text-2xl font-bold text-[var(--color-text)]">{formatCurrency(project.budget_max)}</p>
+                          <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatCurrency(project.budget_max)}</p>
                         </div>
                       )}
                     </>
@@ -270,18 +270,18 @@ export function ProjectDetailPage() {
                 </div>
               </div>
 
-              <div className="border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Timeline</h3>
+              <div className="border border-white/15 p-6">
+                <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Timeline</h3>
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-[var(--color-text-muted)]">Delivery Time</p>
-                    <p className="text-2xl font-bold text-[var(--color-text)]">
+                    <p className="font-heading font-bold text-[var(--color-text)] text-2xl">
                       {project.deadline_days ? `${project.deadline_days} days` : 'Not specified'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-[var(--color-text-muted)]">Posted</p>
-                    <p className="text-2xl font-bold text-[var(--color-text)]">{formatDate(project.created_at)}</p>
+                    <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatDate(project.created_at)}</p>
                   </div>
                 </div>
               </div>
@@ -289,13 +289,13 @@ export function ProjectDetailPage() {
 
             {/* Skills */}
             {(project.required_skills?.length || 0) > 0 && (
-              <div className="border border-[var(--color-border)] p-6">
-                <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Required Skills</h3>
+              <div className="border border-white/15 p-6">
+                <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Required Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.required_skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-3 py-1 text-sm font-mono text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)] transition-colors"
+                      className="px-3 py-1 text-sm font-mono text-[var(--color-text)] border border-white/15 hover:border-white/50 hover:text-[var(--color-white)] transition-colors"
                     >
                       {skill}
                     </span>
@@ -306,13 +306,13 @@ export function ProjectDetailPage() {
 
             {/* Bids Tab Content */}
             {activeTab === 'bids' && (
-              <div className="border border-[var(--color-border)] p-6">
+              <div className="border border-white/15 p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-[var(--color-text)]">Bids ({bids.length})</h2>
+                  <h2 className="font-heading font-semibold text-[var(--color-text)]">Bids ({bids.length})</h2>
                   {canBid && (
                     <Button
                       onClick={() => setShowBidModal(true)}
-                      className="flex items-center justify-center gap-2"
+                      className="flex items-center justify-center gap-2 border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
                     >
                       <CurrencyDollarIcon className="w-5 h-5" />
                       Place a Bid
@@ -327,7 +327,7 @@ export function ProjectDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     {bids.map((bid) => (
-                      <div key={bid.id} className="border border-[var(--color-border)] p-4">
+                      <div key={bid.id} className="border border-white/15 p-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-full bg-[var(--color-border)] flex items-center justify-center">
@@ -339,26 +339,26 @@ export function ProjectDetailPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-[var(--color-text)]">{formatCurrency(bid.amount_cents)}</p>
+                            <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatCurrency(bid.amount_cents)}</p>
                             <p className="text-sm text-[var(--color-text-muted)]">{bid.delivery_days} days delivery</p>
                           </div>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+                        <div className="mt-4 pt-4 border-t border-white/15">
                           <p className="text-[var(--color-text-muted)]">{bid.cover_letter}</p>
                         </div>
                         {isOwner && bid.status === 'pending' && (
                           <div className="mt-4 flex gap-2">
-                            <Button onClick={() => handleAcceptBid(bid.id)} size="sm">
+                            <Button onClick={() => handleAcceptBid(bid.id)} size="sm" className="border border-white px-3 py-1.5 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
                               Accept
                             </Button>
-                            <Button variant="secondary" onClick={() => handleRejectBid(bid.id)} size="sm">
+                            <Button variant="secondary" onClick={() => handleRejectBid(bid.id)} size="sm" className="border border-white/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                               Reject
                             </Button>
                           </div>
                         )}
                         {bid.freelancer_id === user?.id && bid.status === 'pending' && (
                           <div className="mt-4">
-                            <Button variant="secondary" onClick={() => handleWithdrawBid(bid.id)} size="sm" className="text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]">
+                            <Button variant="secondary" onClick={() => handleWithdrawBid(bid.id)} size="sm" className="border border-white/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                               Withdraw Bid
                             </Button>
                           </div>
@@ -374,8 +374,8 @@ export function ProjectDetailPage() {
           {/* Sidebar */}
           <aside className="space-y-6">
             {/* Client Info */}
-            <div className="border border-[var(--color-border)] p-6">
-              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Client</h3>
+            <div className="border border-white/15 p-6">
+              <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Client</h3>
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-[var(--color-border)] flex items-center justify-center overflow-hidden">
                   {project.client?.avatar_url ? (
@@ -392,8 +392,8 @@ export function ProjectDetailPage() {
             </div>
 
             {/* Project Meta */}
-            <div className="border border-[var(--color-border)] p-6">
-              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Details</h3>
+            <div className="border border-white/15 p-6">
+              <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Details</h3>
               <dl className="space-y-4">
                 <div className="flex items-center justify-between">
                   <dt className="text-sm text-[var(--color-text-muted)]">Category</dt>
@@ -429,11 +429,11 @@ export function ProjectDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="border border-[var(--color-border)] p-6">
-              <h3 className="text-lg font-medium text-[var(--color-text)] mb-4 border-b border-[var(--color-border)] pb-4">Actions</h3>
+            <div className="border border-white/15 p-6">
+              <h3 className="font-heading font-medium text-[var(--color-text)] mb-4 border-b border-white/15 pb-4">Actions</h3>
               <div className="space-y-3">
                 {canBid && (
-                  <Button onClick={() => setShowBidModal(true)} fullWidth className="flex items-center justify-center gap-2">
+                  <Button onClick={() => setShowBidModal(true)} fullWidth className="flex items-center justify-center gap-2 border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
                     <CurrencyDollarIcon className="w-5 h-5" />
                     Place a Bid
                   </Button>
@@ -444,17 +444,17 @@ export function ProjectDetailPage() {
                     params={{ projectId: String(projectId) }}
                     className="w-full"
                   >
-                    <Button variant="secondary" fullWidth className="flex items-center justify-center gap-2">
+                    <Button variant="secondary" fullWidth className="flex items-center justify-center gap-2 border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                       <ChatBubbleLeftRightIcon className="w-5 h-5" />
                       Chat
                     </Button>
                   </Link>
                 )}
-                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2">
+                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2 border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                   <ShareIcon className="w-5 h-5" />
                   Share Project
                 </Button>
-                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2 text-[var(--color-gray-500)] hover:bg-[var(--color-gray-800)]">
+                <Button variant="ghost" fullWidth className="flex items-center justify-center gap-2 border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 text-[var(--color-gray-500)]">
                   <FlagIcon className="w-5 h-5" />
                   Report Project
                 </Button>
@@ -473,7 +473,7 @@ export function ProjectDetailPage() {
           >
             <form onSubmit={handleBidSubmit} className="space-y-4">
               <div>
-                <label htmlFor="bid-price" className="input-label">Your Price (USD)</label>
+                <label htmlFor="bid-price" className="input-label text-[var(--color-text-muted)]">Your Price (USD)</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
                   <Input
@@ -481,7 +481,7 @@ export function ProjectDetailPage() {
                     type="number"
                     min="1"
                     step="1"
-                    className="pl-8"
+                    className="pl-8 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                     placeholder="500"
                     value={bidForm.price_cents}
                     onChange={(e) => setBidForm({ ...bidForm, price_cents: e.target.value })}
@@ -490,7 +490,7 @@ export function ProjectDetailPage() {
                 </div>
               </div>
               <div>
-                <label htmlFor="bid-delivery" className="input-label">Delivery Time (days)</label>
+                <label htmlFor="bid-delivery" className="input-label text-[var(--color-text-muted)]">Delivery Time (days)</label>
                 <Input
                   id="bid-delivery"
                   type="number"
@@ -500,14 +500,15 @@ export function ProjectDetailPage() {
                   value={bidForm.delivery_days}
                   onChange={(e) => setBidForm({ ...bidForm, delivery_days: e.target.value })}
                   required
+                  className="border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                 />
               </div>
               <div>
-                <label htmlFor="bid-cover" className="input-label">Cover Letter</label>
+                <label htmlFor="bid-cover" className="input-label text-[var(--color-text-muted)]">Cover Letter</label>
                 <textarea
                   id="bid-cover"
                   rows={4}
-                  className="input resize-none"
+                  className="input resize-none border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                   placeholder="Explain why you're the best fit for this project..."
                   value={bidForm.cover_letter}
                   onChange={(e) => setBidForm({ ...bidForm, cover_letter: e.target.value })}
@@ -515,20 +516,21 @@ export function ProjectDetailPage() {
                 />
               </div>
               <div>
-                <label htmlFor="bid-portfolio" className="input-label">Portfolio URLs (comma separated)</label>
+                <label htmlFor="bid-portfolio" className="input-label text-[var(--color-text-muted)]">Portfolio URLs (comma separated)</label>
                 <Input
                   id="bid-portfolio"
                   type="text"
                   placeholder="https://example.com/project1, https://example.com/project2"
                   value={bidForm.portfolio_urls}
                   onChange={(e) => setBidForm({ ...bidForm, portfolio_urls: e.target.value })}
+                  className="border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
                 />
               </div>
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="secondary" onClick={() => setShowBidModal(false)} fullWidth>
+                <Button type="button" variant="secondary" onClick={() => setShowBidModal(false)} fullWidth className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmittingBid} fullWidth>
+                <Button type="submit" disabled={isSubmittingBid} fullWidth className="border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
                   {isSubmittingBid ? 'Submitting...' : 'Submit Bid'}
                 </Button>
               </div>

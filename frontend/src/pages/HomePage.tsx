@@ -1,8 +1,6 @@
 import { HeroSection } from '@/components/sections/HeroSection';
-import { EditorialManifestoSection } from '@/components/sections/EditorialManifestoSection';
-import { CinemaReelSection } from '@/components/sections/CinemaReelSection';
+import { EditorialSplitSection } from '@/components/sections/EditorialSplitSection';
 import { InteractiveIndexSection } from '@/components/sections/InteractiveIndexSection';
-import { CTASection } from '@/components/sections/CTASection';
 import { Footer } from '@/components/sections/Footer';
 import { usePreloader } from '@/contexts/PreloaderContext';
 
@@ -12,10 +10,8 @@ export function HomePage() {
   return (
     <div className="space-y-0">
       <HeroSection isVisible={isPreloaderComplete} />
-      <EditorialManifestoSection />
-      <CinemaReelSection />
+      <EditorialSplitSection />
       <InteractiveIndexSection />
-      <CTASection />
       <Footer />
     </div>
   );

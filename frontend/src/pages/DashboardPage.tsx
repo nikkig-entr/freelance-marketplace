@@ -65,20 +65,20 @@ function StatRow({ label, value, href, icon: Icon }: {
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-center justify-between py-6 border-b border-[rgba(255,255,255,0.08)] last:border-0 transition-colors duration-200 group">
+    <div className="border border-white/15 p-6">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center">
+        <div className="w-12 h-12 border border-white/15 flex items-center justify-center">
           <Icon className="w-6 h-6 text-[var(--color-text-muted)]" />
         </div>
         <div>
-          <p className="text-sm font-medium text-[var(--color-text-muted)] tracking-wide uppercase">{label}</p>
-          <p className="font-mono text-xl font-medium text-[var(--color-text)] tabular-nums">{value}</p>
+          <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">{label}</p>
+          <p className="font-heading font-bold text-[var(--color-text)] text-2xl tabular-nums">{value}</p>
         </div>
       </div>
       {href && (
         <Link
           to={href}
-          className="flex items-center gap-1.5 text-sm text-[var(--color-text-subtle)] hover:text-[var(--color-accent)] transition-colors opacity-0 group-hover:opacity-100"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-mono text-[var(--color-text-subtle)] hover:text-[var(--color-white)] transition-colors"
         >
           View
           <ArrowRightIcon className="w-4 h-4" />
@@ -112,13 +112,9 @@ function ActivityRow({
     <div
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
-      className={`flex items-start gap-4 py-6 border-b border-[rgba(255,255,255,0.08)] last:border-0 transition-all duration-300 ${
-        isHovered
-          ? 'bg-[var(--glass-bg)] border-l-4 border-l-[var(--color-accent)] pl-6 -ml-6'
-          : ''
-      }`}
+      className={`flex items-start gap-4 py-4 border-b border-white/15 last:border-0 transition-all duration-300 ${isHovered ? 'bg-white/5' : ''}`}
     >
-      <div className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center flex-shrink-0 transition-colors duration-200">
+      <div className="w-10 h-10 border border-white/15 flex items-center justify-center flex-shrink-0 transition-colors duration-200">
         <Icon className="w-5 h-5 text-[var(--color-text-muted)]" />
       </div>
       <div className="flex-1 min-w-0">
@@ -137,7 +133,7 @@ function ActivityRow({
         {item.metadata && (
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
             {item.metadata.amount && (
-              <span className="font-mono text-[var(--color-accent)] tabular-nums">
+              <span className="font-mono text-[var(--color-text)] tabular-nums">
                 {item.metadata.amount > 0 ? '+' : ''}${(item.metadata.amount / 100).toLocaleString()}
               </span>
             )}
@@ -187,14 +183,14 @@ function EmptyState({ icon: Icon, title, description, action }: {
   action?: { label: string; href: string; variant?: 'primary' | 'outline' };
 }) {
   return (
-    <div className="py-16 text-center border border-[var(--glass-border)] rounded-2xl bg-[var(--glass-bg)]">
-      <div className="w-16 h-16 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center mx-auto mb-6">
+    <div className="py-16 text-center border border-white/15 p-6">
+      <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-6">
         <Icon className="w-8 h-8 text-[var(--color-text-subtle)]" />
       </div>
-      <h3 className="text-lg font-medium text-[var(--color-text)] mb-2">{title}</h3>
+      <h3 className="font-heading font-medium text-[var(--color-text)] mb-2">{title}</h3>
       <p className="text-[var(--color-text-muted)] mb-6 max-w-sm mx-auto">{description}</p>
       {action && (
-        <Button asChild variant={action.variant || 'primary'} size="lg">
+        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
           <Link to={action.href}>{action.label}</Link>
         </Button>
       )}
@@ -315,184 +311,184 @@ export function DashboardPage() {
   const unreadMessagesCount = messagesData?.items.filter((m: Message) => !m.is_read).length || 0;
 
   return (
-    <div className="space-y-24 lg:space-y-32">
-      {/* Welcome Header */}
-      <section className="pt-8 lg:pt-12">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <div>
-            <h1 className="text-headline-1 text-balance">
-              Welcome back, <span className="text-[var(--color-accent)]">{user.full_name?.split(' ')[0] || 'there'}</span>
-            </h1>
-            <p className="mt-3 text-body-lg text-[var(--color-text-muted)] max-w-xl">
-              {isFreelancer
-                ? 'Track your bids, messages, and project activity in one place.'
-                : 'Overview of your projects, incoming bids, and conversations.'}
-            </p>
-          </div>
-          <div className="flex gap-3 flex-wrap">
-            {isFreelancer && (
-              <Button asChild size="lg">
-                <Link to="/projects/create">
+    <div className="min-h-screen bg-[var(--color-bg)]">
+      <div className="container py-8 space-y-16 lg:space-y-24">
+        {/* Welcome Header */}
+        <section className="pt-8 lg:pt-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(2rem,4vw,3.5rem)] tracking-tight">
+                Welcome back, <span className="text-[var(--color-white)]">{user.full_name?.split(' ')[0] || 'there'}</span>
+              </h1>
+              <p className="mt-3 text-[var(--color-text-muted)] max-w-xl font-[Instrument_Serif] italic">
+                {isFreelancer
+                  ? 'Track your bids, messages, and project activity in one place.'
+                  : 'Overview of your projects, incoming bids, and conversations.'}
+              </p>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              {isFreelancer && (
+                <Button asChild size="lg" className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
                   <PlusIcon className="w-5 h-5 mr-2" />
                   Post a Project
+                </Button>
+              )}
+              <Button variant="secondary" asChild size="lg" className="border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+                <Link to="/projects">
+                  <MagnifyingGlassIcon className="w-5 h-5 mr-2" />
+                  Browse Projects
                 </Link>
               </Button>
-            )}
-            <Button variant="outline" asChild size="lg">
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section */}
+        <section>
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Overview</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatRow
+              label="Active Projects"
+              value={activeProjectsCount}
+              icon={CubeIcon}
+              href="/projects"
+            />
+            <StatRow
+              label="Pending Bids"
+              value={pendingBidsCount}
+              icon={CheckCircleIcon}
+              href="/projects"
+            />
+            <StatRow
+              label="Unread Messages"
+              value={unreadMessagesCount}
+              icon={ChatBubbleLeftRightIcon}
+              href="/projects"
+            />
+            <StatRow
+              label="Available Balance"
+              value={`$${(displayBalance.balance_cents / 100).toLocaleString()}`}
+              icon={CurrencyDollarIcon}
+              href="/balance"
+            />
+          </div>
+        </section>
+
+        {/* Activity Feed Section */}
+        <section>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] border-b border-white/15 pb-4">Recent Activity</h2>
+            <Button variant="ghost" asChild size="sm" className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text-subtle)] hover:text-[var(--color-white)]">
+              <Link to="/projects">View all</Link>
+            </Button>
+          </div>
+
+          <div className="border border-white/15 overflow-hidden">
+            <ActivityList
+              activities={activities.slice(0, 10)}
+              hoveredId={hoveredActivityId}
+              onHover={setHoveredActivityId}
+              onLeave={() => setHoveredActivityId(null)}
+            />
+          </div>
+
+          {activities.length === 0 && (
+            <EmptyState
+              icon={CubeIcon}
+              title="No activity yet"
+              description={isClient
+                ? 'Create your first project to start receiving bids and messages.'
+                : 'Browse projects and submit bids to see activity here.'}
+              action={{
+                label: isClient ? 'Create Project' : 'Browse Projects',
+                href: isClient ? '/projects/create' : '/projects',
+                variant: isClient ? 'primary' : 'outline',
+              }}
+            />
+          )}
+        </section>
+
+        {/* Quick Actions Section */}
+        <section>
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+              <Link to="/projects/create">
+                <PlusIcon className="w-6 h-6 mr-3" />
+                <span className="font-medium">Post a Project</span>
+              </Link>
+            </Button>
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
               <Link to="/projects">
-                <MagnifyingGlassIcon className="w-5 h-5 mr-2" />
-                Browse Projects
+                <MagnifyingGlassIcon className="w-6 h-6 mr-3" />
+                <span className="font-medium">Browse Projects</span>
+              </Link>
+            </Button>
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+              <Link to="/projects">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 mr-3" />
+                <span className="font-medium">Messages</span>
+              </Link>
+            </Button>
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+              <Link to="/balance">
+                <CurrencyDollarIcon className="w-6 h-6 mr-3" />
+                <span className="font-medium">Balance</span>
               </Link>
             </Button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Stats Section */}
-      <section className="border-t border-[rgba(255,255,255,0.08)] pt-24 lg:pt-32">
-        <h2 className="text-headline-4 mb-12 lg:mb-16">Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          <StatRow
-            label="Active Projects"
-            value={activeProjectsCount}
-            icon={CubeIcon}
-            href="/projects"
-          />
-          <StatRow
-            label="Pending Bids"
-            value={pendingBidsCount}
-            icon={CheckCircleIcon}
-            href="/projects"
-          />
-          <StatRow
-            label="Unread Messages"
-            value={unreadMessagesCount}
-            icon={ChatBubbleLeftRightIcon}
-            href="/projects"
-          />
-          <StatRow
-            label="Available Balance"
-            value={`$${(displayBalance.balance_cents / 100).toLocaleString()}`}
-            icon={CurrencyDollarIcon}
-            href="/balance"
-          />
-        </div>
-      </section>
-
-      {/* Activity Feed Section */}
-      <section className="border-t border-[rgba(255,255,255,0.08)] pt-24 lg:pt-32">
-        <div className="flex items-center justify-between mb-12 lg:mb-16">
-          <h2 className="text-headline-4">Recent Activity</h2>
-          <Button variant="ghost" asChild size="sm">
-            <Link to="/projects">View all</Link>
-          </Button>
-        </div>
-
-        <div className="border border-[rgba(255,255,255,0.08)] rounded-2xl overflow-hidden bg-[var(--glass-bg)]">
-          <ActivityList
-            activities={activities.slice(0, 10)}
-            hoveredId={hoveredActivityId}
-            onHover={setHoveredActivityId}
-            onLeave={() => setHoveredActivityId(null)}
-          />
-        </div>
-
-        {activities.length === 0 && (
-          <EmptyState
-            icon={CubeIcon}
-            title="No activity yet"
-            description={isClient
-              ? 'Create your first project to start receiving bids and messages.'
-              : 'Browse projects and submit bids to see activity here.'}
-            action={{
-              label: isClient ? 'Create Project' : 'Browse Projects',
-              href: isClient ? '/projects/create' : '/projects',
-              variant: isClient ? 'primary' : 'outline',
-            }}
-          />
-        )}
-      </section>
-
-      {/* Quick Actions Section */}
-      <section className="border-t border-[rgba(255,255,255,0.08)] pt-24 lg:pt-32">
-        <h2 className="text-headline-4 mb-12 lg:mb-16">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Button variant="outline" fullWidth asChild size="lg" className="py-6">
-            <Link to="/projects/create">
-              <PlusIcon className="w-6 h-6 mr-3" />
-              <span className="font-medium">Post a Project</span>
-            </Link>
-          </Button>
-          <Button variant="outline" fullWidth asChild size="lg" className="py-6">
-            <Link to="/projects">
-              <MagnifyingGlassIcon className="w-6 h-6 mr-3" />
-              <span className="font-medium">Browse Projects</span>
-            </Link>
-          </Button>
-          <Button variant="outline" fullWidth asChild size="lg" className="py-6">
-            <Link to="/projects">
-              <ChatBubbleLeftRightIcon className="w-6 h-6 mr-3" />
-              <span className="font-medium">Messages</span>
-            </Link>
-          </Button>
-          <Button variant="outline" fullWidth asChild size="lg" className="py-6">
-            <Link to="/balance">
-              <CurrencyDollarIcon className="w-6 h-6 mr-3" />
-              <span className="font-medium">Balance</span>
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Plan Info Section */}
-      <section className="border-t border-[rgba(255,255,255,0.08)] pt-24 lg:pt-32 pb-8 lg:pb-12">
-        <h2 className="text-headline-4 mb-12 lg:mb-16">Your Plan</h2>
-        <div className="max-w-2xl">
-          <div className="border border-[rgba(255,255,255,0.08)] rounded-2xl bg-[var(--glass-bg)] p-8 lg:p-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
-              <div>
-                <p className="text-sm font-medium text-[var(--color-text-muted)] tracking-wide uppercase">Current Plan</p>
-                <p className="mt-1 font-mono text-3xl font-bold text-[var(--color-text)] tabular-nums capitalize">{user.plan}</p>
+        {/* Plan Info Section */}
+        <section className="pb-8 lg:pb-12">
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Your Plan</h2>
+          <div className="max-w-2xl">
+            <div className="border border-white/15 p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+                <div>
+                  <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Current Plan</p>
+                  <p className="mt-1 font-heading font-bold text-[var(--color-text)] text-3xl tabular-nums capitalize">{user.plan}</p>
+                </div>
+                {user.plan !== 'agency' && (
+                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+                    <Link to="/billing">Upgrade Plan</Link>
+                  </Button>
+                )}
               </div>
-              {user.plan !== 'agency' && (
-                <Button variant="outline" asChild size="lg" className="whitespace-nowrap">
-                  <Link to="/billing">Upgrade Plan</Link>
-                </Button>
-              )}
-            </div>
-            <div className="border-t border-[rgba(255,255,255,0.08)] pt-8">
-              <ul className="space-y-4">
-                <li className="flex items-center gap-4">
-                  <CheckCircleIcon className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0" />
-                  <span className="text-[var(--color-text-muted)]">
-                    {user.plan === 'starter' ? '5 bids per week' : user.plan === 'pro' ? '50 bids per week' : 'Unlimited bids'}
-                  </span>
-                </li>
-                <li className="flex items-center gap-4">
-                  {user.plan !== 'starter' && (
-                    <>
-                      <CheckCircleIcon className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0" />
-                      <span className="text-[var(--color-text-muted)]">AI-powered tools</span>
-                    </>
-                  )}
-                  {user.plan === 'starter' && (
-                    <>
-                      <span className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-[var(--color-text-subtle)]">AI-powered tools (Pro+)</span>
-                    </>
-                  )}
-                </li>
-                <li className="flex items-center gap-4">
-                  <CheckCircleIcon className="w-5 h-5 text-[var(--color-accent)] flex-shrink-0" />
-                  <span className="text-[var(--color-text-muted)]">
-                    {user.plan === 'starter' ? '5% platform fee' : user.plan === 'pro' ? '3% platform fee' : '1% platform fee'}
-                  </span>
-                </li>
-              </ul>
+              <div className="border-t border-white/15 pt-8">
+                <ul className="space-y-4">
+                  <li className="flex items-center gap-4">
+                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                    <span className="text-[var(--color-text-muted)]">
+                      {user.plan === 'starter' ? '5 bids per week' : user.plan === 'pro' ? '50 bids per week' : 'Unlimited bids'}
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-4">
+                    {user.plan !== 'starter' && (
+                      <>
+                        <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                        <span className="text-[var(--color-text-muted)]">AI-powered tools</span>
+                      </>
+                    )}
+                    {user.plan === 'starter' && (
+                      <>
+                        <span className="w-5 h-5 flex-shrink-0" />
+                        <span className="text-[var(--color-text-subtle)]">AI-powered tools (Pro+)</span>
+                      </>
+                    )}
+                  </li>
+                  <li className="flex items-center gap-4">
+                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                    <span className="text-[var(--color-text-muted)]">
+                      {user.plan === 'starter' ? '5% platform fee' : user.plan === 'pro' ? '3% platform fee' : '1% platform fee'}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

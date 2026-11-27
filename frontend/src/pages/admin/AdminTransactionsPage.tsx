@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, CalendarIcon, CurrencyDollarIcon, UserCircleIcon, CreditCardIcon, BanknotesIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { adminService } from '@/services/api';
 import { TransactionType, Transaction } from '@/types';
@@ -52,15 +49,15 @@ const TYPE_FILTERS = [
   { value: 'referral_bonus', label: 'Referral Bonuses' },
 ];
 
-const BADGE_VARIANTS: Record<string, 'primary' | 'secondary' | 'outline' | 'danger'> = {
-  deposit: 'primary',
-  bid_bonus: 'primary',
-  referral_bonus: 'primary',
-  withdrawal: 'secondary',
-  platform_fee: 'secondary',
-  project_payment: 'outline',
-  project_refund: 'secondary',
-  subscription_payment: 'outline',
+const BADGE_BORDER_VARIANTS: Record<string, string> = {
+  deposit: 'border-white',
+  bid_bonus: 'border-white',
+  referral_bonus: 'border-white',
+  withdrawal: 'border-white/15',
+  platform_fee: 'border-white/15',
+  project_payment: 'border-white/15',
+  project_refund: 'border-white/15',
+  subscription_payment: 'border-white/15',
 };
 
 export function AdminTransactionsPage() {
@@ -102,8 +99,8 @@ export function AdminTransactionsPage() {
     }
   };
 
-  const getTypeBadgeVariant = (type: TransactionType): 'primary' | 'secondary' | 'outline' | 'danger' => {
-    return BADGE_VARIANTS[type] || 'outline';
+  const getTypeBadgeBorder = (type: TransactionType): string => {
+    return BADGE_BORDER_VARIANTS[type] || 'border-white/15';
   };
 
   const handleExport = () => {
@@ -114,9 +111,9 @@ export function AdminTransactionsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-[var(--color-bg)] container py-8">
         <div className="text-center py-16">
-          <div className="w-8 h-8 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-4 text-[var(--color-text-muted)]">Loading transactions...</p>
         </div>
       </div>
@@ -125,34 +122,41 @@ export function AdminTransactionsPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <Card>
-          <div className="text-center py-12">
-            <p className="text-[var(--color-accent)]">Failed to load transactions</p>
-            <Button variant="outline" className="mt-4" onClick={() => refetch()}>Retry</Button>
-          </div>
-        </Card>
+      <div className="min-h-screen bg-[var(--color-bg)] container py-8">
+        <div className="border border-white/15 p-12 text-center">
+          <p className="text-white">Failed to load transactions</p>
+          <button
+            onClick={() => refetch()}
+            className="border border-white/15 mt-4 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[var(--color-bg)] container py-8 space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Transactions</h1>
-          <p className="text-[var(--color-text-muted)]">View and manage all platform transactions</p>
+          <h1 className="font-heading font-bold text-[var(--color-text)] text-3xl">Transactions</h1>
+          <p className="text-[var(--color-text-muted)] font-[Instrument_Serif] italic">View and manage all platform transactions</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" leftIcon={<ArrowDownTrayIcon className="w-5 h-5" />} onClick={handleExport}>
+          <button
+            onClick={handleExport}
+            className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors flex items-center gap-2"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5" />
             Export CSV
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <div className="border border-white/15 p-4">
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
           <div className="relative flex-1 max-w-md">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-subtle)]" />
@@ -162,13 +166,18 @@ export function AdminTransactionsPage() {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               onKeyDown={(e) => e.key === 'Enter' && setPage(1)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-[var(--color-border)] focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent text-[var(--color-text)] placeholder-[var(--color-text-subtle)] bg-[var(--color-bg)]"
+              className="w-full pl-10 pr-4 py-3 bg-transparent border border-white/15 text-white placeholder-[var(--color-text-subtle)] focus:ring-2 focus:ring-white focus:border-transparent"
             />
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Dropdown
-              trigger={<Button variant="outline" leftIcon={<FunnelIcon className="w-4 h-4" />}>Type: {typeFilter ? TYPE_FILTERS.find(f => f.value === typeFilter)?.label : 'All'}</Button>}
+              trigger={
+                <button className="border border-white/15 px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors flex items-center gap-2">
+                  <FunnelIcon className="w-4 h-4" />
+                  Type: {typeFilter ? TYPE_FILTERS.find(f => f.value === typeFilter)?.label : 'All'}
+                </button>
+              }
               items={TYPE_FILTERS.map(f => ({
                 label: f.label,
                 onClick: () => { setTypeFilter(f.value); setPage(1); },
@@ -191,7 +200,12 @@ export function AdminTransactionsPage() {
             />
 
             <Dropdown
-              trigger={<Button variant="outline" leftIcon={<CalendarIcon className="w-4 h-4" />}>{sortBy === 'created_at' ? 'Date' : 'Amount'} {sortOrder === 'asc' ? '↑' : '↓'}</Button>}
+              trigger={
+                <button className="border border-white/15 px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" />
+                  {sortBy === 'created_at' ? 'Date' : 'Amount'} {sortOrder === 'asc' ? '↑' : '↓'}
+                </button>
+              }
               items={[
                 { label: 'Date ↓', onClick: () => { setSortBy('created_at'); setSortOrder('desc'); } },
                 { label: 'Date ↑', onClick: () => { setSortBy('created_at'); setSortOrder('asc'); } },
@@ -201,21 +215,21 @@ export function AdminTransactionsPage() {
             />
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Transactions Table */}
-      <Card>
+      <div className="border border-white/15 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-sm text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
-                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-[var(--color-text)]" onClick={() => handleSort('created_at')}>
+              <tr className="border-b border-white/15 text-left text-sm font-mono text-[var(--color-text-muted)] tracking-wider uppercase">
+                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-white" onClick={() => handleSort('created_at')}>
                   Date {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="pb-3 pr-4 font-medium">User</th>
                 <th className="pb-3 pr-4 font-medium">Type</th>
                 <th className="pb-3 pr-4 font-medium">Description</th>
-                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-[var(--color-text)] text-right" onClick={() => handleSort('amount_cents')}>
+                <th className="pb-3 pr-4 font-medium cursor-pointer hover:text-white text-right" onClick={() => handleSort('amount_cents')}>
                   Amount {sortBy === 'amount_cents' && (sortOrder === 'asc' ? '↑' : '↓')}
                 </th>
                 <th className="pb-3 pr-4 font-medium">Balance After</th>
@@ -223,21 +237,21 @@ export function AdminTransactionsPage() {
                 <th className="pb-3 font-medium">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-border)]">
+            <tbody className="divide-y divide-white/15">
               {transactions.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-[var(--color-surface-muted)] flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-4">
                       <CurrencyDollarIcon className="w-8 h-8 text-[var(--color-text-subtle)]" />
                     </div>
                     <p className="text-[var(--color-text-muted)]">No transactions found</p>
-                    <p className="text-sm text-[var(--color-text-subtle)] mt-1">Try adjusting your filters</p>
+                    <p className="font-mono text-xs text-[var(--color-text-subtle)] mt-1">Try adjusting your filters</p>
                   </td>
                 </tr>
               ) : (
                 transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-[var(--color-surface-muted)] transition-colors">
-                    <td className="py-4 pr-4 text-[var(--color-text)] whitespace-nowrap">
+                  <tr key={transaction.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-4 pr-4 text-[var(--color-text)] whitespace-nowrap font-mono">
                       {formatDate(transaction.created_at)}
                     </td>
                     <td className="py-4 pr-4">
@@ -245,7 +259,7 @@ export function AdminTransactionsPage() {
                         <UserCircleIcon className="w-5 h-5 text-[var(--color-text-subtle)]" />
                         <div>
                           <p className="font-medium text-[var(--color-text)]">User #{transaction.user_id}</p>
-                          <p className="text-xs text-[var(--color-text-subtle)]">ID: {transaction.uuid.slice(0, 8)}</p>
+                          <p className="font-mono text-xs text-[var(--color-text-subtle)]">ID: {transaction.uuid.slice(0, 8)}</p>
                         </div>
                       </div>
                     </td>
@@ -255,29 +269,32 @@ export function AdminTransactionsPage() {
                           const Icon = TRANSACTION_TYPE_ICONS[transaction.type];
                           return <Icon className="w-4 h-4 text-[var(--color-text-subtle)]" />;
                         })()}
-                        <Badge variant={getTypeBadgeVariant(transaction.type)} size="sm">
+                        <span className={`inline-flex items-center px-3 py-1 text-sm font-mono text-[var(--color-text)] ${getTypeBadgeBorder(transaction.type)}`}>
                           {TRANSACTION_TYPE_LABELS[transaction.type]}
-                        </Badge>
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 pr-4 text-[var(--color-text-muted)] max-w-xs truncate" title={transaction.description || ''}>
                       {transaction.description || '—'}
                     </td>
-                    <td className="py-4 pr-4 text-right font-medium text-[var(--color-text)]">
+                    <td className="py-4 pr-4 text-right font-mono font-medium text-[var(--color-text)]">
                       {formatCurrency(transaction.amount_cents)}
                     </td>
-                    <td className="py-4 pr-4 text-right text-[var(--color-text-muted)]">
+                    <td className="py-4 pr-4 text-right text-[var(--color-text-muted)] font-mono">
                       {formatCurrency(transaction.balance_after_cents)}
                     </td>
                     <td className="py-4 pr-4">
-                      <Badge variant={transaction.is_completed ? 'primary' : 'secondary'} size="sm">
+                      <span className={`inline-flex items-center px-3 py-1 text-sm font-mono ${transaction.is_completed ? 'border-white' : 'border-white/15'} text-[var(--color-text)]`}>
                         {transaction.is_completed ? 'Completed' : 'Pending'}
-                      </Badge>
+                      </span>
                     </td>
                     <td className="py-4">
-                      <Button variant="ghost" size="sm" onClick={() => window.open(`/admin/transactions/${transaction.id}`, '_blank')}>
+                      <button
+                        onClick={() => window.open(`/admin/transactions/${transaction.id}`, '_blank')}
+                        className="border border-white/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors"
+                      >
                         View
-                      </Button>
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -288,32 +305,40 @@ export function AdminTransactionsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-[var(--color-text-muted)]">
+          <div className="px-6 py-4 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="font-mono text-xs text-[var(--color-text-muted)]">
               Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, total)} of {total} transactions
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={pageSize}
                 onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="px-3 py-1 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent bg-[var(--color-bg)]"
+                className="px-3 py-2 bg-transparent border border-white/15 text-white focus:ring-2 focus:ring-white focus:border-transparent font-mono text-xs"
               >
                 <option value={10}>10 per page</option>
                 <option value={25}>25 per page</option>
                 <option value={50}>50 per page</option>
                 <option value={100}>100 per page</option>
               </select>
-              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Previous
-              </Button>
-              <span className="px-3 text-sm text-[var(--color-text-muted)]">Page {page} of {totalPages}</span>
-              <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+              </button>
+              <span className="px-3 font-mono text-xs text-[var(--color-text-muted)]">Page {page} of {totalPages}</span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Next
-              </Button>
+              </button>
             </div>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

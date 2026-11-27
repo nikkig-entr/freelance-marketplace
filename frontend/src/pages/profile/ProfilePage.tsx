@@ -62,13 +62,9 @@ function ActivityRow({
     <div
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
-      className={`flex items-start gap-4 py-4 border-b border-[var(--color-border)] last:border-0 transition-all duration-300 ${
-        isHovered
-          ? 'bg-[var(--glass-bg)] border-l-4 border-l-[var(--color-accent)] pl-4 -ml-4'
-          : ''
-      }`}
+      className={`flex items-start gap-4 py-4 border-b border-white/15 last:border-0 transition-all duration-300 ${isHovered ? 'bg-white/5' : ''}`}
     >
-      <div className="w-10 h-10 rounded-none bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center flex-shrink-0 transition-colors duration-200">
+      <div className="w-10 h-10 border border-white/15 flex items-center justify-center flex-shrink-0 transition-colors duration-200">
         <Icon className="w-5 h-5 text-[var(--color-text-muted)]" />
       </div>
       <div className="flex-1 min-w-0">
@@ -146,11 +142,11 @@ function EmptyState({ icon: Icon, title, description }: {
   description: string;
 }) {
   return (
-    <div className="py-16 text-center border border-[var(--color-border)] p-6">
-      <div className="w-16 h-16 rounded-none bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center mx-auto mb-6">
+    <div className="py-16 text-center border border-white/15 p-6">
+      <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-6">
         <Icon className="w-8 h-8 text-[var(--color-text-subtle)]" />
       </div>
-      <h3 className="text-lg font-medium text-[var(--color-text)] mb-2">{title}</h3>
+      <h3 className="font-heading font-medium text-[var(--color-text)] mb-2">{title}</h3>
       <p className="text-[var(--color-text-muted)] max-w-sm mx-auto">{description}</p>
     </div>
   );
@@ -160,24 +156,24 @@ function ProjectCardItem({ project }: { project: Project }) {
   return (
     <Link
       to="/projects"
-      className="p-6 border border-[var(--color-border)] transition-all duration-200 hover:border-[var(--color-accent)]/50 hover:bg-[var(--glass-bg)] group"
+      className="p-6 border border-white/15 transition-all duration-200 hover:border-white/30 hover:bg-white/5 group"
     >
-      <h4 className="font-semibold text-[var(--color-text)] mb-2 line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors">{project.title}</h4>
+      <h4 className="font-medium text-[var(--color-text)] mb-2 line-clamp-1 group-hover:text-[var(--color-white)] transition-colors">{project.title}</h4>
       <p className="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-2">{project.description}</p>
       <div className="flex flex-wrap gap-1.5 mb-4">
         {(project.tags || []).slice(0, 3).map((skill) => (
-          <span key={skill} className="px-2 py-0.5 text-xs font-mono text-[var(--color-text-subtle)] border border-[var(--color-border)]">
+          <span key={skill} className="px-2 py-0.5 text-xs font-mono text-[var(--color-text-subtle)] border border-white/15">
             {skill}
           </span>
         ))}
         {project.tags && project.tags.length > 3 && (
-          <span className="px-2 py-0.5 text-xs font-mono text-[var(--color-text-subtle)] border border-[var(--color-border)]">
+          <span className="px-2 py-0.5 text-xs font-mono text-[var(--color-text-subtle)] border border-white/15">
             +{project.tags.length - 3} more
           </span>
         )}
       </div>
       <div className="flex items-center justify-between text-sm">
-        <span className="font-mono text-[var(--color-accent)] tabular-nums">
+        <span className="font-mono text-[var(--color-text)] tabular-nums">
           {project.budget_min ? formatCurrency(project.budget_min) : 'Negotiable'}
         </span>
         <time className="text-[var(--color-text-subtle)]" dateTime={project.completed_at || project.updated_at}>
@@ -189,12 +185,10 @@ function ProjectCardItem({ project }: { project: Project }) {
 }
 
 const profileImages = [
-  '/media/hero/hero-main.jpg',
-  '/media/hero/hero-code.jpg',
-  '/media/projects/projects-code.jpg',
-  '/media/projects/projects-design.jpg',
-  '/media/bento/bento-remote-work.jpg',
-  '/media/bento/bento-escrow.jpg',
+  '/media/arch-01.jpg',
+  '/media/arch-02.jpg',
+  '/media/arch-03.jpg',
+  '/media/arch-04.jpg',
 ];
 
 export function ProfilePage() {
@@ -265,13 +259,13 @@ export function ProfilePage() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 animate-pulse space-y-12 lg:space-y-16">
-          <div className="aspect-video bg-[var(--color-border)]" />
+          <div className="aspect-video bg-white/10" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="h-12 bg-[var(--color-border)]" />
-            <div className="h-12 bg-[var(--color-border)]" />
-            <div className="h-12 bg-[var(--color-border)]" />
+            <div className="h-12 bg-white/10" />
+            <div className="h-12 bg-white/10" />
+            <div className="h-12 bg-white/10" />
           </div>
-          <div className="h-64 bg-[var(--color-border)]" />
+          <div className="h-64 bg-white/10" />
         </div>
       </div>
     );
@@ -281,9 +275,11 @@ export function ProfilePage() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center py-16 lg:py-24">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-[var(--color-text)]">Profile not found</h2>
+          <h2 className="font-heading font-bold text-[var(--color-text)] text-2xl">Profile not found</h2>
           <Link to="/projects" className="inline-block mt-6">
-            <Button variant="primary">Browse Projects</Button>
+            <Button className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
+              Browse Projects
+            </Button>
           </Link>
         </div>
       </div>
@@ -360,19 +356,19 @@ export function ProfilePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)] via-[var(--color-bg)]/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
-            <div className="max-w-4xl mx-auto">
+            <div className="container">
               <div className="flex items-start gap-4 mb-8 lg:mb-12">
                 <Link to="/projects" className="text-white/70 hover:text-white transition-colors shrink-0">
                   <ArrowLeftIcon className="w-6 h-6" />
                 </Link>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">{profile.full_name || 'Unnamed User'}</h1>
-                    <span className="px-3 py-1 text-sm font-medium border border-white/30 text-white">
+                    <h1 className="font-heading font-bold text-[var(--color-white)] text-3xl sm:text-4xl tracking-tight">{profile.full_name || 'Unnamed User'}</h1>
+                    <span className="px-3 py-1 text-sm font-mono font-medium border border-white/30 text-white">
                       {profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                     </span>
                     {profile.is_verified && (
-                      <span className="flex items-center gap-1.5 px-3 py-1 text-sm border border-white/30 text-white">
+                      <span className="flex items-center gap-1.5 px-3 py-1 text-sm font-mono border border-white/30 text-white">
                         <ShieldCheckIcon className="w-4 h-4" />
                         Verified
                       </span>
@@ -382,8 +378,7 @@ export function ProfilePage() {
                 </div>
                 {!isOwnProfile && profile.role === 'freelancer' && (
                   <Button
-                    variant="outline"
-                    className="bg-white text-[var(--color-black)] hover:bg-white/90 px-6 py-3 whitespace-nowrap shrink-0"
+                    className="bg-white text-black hover:bg-white/90 px-6 py-3 whitespace-nowrap shrink-0 border border-white font-mono text-xs uppercase tracking-[0.2em]"
                     onClick={handleHire}
                   >
                     Hire Now
@@ -393,23 +388,23 @@ export function ProfilePage() {
 
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
-                <div className="bg-white/10 rounded-none p-5 lg:p-6 backdrop-blur-sm border border-white/10">
-                  <p className="text-white/60 text-sm font-medium tracking-wide uppercase">Rating</p>
-                  <p className="mt-1 text-3xl sm:text-4xl font-bold flex items-center gap-1.5">
+                <div className="bg-white/10 border border-white/10 p-5 lg:p-6">
+                  <p className="text-white/60 font-mono text-xs tracking-wider uppercase">Rating</p>
+                  <p className="mt-1 font-heading font-bold text-white text-3xl sm:text-4xl flex items-center gap-1.5">
                     {profile.rating || 0} <StarIcon className="w-6 h-6" />
                   </p>
                 </div>
-                <div className="bg-white/10 rounded-none p-5 lg:p-6 backdrop-blur-sm border border-white/10">
-                  <p className="text-white/60 text-sm font-medium tracking-wide uppercase">Reviews</p>
-                  <p className="mt-1 text-3xl sm:text-4xl font-bold font-mono tabular-nums">{profile.reviews_count || 0}</p>
+                <div className="bg-white/10 border border-white/10 p-5 lg:p-6">
+                  <p className="text-white/60 font-mono text-xs tracking-wider uppercase">Reviews</p>
+                  <p className="mt-1 font-heading font-bold text-white text-3xl sm:text-4xl font-mono tabular-nums">{profile.reviews_count || 0}</p>
                 </div>
-                <div className="bg-white/10 rounded-none p-5 lg:p-6 backdrop-blur-sm border border-white/10">
-                  <p className="text-white/60 text-sm font-medium tracking-wide uppercase">Completed</p>
-                  <p className="mt-1 text-3xl sm:text-4xl font-bold font-mono tabular-nums">{profile.completed_projects || 0}</p>
+                <div className="bg-white/10 border border-white/10 p-5 lg:p-6">
+                  <p className="text-white/60 font-mono text-xs tracking-wider uppercase">Completed</p>
+                  <p className="mt-1 font-heading font-bold text-white text-3xl sm:text-4xl font-mono tabular-nums">{profile.completed_projects || 0}</p>
                 </div>
-                <div className="bg-white/10 rounded-none p-5 lg:p-6 backdrop-blur-sm border border-white/10">
-                  <p className="text-white/60 text-sm font-medium tracking-wide uppercase">Member Since</p>
-                  <p className="mt-1 text-xl sm:text-2xl font-bold font-mono tabular-nums">{formatDate(profile.created_at).split(' ').slice(1).join(' ')}</p>
+                <div className="bg-white/10 border border-white/10 p-5 lg:p-6">
+                  <p className="text-white/60 font-mono text-xs tracking-wider uppercase">Member Since</p>
+                  <p className="mt-1 font-heading font-bold text-white text-xl sm:text-2xl font-mono tabular-nums">{formatDate(profile.created_at).split(' ').slice(1).join(' ')}</p>
                 </div>
               </div>
             </div>
@@ -417,11 +412,11 @@ export function ProfilePage() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 -mt-8 lg:-mt-12 relative z-10">
+      <div className="container py-16 lg:py-24 -mt-8 lg:-mt-12 relative z-10">
         {/* Profile Card */}
-        <div className="border border-[var(--color-border)] p-6 lg:p-8 mb-12 lg:mb-16">
+        <div className="border border-white/15 p-6 lg:p-8 mb-12 lg:mb-16">
           <div className="flex flex-col md:flex-row md:items-start gap-8">
-            <div className="w-28 h-28 rounded-full bg-[var(--color-border)] flex items-center justify-center flex-shrink-0 overflow-hidden border border-[var(--glass-border)]">
+            <div className="w-28 h-28 border border-white/15 flex items-center justify-center flex-shrink-0 overflow-hidden">
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
               ) : (
@@ -431,7 +426,7 @@ export function ProfilePage() {
             <div className="flex-1 md:flex md:items-center md:justify-between">
               <div>
                 {profile.bio && (
-                  <p className="text-body-lg text-[var(--color-text-muted)] mb-6 max-w-2xl">{profile.bio}</p>
+                  <p className="font-[Instrument_Serif] italic text-[var(--color-text-muted)] text-lg mb-6 max-w-2xl">{profile.bio}</p>
                 )}
                 <div className="flex flex-wrap items-center gap-4 lg:gap-6 text-sm text-[var(--color-text-muted)]">
                   {profile.location && (
@@ -441,7 +436,7 @@ export function ProfilePage() {
                     </span>
                   )}
                   {profile.website && (
-                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--color-accent)] transition-colors">
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-white transition-colors">
                       <GlobeAltIcon className="w-4 h-4" />
                       Website
                     </a>
@@ -459,7 +454,7 @@ export function ProfilePage() {
                 </div>
               </div>
               {isOwnProfile && (
-                <Button variant="outline" asChild size="lg" className="whitespace-nowrap mt-4 md:mt-0 md:ml-8">
+                <Button variant="secondary" asChild size="lg" className="whitespace-nowrap mt-4 md:mt-0 md:ml-8 border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
                   <Link to="/settings">Edit Profile</Link>
                 </Button>
               )}
@@ -467,13 +462,13 @@ export function ProfilePage() {
           </div>
 
           {(profile.skills || []).length > 0 && (
-            <div className="mt-8 lg:mt-10 pt-8 lg:pt-10 border-t border-[var(--color-border)]">
-              <h3 className="font-medium text-[var(--color-text)] mb-4 tracking-wide uppercase text-sm">Skills</h3>
+            <div className="mt-8 lg:mt-10 pt-8 lg:pt-10 border-t border-white/15">
+              <h3 className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-4">Skills</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="px-3 py-1.5 text-sm font-mono text-[var(--color-text)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)] transition-colors"
+                    className="px-3 py-1.5 text-sm font-mono text-[var(--color-text)] border border-white/15 hover:border-white/30 hover:text-white transition-colors"
                   >
                     {skill}
                   </span>
@@ -484,8 +479,8 @@ export function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="border border-[var(--color-border)]">
-          <nav className="border-b border-[var(--color-border)]" aria-label="Profile tabs">
+        <div className="border border-white/15">
+          <nav className="border-b border-white/15" aria-label="Profile tabs">
             <ul className="flex flex-wrap -mb-px" role="tablist">
               {tabs.map((tab) => (
                 <li key={tab.id} role="presentation">
@@ -495,8 +490,8 @@ export function ProfilePage() {
                     aria-selected={activeTab === tab.id}
                     className={`flex items-center gap-2 px-6 py-5 text-sm font-medium border-b-2 transition-all duration-200 ${
                       activeTab === tab.id
-                        ? 'border-[var(--color-accent)] text-[var(--color-accent)]'
-                        : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-[var(--color-text-muted)] hover:text-white hover:border-white/15'
                     }`}
                   >
                     <tab.icon className="w-5 h-5" />
@@ -512,15 +507,15 @@ export function ProfilePage() {
               <div className="space-y-10 lg:space-y-12">
                 {profile.role === 'freelancer' && (
                   <div>
-                    <h3 className="font-semibold text-[var(--color-text)] mb-5 tracking-wide uppercase text-sm">Availability</h3>
+                    <h3 className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-5">Availability</h3>
                     <div className="flex items-center gap-3">
                       <span
-                        className={`px-4 py-2 text-sm font-medium rounded-none border transition-colors ${
+                        className={`px-4 py-2 text-sm font-medium border transition-colors ${
                           profile.availability === 'available'
-                            ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-[var(--color-accent)]/30'
+                            ? 'bg-white/10 text-white border-white/30'
                             : profile.availability === 'busy'
-                            ? 'bg-[var(--color-gray-700)]/50 text-[var(--color-gray-400)] border-[var(--color-gray-600)]'
-                            : 'bg-[var(--glass-bg)] text-[var(--color-text-muted)] border-[var(--glass-border)]'
+                            ? 'bg-white/5 text-[var(--color-text-muted)] border-white/15'
+                            : 'bg-white/5 text-[var(--color-text-muted)] border-white/15'
                         }`}
                       >
                         {profile.availability === 'available' ? 'Available for work' :
@@ -531,22 +526,22 @@ export function ProfilePage() {
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold text-[var(--color-text)] mb-5 tracking-wide uppercase text-sm">Account Details</h3>
+                  <h3 className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-5">Account Details</h3>
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <dt className="text-sm text-[var(--color-text-muted)] tracking-wide uppercase">Role</dt>
+                      <dt className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Role</dt>
                       <dd className="mt-1 font-mono text-[var(--color-text)] capitalize">{profile.role}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm text-[var(--color-text-muted)] tracking-wide uppercase">Plan</dt>
+                      <dt className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Plan</dt>
                       <dd className="mt-1 font-mono text-[var(--color-text)] capitalize">{profile.plan}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm text-[var(--color-text-muted)] tracking-wide uppercase">Email Verified</dt>
+                      <dt className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Email Verified</dt>
                       <dd className="mt-1 font-mono text-[var(--color-text)]">{profile.is_verified ? 'Yes' : 'No'}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm text-[var(--color-text-muted)] tracking-wide uppercase">Identity Verified</dt>
+                      <dt className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Identity Verified</dt>
                       <dd className="mt-1 font-mono text-[var(--color-text)]">{profile.is_verified ? 'Yes' : 'No'}</dd>
                     </div>
                   </dl>
@@ -583,12 +578,12 @@ export function ProfilePage() {
                 ) : (
                   <div className="space-y-6">
                     {reviews.map((review) => (
-                      <div key={review.id} className="p-6 border border-[var(--color-border)]">
+                      <div key={review.id} className="p-6 border border-white/15">
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-[var(--color-border)] flex items-center justify-center border border-[var(--glass-border)]">
+                            <div className="w-12 h-12 border border-white/15 flex items-center justify-center">
                               {review.reviewer?.avatar_url ? (
-                                <img src={review.reviewer.avatar_url} alt="" className="w-12 h-12 rounded-full" loading="lazy" />
+                                <img src={review.reviewer.avatar_url} alt="" className="w-12 h-12" loading="lazy" />
                               ) : (
                                 <ShieldCheckIcon className="w-6 h-6 text-[var(--color-text-muted)]" />
                               )}
@@ -598,7 +593,7 @@ export function ProfilePage() {
                               <p className="text-sm text-[var(--color-text-muted)] font-mono">{formatDate(review.created_at)}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-[var(--color-accent)]">
+                          <div className="flex items-center gap-1 text-white">
                             {[...Array(5)].map((_, i) => (
                               <StarIcon
                                 key={i}
@@ -621,7 +616,7 @@ export function ProfilePage() {
 
             {activeTab === 'activity' && (
               <div>
-                <div className="border border-[var(--color-border)] overflow-hidden bg-[var(--glass-bg)]">
+                <div className="border border-white/15 overflow-hidden bg-white/5">
                   <ActivityList
                     activities={activities.slice(0, 20)}
                     hoveredId={hoveredActivityId}
@@ -652,13 +647,13 @@ export function ProfilePage() {
         >
           <div className="space-y-4">
             <p className="text-[var(--color-text-muted)]">Send a message to discuss your project requirements.</p>
-            <Button variant="primary" fullWidth asChild onClick={() => setShowContactModal(false)}>
+            <Button asChild fullWidth className="border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black" onClick={() => setShowContactModal(false)}>
               <Link to="/projects">
                 <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2 inline" />
                 Start Chat
               </Link>
             </Button>
-            <Button variant="secondary" fullWidth onClick={() => setShowContactModal(false)}>
+            <Button variant="secondary" fullWidth onClick={() => setShowContactModal(false)} className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
               Cancel
             </Button>
           </div>

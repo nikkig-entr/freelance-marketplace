@@ -3,7 +3,6 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { projectService } from '@/services/api';
 import { ArrowLeftIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { BriefcaseIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CreateProjectForm {
@@ -106,32 +105,29 @@ export function CreateProjectPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container py-8 max-w-3xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
+        <div className="flex items-center gap-4 mb-12">
+          <Link to="/projects" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">Create New Project</h1>
-            <p className="mt-1 text-[var(--color-text-muted)]">Fill in the details below to post your project</p>
+            <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(2rem,4vw,3rem)] tracking-tight">Create New Project</h1>
+            <p className="mt-1 text-[var(--color-text-muted)] font-[Instrument_Serif] italic">Fill in the details below to post your project</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
           {/* Basic Info */}
-          <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-[var(--color-text)] flex items-center gap-2">
-              <BriefcaseIcon className="w-5 h-5 text-[var(--color-accent)]" />
-              Project Details
-            </h2>
+          <div className="border border-white/15 p-6 lg:p-8 space-y-8">
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2vw,1.5rem)] tracking-tight border-b border-white/15 pb-4">Project Details</h2>
 
             <div>
-              <label htmlFor="title" className="label">Project Title *</label>
+              <label htmlFor="title" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Project Title *</label>
               <input
                 id="title"
                 type="text"
-                className={`input ${errors.title ? 'input-error' : ''}`}
+                className={`w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white ${errors.title ? 'border-[var(--color-gray-500)]' : ''}`}
                 placeholder="e.g., Build a React Native mobile app"
                 {...register('title', {
                   required: 'Title is required',
@@ -139,14 +135,14 @@ export function CreateProjectPage() {
                   maxLength: { value: 255, message: 'Title must be less than 255 characters' },
                 })}
               />
-              {errors.title && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.title.message}</p>}
+              {errors.title && <p className="mt-1 font-mono text-xs text-[var(--color-gray-500)]">{errors.title.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="category_id" className="label">Category</label>
+              <label htmlFor="category_id" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Category</label>
               <select
                 id="category_id"
-                className={`input ${errors.category_id ? 'input-error' : ''}`}
+                className={`w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg appearance-none text-[var(--color-text)] focus:ring-0 focus:border-white ${errors.category_id ? 'border-[var(--color-gray-500)]' : ''}`}
                 {...register('category_id', { valueAsNumber: true })}
               >
                 <option value="">Select a category</option>
@@ -157,28 +153,28 @@ export function CreateProjectPage() {
             </div>
 
             <div>
-              <label htmlFor="description" className="label">Description *</label>
+              <label htmlFor="description" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Description *</label>
               <textarea
                 id="description"
                 rows={6}
-                className={`input resize-none ${errors.description ? 'input-error' : ''}`}
+                className={`w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white resize-none ${errors.description ? 'border-[var(--color-gray-500)]' : ''}`}
                 placeholder="Describe your project in detail. What do you need built? What are the goals?"
                 {...register('description', {
                   required: 'Description is required',
                   minLength: { value: 50, message: 'Description must be at least 50 characters' },
                 })}
               />
-              {errors.description && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.description.message}</p>}
+              {errors.description && <p className="mt-1 font-mono text-xs text-[var(--color-gray-500)]">{errors.description.message}</p>}
               {suggestedSkills.length > 0 && (
-                <div className="mt-3 p-3 bg-[var(--color-accent-muted)] rounded-lg border border-[var(--color-accent)]/20">
-                  <p className="text-sm font-medium text-[var(--color-accent)] mb-2">AI Suggested Skills:</p>
+                <div className="mt-4 p-4 border border-white/15 bg-white/5">
+                  <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-3">AI Suggested Skills:</p>
                   <div className="flex flex-wrap gap-2">
                     {suggestedSkills.map((skill) => (
                       <button
                         key={skill}
                         type="button"
                         onClick={() => addSuggestedSkill(skill)}
-                        className="badge badge-primary cursor-pointer hover:bg-[var(--color-accent)]/20"
+                        className="px-3 py-1.5 text-sm font-mono text-[var(--color-text)] border border-white/15 hover:border-white/30 hover:text-white hover:bg-white/5 transition-colors"
                       >
                         + {skill}
                       </button>
@@ -189,44 +185,44 @@ export function CreateProjectPage() {
             </div>
 
             <div>
-              <label htmlFor="requirements" className="label">Requirements (Optional)</label>
+              <label htmlFor="requirements" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Requirements (Optional)</label>
               <textarea
                 id="requirements"
                 rows={4}
-                className="input resize-none"
+                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white resize-none"
                 placeholder="Any specific requirements, technologies, or constraints?"
                 {...register('requirements')}
               />
             </div>
 
             <div>
-              <label className="label">Skills Required</label>
+              <label className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Skills Required</label>
               <input
                 id="skills"
                 type="text"
-                className="input"
+                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
                 placeholder="React, TypeScript, Node.js, PostgreSQL (comma separated)"
                 {...register('skills')}
               />
-              <p className="mt-1 text-sm text-[var(--color-text-muted)]">Separate skills with commas</p>
+              <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">Separate skills with commas</p>
             </div>
           </div>
 
           {/* Budget & Timeline */}
-          <div className="card p-6 space-y-6">
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">Budget & Timeline</h2>
+          <div className="border border-white/15 p-6 lg:p-8 space-y-8">
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2vw,1.5rem)] tracking-tight border-b border-white/15 pb-4">Budget & Timeline</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="budget_min" className="label">Minimum Budget (USD) *</label>
+                <label htmlFor="budget_min" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Minimum Budget (USD) *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] font-mono">$</span>
                   <input
                     id="budget_min"
                     type="number"
                     min="10"
                     step="10"
-                    className={`input pl-8 ${errors.budget_min ? 'input-error' : ''}`}
+                    className={`w-full border-0 border-b border-white/30 bg-transparent pl-8 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white ${errors.budget_min ? 'border-[var(--color-gray-500)]' : ''}`}
                     placeholder="500"
                     {...register('budget_min', {
                       required: 'Minimum budget is required',
@@ -234,24 +230,24 @@ export function CreateProjectPage() {
                     })}
                   />
                 </div>
-                {errors.budget_min && <p className="mt-1 text-sm text-[var(--color-accent)]">{errors.budget_min.message}</p>}
+                {errors.budget_min && <p className="mt-1 font-mono text-xs text-[var(--color-gray-500)]">{errors.budget_min.message}</p>}
               </div>
 
               <div>
-                <label htmlFor="budget_max" className="label">Maximum Budget (USD)</label>
+                <label htmlFor="budget_max" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Maximum Budget (USD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] font-mono">$</span>
                   <input
                     id="budget_max"
                     type="number"
                     min="10"
                     step="10"
-                    className="input pl-8"
+                    className="w-full border-0 border-b border-white/30 bg-transparent pl-8 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
                     placeholder="1000"
                     {...register('budget_max')}
                   />
                 </div>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">Leave empty for fixed price</p>
+                <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">Leave empty for fixed price</p>
               </div>
             </div>
 
@@ -259,36 +255,36 @@ export function CreateProjectPage() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border)] rounded focus:ring-2 focus:ring-[var(--color-accent)]"
+                  className="w-4 h-4 border border-white/30 bg-transparent text-white focus:ring-2 focus:ring-white"
                   {...register('is_fixed_price')}
                 />
-                <span className="text-sm text-[var(--color-text-muted)]">Fixed price project (not hourly)</span>
+                <span className="font-mono text-xs text-[var(--color-text-muted)]">Fixed price project (not hourly)</span>
               </label>
             </div>
 
             <div>
-              <label htmlFor="deadline_days" className="label">Deadline (days)</label>
+              <label htmlFor="deadline_days" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Deadline (days)</label>
               <input
                 id="deadline_days"
                 type="number"
                 min="1"
                 max="365"
-                className="input"
+                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
                 placeholder="14"
                 {...register('deadline_days', { valueAsNumber: true })}
               />
-              <p className="mt-1 text-sm text-[var(--color-text-muted)]">Optional: Number of days to complete the project</p>
+              <p className="mt-1 font-mono text-xs text-[var(--color-text-muted)]">Optional: Number of days to complete the project</p>
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-4">
-            <Link to="/projects" className="btn-secondary">
+            <Link to="/projects" className="border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors">
               Cancel
             </Link>
-            <button type="submit" disabled={isLoading} className="btn-primary flex items-center gap-2">
+            <button type="submit" disabled={isLoading} className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors flex items-center gap-2">
               {isLoading ? (
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-black" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>

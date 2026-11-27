@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCardIcon, CheckCircleIcon, InformationCircleIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Modal, ConfirmModal } from '@/components/ui/Modal';
 import { billingService } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -115,90 +112,90 @@ export function BillingPage() {
   const currentPlan = user.plan;
   const isProOrAgency = currentPlan === 'pro' || currentPlan === 'agency';
 
-  const getPlanColor = (plan: string) => {
-    switch (plan) {
-      case 'starter':
-        return 'text-[var(--color-text-muted)] bg-[var(--color-surface-muted)]';
-      case 'pro':
-      case 'agency':
-        return 'text-[var(--color-accent)] bg-[var(--color-accent-muted)]';
-      default:
-        return 'text-[var(--color-text-muted)] bg-[var(--color-surface-muted)]';
-    }
-  };
-
-  const getStatusBadgeVariant = (status: string): 'primary' | 'secondary' | 'outline' | 'danger' => {
+  const getStatusBorder = (status: string): string => {
     switch (status) {
       case 'paid':
-        return 'primary';
+        return 'border-white';
       case 'pending':
-        return 'secondary';
+        return 'border-white/15';
       case 'failed':
-        return 'danger';
+        return 'border-white';
       default:
-        return 'secondary';
+        return 'border-white/15';
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--color-bg)] container py-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-heading font-bold text-[var(--color-text)]">Billing & Subscription</h1>
-        <p className="mt-1 text-[var(--color-text-muted)]">Manage your plan, payment methods, and billing history</p>
+        <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(2rem,4vw,3rem)] tracking-tight">Billing & Subscription</h1>
+        <p className="mt-1 text-[var(--color-text-muted)] font-[Instrument_Serif] italic">Manage your plan, payment methods, and billing history</p>
       </div>
 
       {/* Current Plan */}
-      <Card>
-        <CardTitle title="Current Plan" subtitle={`You're on the ${currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} plan`} />
-        <div className="flex items-center justify-between p-6 rounded-xl bg-[var(--color-surface-muted)]">
+      <div className="border border-white/15 p-6">
+        <div className="mb-6">
+          <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Current Plan</p>
+          <p className="font-heading font-semibold text-[var(--color-text)] text-xl mt-1">You're on the {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)} plan</p>
+        </div>
+        <div className="flex items-center justify-between p-6 border border-white/15">
           <div className="flex items-center gap-4">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${getPlanColor(currentPlan)}`}>
-              <CurrencyDollarIcon className="w-8 h-8" />
+            <div className="w-16 h-16 border border-white/15 flex items-center justify-center">
+              <CurrencyDollarIcon className="w-8 h-8 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[var(--color-text)] capitalize">{currentPlan}</p>
-              <p className="text-[var(--color-text-muted)]">
+              <p className="font-heading font-bold text-[var(--color-text)] text-2xl capitalize">{currentPlan}</p>
+              <p className="font-mono text-xs text-[var(--color-text-muted)]">
                 {currentPlan === 'starter' ? 'Free forever' : billingInterval === 'year' ? 'Billed yearly' : 'Billed monthly'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {isProOrAgency && (
-              <Button variant="outline" onClick={() => portalMutation.mutate()}>
+              <button
+                onClick={() => portalMutation.mutate()}
+                className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors"
+              >
                 Manage in Portal
-              </Button>
+              </button>
             )}
           </div>
         </div>
 
         {/* Subscription Status */}
         {isProOrAgency && (
-          <div className="mt-4 p-4 rounded-xl bg-[var(--color-surface-muted)]">
+          <div className="mt-4 p-4 border border-white/15">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--color-success-muted)] flex items-center justify-center">
-                  <CheckCircleIcon className="w-5 h-5 text-[var(--color-success)]" />
+                <div className="w-8 h-8 border border-white flex items-center justify-center">
+                  <CheckCircleIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="font-medium text-[var(--color-text)]">Active Subscription</p>
-                  <p className="text-sm text-[var(--color-text-muted)]">
+                  <p className="font-mono text-xs text-[var(--color-text-muted)]">
                     Manage your subscription in the billing portal
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setShowCancelModal(true)}>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors"
+              >
                 Cancel Plan
-              </Button>
+              </button>
             </div>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Plans Comparison */}
-      <Card>
-        <CardTitle title="Available Plans" subtitle="Choose the plan that fits your needs" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="border border-white/15 p-6">
+        <div className="mb-6">
+          <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Available Plans</p>
+          <p className="font-heading font-semibold text-[var(--color-text)] text-xl mt-1">Choose the plan that fits your needs</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {(['starter', 'pro', 'agency'] as const).map((plan) => {
             const price = PLAN_PRICES[plan];
             const features = PLAN_FEATURES[plan];
@@ -208,27 +205,27 @@ export function BillingPage() {
             return (
               <div
                 key={plan}
-                className={`relative rounded-2xl p-6 border-2 transition-all ${
+                className={`relative rounded-none p-6 border-2 transition-all ${
                   isCurrent
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-muted)] shadow-[var(--shadow-lg)]'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-md)]'
+                    ? 'border-white bg-white/5'
+                    : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/5'
                 }`}
               >
                 {isCurrent && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge variant="primary" size="sm">Current Plan</Badge>
+                    <span className="border border-white px-3 py-1 font-mono text-xs uppercase tracking-[0.2em]">Current Plan</span>
                   </div>
                 )}
                 <div className="text-center mb-6">
-                  <p className="text-lg font-medium text-[var(--color-text-muted)] capitalize">{plan}</p>
+                  <p className="font-heading font-medium text-[var(--color-text-muted)] capitalize text-lg">{plan}</p>
                   <div className="mt-2 flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-[var(--color-text)]">
+                    <span className="font-heading font-bold text-[var(--color-text)] text-4xl">
                       {price.monthly === 0 ? 'Free' : `$${(billingInterval === 'year' ? price.yearly : price.monthly) / 100}`}
                     </span>
-                    <span className="text-[var(--color-text-muted)]">/{billingInterval === 'year' ? 'year' : 'month'}</span>
+                    <span className="font-mono text-xs text-[var(--color-text-muted)]">/{billingInterval === 'year' ? 'year' : 'month'}</span>
                   </div>
                   {price.yearly > 0 && (
-                    <p className="text-sm text-[var(--color-success)] mt-1">
+                    <p className="font-mono text-xs text-white mt-1">
                       {billingInterval === 'month' ? `Save ${Math.round((1 - price.yearly / (price.monthly * 12)) * 100)}% yearly` : 'Best value'}
                     </p>
                   )}
@@ -237,28 +234,32 @@ export function BillingPage() {
                 <ul className="space-y-3 mb-6">
                   {features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <CheckCircleIcon className="w-5 h-5 text-[var(--color-success)] flex-shrink-0 mt-0.5" />
+                      <CheckCircleIcon className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
                       <span className="text-[var(--color-text-muted)]">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <Button
-                  variant={isCurrent ? 'outline' : isUpgrade ? 'primary' : 'outline'}
-                  fullWidth
-                  loading={subscribeMutation.isPending}
+                <button
                   onClick={() => isCurrent ? null : subscribeMutation.mutate({ plan, interval: billingInterval })}
-                  disabled={isCurrent}
+                  disabled={isCurrent || subscribeMutation.isPending}
+                  className={`w-full py-3 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
+                    isCurrent
+                      ? 'border border-white/15 hover:bg-white/10'
+                      : isUpgrade
+                        ? 'border border-white hover:bg-white hover:text-black'
+                        : 'border border-white/15 hover:bg-white/10'
+                  }`}
                 >
-                  {isCurrent ? 'Current Plan' : isUpgrade ? 'Upgrade' : 'Downgrade'}
-                </Button>
+                  {subscribeMutation.isPending ? 'Processing...' : isCurrent ? 'Current Plan' : isUpgrade ? 'Upgrade' : 'Downgrade'}
+                </button>
               </div>
             );
           })}
         </div>
 
         {/* Billing Interval Toggle */}
-        <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+        <div className="pt-6 border-t border-white/15">
           <div className="flex items-center justify-center gap-4">
             <span className={`font-medium ${billingInterval === 'month' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
               Monthly
@@ -270,29 +271,32 @@ export function BillingPage() {
                 onChange={(e) => setBillingInterval(e.target.checked ? 'year' : 'month')}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[var(--color-border)] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[var(--color-accent)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[var(--color-bg)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--color-bg)] after:border after:border-[var(--color-border)] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
+              <div className="w-11 h-6 border border-white/15 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-white rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-white/15 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white"></div>
             </label>
             <span className={`font-medium ${billingInterval === 'year' ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
               Yearly
-              {PLAN_PRICES.pro.yearly > 0 && <Badge variant="primary" size="sm" className="ml-1">Save 20%</Badge>}
+              {PLAN_PRICES.pro.yearly > 0 && <span className="border border-white ml-1 px-2 py-0.5 font-mono text-xs uppercase tracking-[0.2em]">Save 20%</span>}
             </span>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Billing History */}
-      <Card>
-        <CardTitle title="Billing History" subtitle="Your invoices and receipts" />
+      <div className="border border-white/15 p-6">
+        <div className="mb-6">
+          <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Billing History</p>
+          <p className="font-heading font-semibold text-[var(--color-text)] text-xl mt-1">Your invoices and receipts</p>
+        </div>
         {invoicesLoading ? (
           <div className="text-center py-8">
-            <div className="w-8 h-8 border-4 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-4 text-[var(--color-text-muted)]">Loading invoices...</p>
           </div>
         ) : invoices && invoices.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-[var(--color-text-subtle)] border-b border-[var(--color-border)]">
+                <tr className="border-b border-white/15 text-left text-sm font-mono text-[var(--color-text-muted)] tracking-wider uppercase">
                   <th className="pb-3 font-medium">Date</th>
                   <th className="pb-3 font-medium">Description</th>
                   <th className="pb-3 font-medium text-right">Amount</th>
@@ -300,19 +304,21 @@ export function BillingPage() {
                   <th className="pb-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/15">
                 {invoices.map((invoice: Invoice) => (
-                  <tr key={invoice.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-muted)]">
-                    <td className="py-4 text-[var(--color-text)]">{new Date(invoice.created_at).toLocaleDateString()}</td>
+                  <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-4 font-mono text-[var(--color-text)]">{new Date(invoice.created_at).toLocaleDateString()}</td>
                     <td className="py-4 text-[var(--color-text-muted)]">{invoice.description || `Invoice #${invoice.id}`}</td>
-                    <td className="py-4 text-right font-medium text-[var(--color-text)]">${(invoice.amount_cents / 100).toFixed(2)}</td>
+                    <td className="py-4 text-right font-mono font-medium text-[var(--color-text)]">${(invoice.amount_cents / 100).toFixed(2)}</td>
                     <td className="py-4 text-right">
-                      <Badge variant={getStatusBadgeVariant(invoice.status)} size="sm">
+                      <span className={`inline-flex items-center px-3 py-1 text-sm font-mono text-[var(--color-text)] ${getStatusBorder(invoice.status)}`}>
                         {invoice.status}
-                      </Badge>
+                      </span>
                     </td>
                     <td className="py-4 text-right">
-                      <Button variant="ghost" size="sm">Download</Button>
+                      <button className="border border-white/15 px-3 py-1.5 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors">
+                        Download
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -321,44 +327,57 @@ export function BillingPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full bg-[var(--color-surface-muted)] flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-4">
               <CurrencyDollarIcon className="w-8 h-8 text-[var(--color-text-subtle)]" />
             </div>
             <p className="text-[var(--color-text-muted)] mb-4">No billing history yet</p>
-            <p className="text-sm text-[var(--color-text-subtle)]">Your invoices will appear here after your first payment</p>
+            <p className="font-mono text-xs text-[var(--color-text-subtle)]">Your invoices will appear here after your first payment</p>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Payment Methods */}
-      <Card>
-        <CardTitle title="Payment Methods" subtitle="Manage your saved payment methods" />
+      <div className="border border-white/15 p-6">
+        <div className="mb-6">
+          <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Payment Methods</p>
+          <p className="font-heading font-semibold text-[var(--color-text)] text-xl mt-1">Manage your saved payment methods</p>
+        </div>
         <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-full bg-[var(--color-surface-muted)] flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-4">
             <CreditCardIcon className="w-8 h-8 text-[var(--color-text-subtle)]" />
           </div>
           <p className="text-[var(--color-text-muted)] mb-4">Payment methods are managed through Stripe</p>
-          <Button variant="outline" leftIcon={<CreditCardIcon className="w-4 h-4" />} onClick={() => portalMutation.mutate()}>
+          <button
+            onClick={() => portalMutation.mutate()}
+            className="border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors flex items-center gap-2 mx-auto"
+          >
+            <CreditCardIcon className="w-4 h-4" />
             Manage Payment Methods
-          </Button>
+          </button>
         </div>
-      </Card>
+      </div>
 
       {/* Stripe Portal Modal */}
       {showPortalModal && portalUrl && (
         <Modal isOpen={showPortalModal} onClose={() => setShowPortalModal(false)} title="Billing Portal" size="lg">
           <div className="text-center py-4">
-            <InformationCircleIcon className="w-12 h-12 text-[var(--color-accent)] mx-auto mb-4" />
+            <InformationCircleIcon className="w-12 h-12 text-white mx-auto mb-4" />
             <p className="text-[var(--color-text-muted)] mb-6">
               You'll be redirected to Stripe's secure billing portal to manage your subscription, payment methods, and billing details.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button variant="primary" onClick={() => window.open(portalUrl, '_blank')}>
+              <button
+                onClick={() => window.open(portalUrl, '_blank')}
+                className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
+              >
                 Open Billing Portal
-              </Button>
-              <Button variant="outline" onClick={() => setShowPortalModal(false)}>
+              </button>
+              <button
+                onClick={() => setShowPortalModal(false)}
+                className="border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 transition-colors"
+              >
                 Close
-              </Button>
+              </button>
             </div>
           </div>
         </Modal>

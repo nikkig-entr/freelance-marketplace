@@ -16,8 +16,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import toast from 'react-hot-toast';
 
@@ -102,7 +100,7 @@ export function WithdrawalPage() {
 
   const onSubmit = async (data: WithdrawalForm) => {
     const amountCents = Math.round(parseFloat(data.amount_cents) * 100);
-    if (!amountCents || amountCents < 1000) { // $10 minimum
+    if (!amountCents || amountCents < 1000) {
       toast.error('Minimum withdrawal amount is $10.00');
       return;
     }
@@ -140,7 +138,6 @@ export function WithdrawalPage() {
       });
       toast.success('Withdrawal request submitted!');
       setShowSuccessModal(true);
-      // Reset form
       setValue('amount_cents', '');
       setValue('bank_account_name', '');
       setValue('bank_account_number', '');
@@ -168,6 +165,7 @@ export function WithdrawalPage() {
               id="bank_account_name"
               type="text"
               error={errors.bank_account_name?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('bank_account_name', { required: 'Account name is required' })}
             />
             <Input
@@ -175,6 +173,7 @@ export function WithdrawalPage() {
               id="bank_account_number"
               type="text"
               error={errors.bank_account_number?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('bank_account_number', { required: 'Account number is required' })}
             />
             <Input
@@ -182,12 +181,14 @@ export function WithdrawalPage() {
               id="bank_routing_number"
               type="text"
               error={errors.bank_routing_number?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('bank_routing_number', { required: 'Routing number is required' })}
             />
             <Input
               label="SWIFT/BIC (for international)"
               id="bank_swift_bic"
               type="text"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('bank_swift_bic')}
             />
           </div>
@@ -200,9 +201,10 @@ export function WithdrawalPage() {
               id="stripe_email"
               type="email"
               error={errors.stripe_email?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('stripe_email', { required: 'Email is required' })}
             />
-            <p className="text-sm text-[var(--color-text-muted)]">Make sure your Stripe account is connected in Settings</p>
+            <p className="font-mono text-xs text-[var(--color-text-muted)]">Make sure your Stripe account is connected in Settings</p>
           </div>
         );
       case 'crypto':
@@ -214,13 +216,14 @@ export function WithdrawalPage() {
               type="text"
               placeholder="0x..."
               error={errors.crypto_address?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('crypto_address', { required: 'Wallet address is required' })}
             />
             <div>
-              <label htmlFor="crypto_network" className="label">Network *</label>
+              <label htmlFor="crypto_network" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Network *</label>
               <select
                 id="crypto_network"
-                className="input"
+                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg appearance-none text-[var(--color-text)] focus:ring-0 focus:border-white"
                 {...register('crypto_network', { required: 'Network is required' })}
               >
                 <option value="">Select network</option>
@@ -230,9 +233,9 @@ export function WithdrawalPage() {
                 <option value="arbitrum">Arbitrum</option>
                 <option value="optimism">Optimism</option>
               </select>
-              {errors.crypto_network && <p className="mt-1 text-sm text-[var(--color-error)]">{errors.crypto_network.message}</p>}
+              {errors.crypto_network && <p className="mt-1 font-mono text-xs text-[var(--color-gray-500)]">{errors.crypto_network.message}</p>}
             </div>
-            <p className="text-sm text-[var(--color-text-muted)]">Only USDC/USDT stablecoins supported. Minimum $10.</p>
+            <p className="font-mono text-xs text-[var(--color-text-muted)]">Only USDC/USDT stablecoins supported. Minimum $10.</p>
           </div>
         );
       case 'paypal':
@@ -243,9 +246,10 @@ export function WithdrawalPage() {
               id="paypal_email"
               type="email"
               error={errors.paypal_email?.message}
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('paypal_email', { required: 'Email is required' })}
             />
-            <p className="text-sm text-[var(--color-text-muted)]">Funds will be sent to this PayPal account</p>
+            <p className="font-mono text-xs text-[var(--color-text-muted)]">Funds will be sent to this PayPal account</p>
           </div>
         );
       default:
@@ -253,23 +257,15 @@ export function WithdrawalPage() {
     }
   };
 
-  const getStatusBadgeVariant = (status: Withdrawal['status']): 'primary' | 'secondary' | 'outline' | 'danger' => {
-    switch (status) {
-      case 'pending':
-        return 'secondary';
-      case 'processing':
-        return 'primary';
-      case 'completed':
-        return 'primary';
-      case 'failed':
-      case 'cancelled':
-        return 'danger';
-      default:
-        return 'secondary';
-    }
+  const getStatusBadge = (status: Withdrawal['status']) => {
+    return (
+      <span className="inline-flex items-center px-3 py-1 text-sm font-mono text-[var(--color-text)] border border-white/15">
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </span>
+    );
   };
 
-  const commissionRate = 0.05; // 5%
+  const commissionRate = 0.05;
   const amountCents = amount ? Math.round(parseFloat(amount) * 100) : 0;
   const commissionCents = Math.round(amountCents * commissionRate);
   const netCents = amountCents - commissionCents;
@@ -277,51 +273,49 @@ export function WithdrawalPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container py-8 max-w-3xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/balance" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)]">
+        <div className="flex items-center gap-4 mb-12">
+          <Link to="/balance" className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors">
             <ArrowLeftIcon className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-[var(--color-text)]">Withdraw Funds</h1>
-            <p className="mt-1 text-[var(--color-text-muted)]">Transfer your earnings to your preferred payment method</p>
+            <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(2rem,4vw,3rem)] tracking-tight">Withdraw Funds</h1>
+            <p className="mt-1 text-[var(--color-text-muted)] font-[Instrument_Serif] italic">Transfer your earnings to your preferred payment method</p>
           </div>
         </div>
 
         {/* Available Balance */}
-        <Card padding="lg" className="mb-8 gradient-border-accent">
+        <div className="border border-white/15 p-6 lg:p-8 mb-10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[var(--color-text-muted)]">Available Balance</p>
-              <p className="text-3xl font-bold text-[var(--color-text)] mt-1">
-                {formatCurrency(userBalance)}
-              </p>
+              <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Available Balance</p>
+              <p className="font-heading font-bold text-[var(--color-text)] text-3xl mt-1">{formatCurrency(userBalance)}</p>
             </div>
-            <div className="w-16 h-16 bg-[var(--color-accent-muted)] rounded-xl flex items-center justify-center">
-              <CurrencyDollarIcon className="w-8 h-8 text-[var(--color-accent)]" />
+            <div className="w-16 h-16 border border-white/15 flex items-center justify-center">
+              <CurrencyDollarIcon className="w-8 h-8 text-white" />
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Withdrawal Form */}
-        <Card padding="lg" className="mb-8">
-          <h2 className="text-lg font-semibold text-[var(--color-text)] mb-6">New Withdrawal</h2>
+        <div className="border border-white/15 p-6 lg:p-8 mb-10">
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2vw,1.5rem)] tracking-tight mb-8 border-b border-white/15 pb-4">New Withdrawal</h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Amount */}
             <div>
-              <label htmlFor="amount" className="label">Amount (USD) *</label>
+              <label htmlFor="amount" className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">Amount (USD) *</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)]">$</span>
-                <Input
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] font-mono">$</span>
+                <input
                   id="amount"
                   type="number"
                   min="10"
                   max={userBalance / 100 || 10000}
                   step="0.01"
                   placeholder="50.00"
-                  error={errors.amount_cents?.message}
+                  className={`w-full border-0 border-b border-white/30 bg-transparent pl-8 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white ${errors.amount_cents ? 'border-[var(--color-gray-500)]' : ''}`}
                   {...register('amount_cents', {
                     required: 'Amount is required',
                     min: { value: 10, message: 'Minimum withdrawal is $10.00' },
@@ -329,37 +323,38 @@ export function WithdrawalPage() {
                   })}
                 />
               </div>
+              {errors.amount_cents && <p className="mt-1 font-mono text-xs text-[var(--color-gray-500)]">{errors.amount_cents.message}</p>}
             </div>
 
             {/* Fee Summary */}
             {amountCents > 0 && (
-              <div className="bg-[var(--color-surface-muted)] rounded-lg p-4 space-y-2">
+              <div className="bg-white/5 border border-white/15 p-6 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--color-text-muted)]">Withdrawal Amount</span>
-                  <span className="font-medium text-[var(--color-text)]">{formatCurrency(amountCents)}</span>
+                  <span className="text-[var(--color-text-muted)] font-mono">Withdrawal Amount</span>
+                  <span className="font-mono font-medium text-[var(--color-text)]">{formatCurrency(amountCents)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[var(--color-text-muted)]">Platform Fee (5%)</span>
-                  <span className="font-medium text-[var(--color-error)]">-{formatCurrency(commissionCents)}</span>
+                  <span className="text-[var(--color-text-muted)] font-mono">Platform Fee (5%)</span>
+                  <span className="font-mono font-medium text-[var(--color-gray-500)]">-{formatCurrency(commissionCents)}</span>
                 </div>
-                <div className="border-t border-[var(--color-border)] pt-2 flex justify-between">
-                  <span className="font-medium text-[var(--color-text)]">You Will Receive</span>
-                  <span className="font-semibold text-[var(--color-success)] text-lg">{formatCurrency(netCents)}</span>
+                <div className="border-t border-white/15 pt-2 flex justify-between">
+                  <span className="font-mono font-medium text-[var(--color-text)]">You Will Receive</span>
+                  <span className="font-heading font-semibold text-white text-lg">{formatCurrency(netCents)}</span>
                 </div>
               </div>
             )}
 
             {/* Method Selection */}
             <div>
-              <label className="label">Withdrawal Method *</label>
+              <label className="block font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-4">Withdrawal Method *</label>
               <div className="grid grid-cols-2 gap-3">
                 {WITHDRAWAL_METHODS.map((method) => (
                   <label
                     key={method.value}
-                    className={`relative cursor-pointer p-4 border-2 rounded-xl transition-all flex flex-col items-center gap-3 ${
+                    className={`relative cursor-pointer p-4 border-2 transition-all flex flex-col items-center gap-3 ${
                       selectedMethod === method.value
-                        ? 'border-[var(--color-accent)] bg-[var(--color-accent-muted)]'
-                        : 'border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
+                        ? 'border-white bg-white/5'
+                        : 'border-white/15 hover:border-white/30'
                     }`}
                   >
                     <input
@@ -368,13 +363,13 @@ export function WithdrawalPage() {
                       className="sr-only"
                       {...register('method', { onChange: () => setSelectedMethod(method.value) })}
                     />
-                    <div className="w-12 h-12 bg-[var(--color-surface-muted)] rounded-xl flex items-center justify-center text-[var(--color-text-muted)]">
+                    <div className="w-12 h-12 border border-white/15 flex items-center justify-center text-[var(--color-text-muted)]">
                       {method.icon}
                     </div>
-                    <span className="font-medium text-[var(--color-text)] text-center">{method.label}</span>
-                    <p className="text-xs text-[var(--color-text-muted)] text-center">{method.description}</p>
+                    <span className="font-medium text-[var(--color-text)] text-center text-sm">{method.label}</span>
+                    <p className="font-mono text-xs text-[var(--color-text-muted)] text-center">{method.description}</p>
                     {selectedMethod === method.value && (
-                      <div className="absolute inset-0 border-2 border-[var(--color-accent)] rounded-xl pointer-events-none" />
+                      <div className="absolute inset-0 border-2 border-white pointer-events-none" />
                     )}
                   </label>
                 ))}
@@ -382,87 +377,85 @@ export function WithdrawalPage() {
             </div>
 
             {/* Method-specific Fields */}
-            <div className="border-t border-[var(--color-border)] pt-6">
+            <div className="border-t border-white/15 pt-8">
               {getMethodFields(selectedMethod)}
             </div>
 
             {/* Submit */}
-            <div className="pt-4 border-t border-[var(--color-border)]">
-              <Button type="submit" fullWidth size="lg" loading={isSubmitting} disabled={amountCents === 0}>
+            <div className="pt-4 border-t border-white/15">
+              <Button type="submit" fullWidth size="lg" loading={isSubmitting} disabled={amountCents === 0} className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed">
                 Submit Withdrawal Request
               </Button>
-              <p className="text-center text-sm text-[var(--color-text-muted)] mt-3">
+              <p className="text-center font-mono text-xs text-[var(--color-text-muted)] mt-3">
                 By submitting, you agree to our{' '}
-                <Link to="/terms" className="text-[var(--color-accent)] hover:text-[var(--color-accent-hover)]">Terms of Service</Link>
+                <Link to="/terms" className="text-white hover:underline">Terms of Service</Link>
               </p>
             </div>
           </form>
-        </Card>
+        </div>
 
         {/* Withdrawal History */}
-        <Card>
-          <div className="p-4 border-b border-[var(--color-border)]">
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">Withdrawal History</h2>
+        <div className="border border-white/15 overflow-hidden">
+          <div className="p-6 border-b border-white/15">
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2vw,1.5rem)] tracking-tight">Withdrawal History</h2>
           </div>
 
           {isLoading ? (
             <div className="p-6 space-y-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse flex items-center gap-4 px-6 py-4">
-                  <div className="w-10 h-10 bg-[var(--color-border)] rounded-full" />
+                <div key={i} className="animate-pulse flex items-center gap-4 px-6 py-4 border-b border-white/15">
+                  <div className="w-10 h-10 border border-white/15" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-[var(--color-border)] rounded w-1/3" />
-                    <div className="h-3 bg-[var(--color-border)] rounded w-1/4" />
+                    <div className="h-4 bg-white/10 w-1/3" />
+                    <div className="h-3 bg-white/10 w-1/4" />
                   </div>
-                  <div className="h-6 bg-[var(--color-border)] rounded w-24" />
+                  <div className="h-6 bg-white/10 w-24" />
                 </div>
               ))}
             </div>
           ) : withdrawals.length === 0 ? (
             <div className="p-12 text-center">
               <BanknotesIcon className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-[var(--color-text)]">No withdrawals yet</h3>
+              <h3 className="font-heading font-medium text-[var(--color-text)] text-xl">No withdrawals yet</h3>
               <p className="mt-1 text-[var(--color-text-muted)]">Your withdrawal history will appear here</p>
             </div>
           ) : (
-            <div className="divide-y divide-[var(--color-border)]">
+            <div className="divide-y divide-white/15">
               {withdrawals.map((withdrawal) => (
-                <div key={withdrawal.id} className="p-6 hover:bg-[var(--color-surface-muted)]">
+                <div key={withdrawal.id} className="p-6 hover:bg-white/5 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <Badge variant={getStatusBadgeVariant(withdrawal.status)} size="sm">
-                          {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
-                        </Badge>
-                        <span className="text-sm text-[var(--color-text-muted)]">{withdrawal.method.replace('_', ' ')}</span>
+                        {getStatusBadge(withdrawal.status)}
+                        <span className="font-mono text-xs text-[var(--color-text-muted)]">{withdrawal.method.replace('_', ' ')}</span>
                       </div>
-                      <p className="text-2xl font-bold text-[var(--color-text)]">{formatCurrency(withdrawal.amount_cents)}</p>
-                      <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                      <p className="font-heading font-bold text-[var(--color-text)] text-2xl">{formatCurrency(withdrawal.amount_cents)}</p>
+                      <p className="font-mono text-sm text-[var(--color-text-muted)] mt-1">
                         Net: {formatCurrency(withdrawal.net_amount_cents)} · Fee: {formatCurrency(withdrawal.platform_fee_cents + withdrawal.processing_fee_cents)}
                       </p>
-                      <p className="text-sm text-[var(--color-text-muted)] mt-1">{formatDate(withdrawal.created_at)}</p>
+                      <p className="font-mono text-sm text-[var(--color-text-muted)] mt-1">{formatDate(withdrawal.created_at)}</p>
                     </div>
                     <div className="text-right">
                       {withdrawal.status === 'pending' && (
-                        <span className="text-sm text-[var(--color-warning)] flex items-center gap-1">
+                        <span className="font-mono text-xs text-[var(--color-gray-500)] flex items-center gap-1">
                           <ClockIcon className="w-4 h-4" />
                           Under Review
                         </span>
                       )}
                       {withdrawal.status === 'completed' && (
-                        <span className="text-sm text-[var(--color-success)] flex items-center gap-1">
+                        <span className="font-mono text-xs text-white flex items-center gap-1">
                           <CheckCircleIcon className="w-4 h-4" />
                           Completed
                         </span>
                       )}
                       {withdrawal.status === 'failed' && (
-                        <span className="text-sm text-[var(--color-error)] flex items-center gap-1">
+                        <span className="font-mono text-xs text-[var(--color-gray-500)] flex items-center gap-1">
                           <ExclamationCircleIcon className="w-4 h-4" />
                           Failed
                         </span>
                       )}
                       {withdrawal.status === 'cancelled' && (
-                        <span className="text-sm text-[var(--color-error)] flex items-center gap-1">
+                        <span className="font-mono text-xs text-[var(--color-gray-500)] flex items-center gap-1">
                           <XCircleIcon className="w-4 h-4" />
                           Cancelled
                         </span>
@@ -470,7 +463,7 @@ export function WithdrawalPage() {
                     </div>
                   </div>
                   {withdrawal.rejection_reason && (
-                    <div className="mt-3 p-3 bg-[var(--color-error-muted)] rounded-lg text-sm text-[var(--color-error)]">
+                    <div className="mt-3 p-3 border border-white/15 bg-white/5 font-mono text-sm text-[var(--color-gray-500)]">
                       <span className="font-medium">Reason:</span> {withdrawal.rejection_reason}
                     </div>
                   )}
@@ -478,7 +471,7 @@ export function WithdrawalPage() {
               ))}
             </div>
           )}
-        </Card>
+        </div>
 
         {/* Success Modal */}
         <Modal
@@ -488,11 +481,11 @@ export function WithdrawalPage() {
           size="sm"
         >
           <div className="text-center">
-            <div className="w-16 h-16 bg-[var(--color-success-muted)] rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircleIcon className="w-8 h-8 text-[var(--color-success)]" />
+            <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-4">
+              <CheckCircleIcon className="w-8 h-8 text-white" />
             </div>
             <p className="text-[var(--color-text-muted)]">Your withdrawal request has been submitted for review. You'll be notified once it's processed.</p>
-            <Button variant="primary" fullWidth onClick={() => setShowSuccessModal(false)} className="mt-6">
+            <Button variant="primary" fullWidth onClick={() => setShowSuccessModal(false)} className="mt-6 border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
               Done
             </Button>
           </div>
