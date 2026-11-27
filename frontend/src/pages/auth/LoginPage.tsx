@@ -46,9 +46,9 @@ export function LoginPage() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-      {/* Left Side - Image + Headline */}
-      <div className="relative hidden lg:block bg-[var(--color-bg)] overflow-hidden">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col lg:flex-row">
+      {/* Left Side - Image + Headline - Full bleed on mobile */}
+      <div className="relative lg:w-1/2 hidden lg:block bg-[var(--color-bg)] overflow-hidden min-h-[100dvh]">
         <CinemaMedia
           src="/media/arch-02.jpg"
           aspectRatio={1}
@@ -65,10 +65,28 @@ export function LoginPage() {
         </div>
       </div>
 
+      {/* Mobile Hero - condensed */}
+      <div className="lg:hidden relative bg-[var(--color-bg)] min-h-[40vh] overflow-hidden">
+        <CinemaMedia
+          src="/media/arch-02.jpg"
+          aspectRatio={16/9}
+          className="w-full h-full"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/60 via-transparent to-[var(--color-bg)]/90" />
+        <div className="absolute bottom-6 left-6 right-6 z-10">
+          <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-2">
+            Sign In
+          </span>
+          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(1.75rem,5vw,2.5rem)]">
+            Welcome back
+          </h1>
+        </div>
+      </div>
+
       {/* Right Side - Form */}
-      <div className="flex items-center justify-center p-8 lg:p-16 bg-[var(--color-bg)]">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[var(--color-bg)] min-h-[100dvh] lg:min-h-auto">
         <div className="w-full max-w-md">
-          <div className="mb-12">
+          <div className="mb-10 lg:mb-12">
             <Link to="/" className="inline-flex items-center gap-2 mb-8">
               <span className="font-mono text-xs tracking-[0.25em] uppercase text-[var(--color-text)]">
                 FREELANCEHUB
@@ -89,7 +107,7 @@ export function LoginPage() {
               placeholder="you@example.com"
               autoComplete="email"
               error={errors.email?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-3 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
               {...register('email')}
             />
 
@@ -103,24 +121,24 @@ export function LoginPage() {
                 rightIcon={
                   <button
                     type="button"
-                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors"
+                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                 }
-                className="border-0 border-b border-white/30 bg-transparent px-0 py-3 pr-12 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
                 {...register('password')}
               />
             </div>
 
-            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors">
+            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[56px]">
               Sign In
             </Button>
           </form>
 
-          <div className="mt-12 text-center">
+          <div className="mt-10 lg:mt-12 text-center">
             <p className="text-[var(--color-text-muted)]">
               Don&apos;t have an account?{' '}
               <Link to="/register" className="font-medium text-[var(--color-text)] hover:underline transition-colors">

@@ -162,7 +162,7 @@ export function ProjectsPage() {
               </span>
             </div>
 
-            {/* Monumental Headline */}
+            {/* Monumental Headline - Constrained display, no clipping */}
             <MonumentalHeadline
               splitBy="lines"
               delay={0.1}
@@ -198,7 +198,7 @@ export function ProjectsPage() {
                     value={filters.search || ''}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Search projects, skills, technologies…"
-                    className="w-full pl-12 pr-4 py-4 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-lg focus:outline-none font-sans"
+                    className="w-full pl-12 pr-4 py-4 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-lg focus:outline-none font-sans min-h-[48px]"
                     aria-label="Search projects"
                   />
                 </div>
@@ -211,9 +211,9 @@ export function ProjectsPage() {
                 <span className="font-mono text-[var(--color-white)] text-lg">{projects.length || 0}</span>
                 <span>projects found</span>
                 {hasActiveFilters && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent">
+                  <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent min-h-[44px]">
                     <span className="text-[var(--color-white)] font-medium text-xs">Active filters</span>
-                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-white)]" aria-label="Clear filters">
+                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-white)] min-h-[44px] min-w-[44px] flex items-center" aria-label="Clear filters">
                       <XMarkIcon className="w-4 h-4" />
                     </button>
                   </span>
@@ -223,7 +223,7 @@ export function ProjectsPage() {
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
                 leftIcon={<FunnelIcon className="w-4 h-4" />}
-                className="hidden sm:flex border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                className="hidden sm:flex border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]"
               >
                 Filters
                 <ChevronDownIcon className="w-4 h-4" />
@@ -250,7 +250,7 @@ export function ProjectsPage() {
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
                     options={statusOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
 
@@ -261,7 +261,7 @@ export function ProjectsPage() {
                     value={filters.category_id || ''}
                     onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
                     options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
 
@@ -276,20 +276,20 @@ export function ProjectsPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
 
                 {/* Budget Range */}
                 <div className="lg:col-span-2">
                   <label className="input-label text-[var(--color-text-muted)]">Budget Range</label>
-                  <div className="mt-1.5 flex items-center gap-3">
+                  <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.budget_min || ''}
                       onChange={(e) => handleFilterChange('budget_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -297,7 +297,7 @@ export function ProjectsPage() {
                       placeholder="Max"
                       value={filters.budget_max || ''}
                       onChange={(e) => handleFilterChange('budget_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export function ProjectsPage() {
                       type="checkbox"
                       checked={filters.is_fixed_price || false}
                       onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                      className="w-4 h-4 rounded-none border-white/30 text-white focus:ring-2 focus:ring-white bg-transparent"
+                      className="w-4 h-4 rounded-none border-white/30 text-white focus:ring-2 focus:ring-white bg-transparent min-w-[20px] min-h-[20px]"
                     />
                     <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
                   </label>
@@ -328,7 +328,7 @@ export function ProjectsPage() {
             <div className="border border-white/15 bg-[var(--color-surface)]">
               <div className="p-6 border-b border-white/15 flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--color-text)]">Filters</h3>
-                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)] p-1">
+                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)] p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
@@ -339,7 +339,7 @@ export function ProjectsPage() {
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
                     options={statusOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 <div>
@@ -348,7 +348,7 @@ export function ProjectsPage() {
                     value={filters.category_id || ''}
                     onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
                     options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 <div>
@@ -361,18 +361,18 @@ export function ProjectsPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 <div>
                   <label className="input-label text-[var(--color-text-muted)]">Budget</label>
-                  <div className="mt-1.5 flex items-center gap-3">
+                  <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.budget_min || ''}
                       onChange={(e) => handleFilterChange('budget_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -380,7 +380,7 @@ export function ProjectsPage() {
                       placeholder="Max"
                       value={filters.budget_max || ''}
                       onChange={(e) => handleFilterChange('budget_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                   </div>
                 </div>
@@ -389,12 +389,12 @@ export function ProjectsPage() {
                     type="checkbox"
                     checked={filters.is_fixed_price || false}
                     onChange={(e) => handleFilterChange('is_fixed_price', e.target.checked)}
-                    className="w-4 h-4 rounded-none border-white/30 text-white focus:ring-2 focus:ring-white bg-transparent"
+                    className="w-4 h-4 rounded-none border-white/30 text-white focus:ring-2 focus:ring-white bg-transparent min-w-[20px] min-h-[20px]"
                   />
                   <span className="text-sm text-[var(--color-text)]">Fixed Price Only</span>
                 </label>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-white/15 border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black">
+                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-white/15 border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]">
                     Clear All Filters
                   </Button>
                 )}
@@ -402,7 +402,7 @@ export function ProjectsPage() {
             </div>
           </aside>
 
-          {/* Projects List */}
+          {/* Projects List - Clean index layout, stacks on mobile */}
           <section className="lg:col-span-9">
             {isLoading ? (
               <IndexListSkeleton count={6} />
@@ -415,7 +415,7 @@ export function ProjectsPage() {
                   </p>
                 </div>
 
-                {/* Index-style Project List */}
+                {/* Index-style Project List - Clean, no horizontal overflow */}
                 <IndexList
                   items={indexListItems}
                   emptyMessage="No projects found"
@@ -431,7 +431,7 @@ export function ProjectsPage() {
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
-                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                     >
                       Previous
                     </Button>
@@ -453,7 +453,7 @@ export function ProjectsPage() {
                             variant={page === pageNum ? 'primary' : 'ghost'}
                             size="sm"
                             onClick={() => setPage(pageNum)}
-                            className="w-10 h-10 text-sm font-mono"
+                            className="w-10 h-10 text-sm font-mono min-h-[44px] min-w-[44px]"
                           >
                             {pageNum}
                           </Button>
@@ -466,7 +466,7 @@ export function ProjectsPage() {
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       rightIcon={<ChevronDownIcon className="w-4 h-4" />}
-                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                     >
                       Next
                     </Button>
@@ -481,7 +481,7 @@ export function ProjectsPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                     leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
-                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                   >
                     Previous
                   </Button>
@@ -494,7 +494,7 @@ export function ProjectsPage() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     rightIcon={<ChevronDownIcon className="w-4 h-4" />}
-                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                   >
                     Next
                   </Button>
@@ -512,7 +512,7 @@ export function ProjectsPage() {
           size="lg"
           onClick={() => setShowFilters(true)}
           leftIcon={<FunnelIcon className="w-5 h-5" />}
-          className="shadow-xl border-white bg-white text-black hover:bg-white/90"
+          className="shadow-xl border-white bg-white text-black hover:bg-white/90 min-h-[56px]"
         >
           Filters {hasActiveFilters && <Badge className="ml-2 border-white bg-white text-black">Active</Badge>}
         </Button>

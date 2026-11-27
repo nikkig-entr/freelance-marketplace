@@ -67,12 +67,12 @@ function StatRow({ label, value, href, icon: Icon }: {
   return (
     <div className="border border-white/15 p-6">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 border border-white/15 flex items-center justify-center">
+        <div className="w-12 h-12 border border-white/15 flex items-center justify-center flex-shrink-0">
           <Icon className="w-6 h-6 text-[var(--color-text-muted)]" />
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">{label}</p>
-          <p className="font-heading font-bold text-[var(--color-text)] text-2xl tabular-nums">{value}</p>
+          <p className="font-heading font-bold text-[var(--color-text)] text-2xl tabular-nums truncate">{value}</p>
         </div>
       </div>
       {href && (
@@ -114,17 +114,17 @@ function ActivityRow({
       onMouseLeave={onLeave}
       className={`flex items-start gap-4 py-4 border-b border-white/15 last:border-0 transition-all duration-300 ${isHovered ? 'bg-white/5' : ''}`}
     >
-      <div className="w-10 h-10 border border-white/15 flex items-center justify-center flex-shrink-0 transition-colors duration-200">
+      <div className="w-10 h-10 border border-white/15 flex items-center justify-center flex-shrink-0 transition-colors duration-200 min-w-[44px] min-h-[44px]">
         <Icon className="w-5 h-5 text-[var(--color-text-muted)]" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="font-medium text-[var(--color-text)]">{item.title}</p>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">{item.description}</p>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <p className="font-medium text-[var(--color-text)] truncate">{item.title}</p>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)] truncate">{item.description}</p>
           </div>
           <time
-            className="font-mono text-xs text-[var(--color-text-subtle)] tabular-nums whitespace-nowrap"
+            className="font-mono text-xs text-[var(--color-text-subtle)] tabular-nums whitespace-nowrap flex-shrink-0"
             dateTime={item.timestamp}
           >
             {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
@@ -141,7 +141,7 @@ function ActivityRow({
               <span className="text-[var(--color-text-subtle)] capitalize">{item.metadata.status.replace('_', ' ')}</span>
             )}
             {item.metadata.projectTitle && (
-              <span className="text-[var(--color-text-subtle)]">{item.metadata.projectTitle}</span>
+              <span className="text-[var(--color-text-subtle)] truncate max-w-xs">{item.metadata.projectTitle}</span>
             )}
           </div>
         )}
@@ -190,7 +190,7 @@ function EmptyState({ icon: Icon, title, description, action }: {
       <h3 className="font-heading font-medium text-[var(--color-text)] mb-2">{title}</h3>
       <p className="text-[var(--color-text-muted)] mb-6 max-w-sm mx-auto">{description}</p>
       {action && (
-        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
+        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px]">
           <Link to={action.href}>{action.label}</Link>
         </Button>
       )}
@@ -312,28 +312,28 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-      <div className="container py-8 space-y-16 lg:space-y-24">
+      <div className="container py-6 lg:py-8 space-y-10 lg:space-y-16">
         {/* Welcome Header */}
-        <section className="pt-8 lg:pt-12">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <section className="pt-4 lg:pt-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 lg:gap-6">
             <div>
-              <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(2rem,4vw,3.5rem)] tracking-tight">
+              <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(1.75rem,3.5vw,2.5rem)] tracking-tight">
                 Welcome back, <span className="text-[var(--color-white)]">{user.full_name?.split(' ')[0] || 'there'}</span>
               </h1>
-              <p className="mt-3 text-[var(--color-text-muted)] max-w-xl font-[Instrument_Serif] italic">
+              <p className="mt-2 text-[var(--color-text-muted)] max-w-xl font-[Instrument_Serif] italic text-sm lg:text-base">
                 {isFreelancer
                   ? 'Track your bids, messages, and project activity in one place.'
                   : 'Overview of your projects, incoming bids, and conversations.'}
               </p>
             </div>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 flex-wrap w-full sm:w-auto">
               {isFreelancer && (
-                <Button asChild size="lg" className="border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">
+                <Button asChild size="lg" className="border border-white px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px] w-full sm:w-auto">
                   <PlusIcon className="w-5 h-5 mr-2" />
                   Post a Project
                 </Button>
               )}
-              <Button variant="secondary" asChild size="lg" className="border border-white/15 px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+              <Button variant="secondary" asChild size="lg" className="border border-white/15 px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px] w-full sm:w-auto">
                 <Link to="/projects">
                   <MagnifyingGlassIcon className="w-5 h-5 mr-2" />
                   Browse Projects
@@ -343,10 +343,10 @@ export function DashboardPage() {
           </div>
         </section>
 
-        {/* Stats Section */}
+        {/* Stats Section - Grid stacks on mobile */}
         <section>
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Overview</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Overview</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             <StatRow
               label="Active Projects"
               value={activeProjectsCount}
@@ -376,9 +376,9 @@ export function DashboardPage() {
 
         {/* Activity Feed Section */}
         <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] border-b border-white/15 pb-4">Recent Activity</h2>
-            <Button variant="ghost" asChild size="sm" className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text-subtle)] hover:text-[var(--color-white)]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] border-b border-white/15 pb-3">Recent Activity</h2>
+            <Button variant="ghost" asChild size="sm" className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text-subtle)] hover:text-[var(--color-white)] min-h-[44px]">
               <Link to="/projects">View all</Link>
             </Button>
           </div>
@@ -408,29 +408,29 @@ export function DashboardPage() {
           )}
         </section>
 
-        {/* Quick Actions Section */}
+        {/* Quick Actions Section - Grid stacks on mobile */}
         <section>
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
               <Link to="/projects/create">
                 <PlusIcon className="w-6 h-6 mr-3" />
                 <span className="font-medium">Post a Project</span>
               </Link>
             </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
               <Link to="/projects">
                 <MagnifyingGlassIcon className="w-6 h-6 mr-3" />
                 <span className="font-medium">Browse Projects</span>
               </Link>
             </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
               <Link to="/projects">
                 <ChatBubbleLeftRightIcon className="w-6 h-6 mr-3" />
                 <span className="font-medium">Messages</span>
               </Link>
             </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-6 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
               <Link to="/balance">
                 <CurrencyDollarIcon className="w-6 h-6 mr-3" />
                 <span className="font-medium">Balance</span>
@@ -440,30 +440,30 @@ export function DashboardPage() {
         </section>
 
         {/* Plan Info Section */}
-        <section className="pb-8 lg:pb-12">
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.5rem,2.5vw,2rem)] mb-8 border-b border-white/15 pb-4">Your Plan</h2>
+        <section className="pb-6 lg:pb-10">
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Your Plan</h2>
           <div className="max-w-2xl">
-            <div className="border border-white/15 p-6 lg:p-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+            <div className="border border-white/15 p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Current Plan</p>
-                  <p className="mt-1 font-heading font-bold text-[var(--color-text)] text-3xl tabular-nums capitalize">{user.plan}</p>
+                  <p className="mt-1 font-heading font-bold text-[var(--color-text)] text-2xl lg:text-3xl tabular-nums capitalize">{user.plan}</p>
                 </div>
                 {user.plan !== 'agency' && (
-                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10">
+                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[48px]">
                     <Link to="/billing">Upgrade Plan</Link>
                   </Button>
                 )}
               </div>
-              <div className="border-t border-white/15 pt-8">
-                <ul className="space-y-4">
-                  <li className="flex items-center gap-4">
+              <div className="border-t border-white/15 pt-6">
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3">
                     <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
                     <span className="text-[var(--color-text-muted)]">
                       {user.plan === 'starter' ? '5 bids per week' : user.plan === 'pro' ? '50 bids per week' : 'Unlimited bids'}
                     </span>
                   </li>
-                  <li className="flex items-center gap-4">
+                  <li className="flex items-center gap-3">
                     {user.plan !== 'starter' && (
                       <>
                         <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
@@ -477,7 +477,7 @@ export function DashboardPage() {
                       </>
                     )}
                   </li>
-                  <li className="flex items-center gap-4">
+                  <li className="flex items-center gap-3">
                     <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
                     <span className="text-[var(--color-text-muted)]">
                       {user.plan === 'starter' ? '5% platform fee' : user.plan === 'pro' ? '3% platform fee' : '1% platform fee'}

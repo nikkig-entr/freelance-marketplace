@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
 export interface PreloaderContextValue {
   isPreloaderComplete: boolean;
@@ -8,10 +8,15 @@ export interface PreloaderContextValue {
 export const PreloaderContext = createContext<PreloaderContextValue | undefined>(undefined);
 
 export function PreloaderProvider({ children }: { children: ReactNode }) {
-  const [isPreloaderComplete, setPreloaderComplete] = useState(false);
+  const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
+
+  // Stable reference for setPreloaderComplete
+  const stableSetPreloaderComplete = useCallback((complete: boolean) => {
+    setIsPreloaderComplete(complete);
+  }, []);
 
   return (
-    <PreloaderContext.Provider value={{ isPreloaderComplete, setPreloaderComplete }}>
+    <PreloaderContext.Provider value={{ isPreloaderComplete, setPreloaderComplete: stableSetPreloaderComplete }}>
       {children}
     </PreloaderContext.Provider>
   );

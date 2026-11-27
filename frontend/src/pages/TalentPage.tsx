@@ -177,7 +177,7 @@ export function TalentPage() {
               </span>
             </div>
 
-            {/* Monumental Headline */}
+            {/* Monumental Headline - Constrained display, no clipping */}
             <MonumentalHeadline
               splitBy="lines"
               delay={0.1}
@@ -213,7 +213,7 @@ export function TalentPage() {
                     value={filters.search || ''}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Search freelancers by skill, name, or keyword…"
-                    className="w-full pl-12 pr-4 py-4 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-lg focus:outline-none font-sans"
+                    className="w-full pl-12 pr-4 py-4 bg-transparent border-0 text-[var(--color-text)] placeholder-[var(--color-text-subtle)] text-lg focus:outline-none font-sans min-h-[48px]"
                     aria-label="Search freelancers"
                   />
                 </div>
@@ -226,9 +226,9 @@ export function TalentPage() {
                 <span className="font-mono text-[var(--color-white)] text-lg">{talent.length || 0}</span>
                 <span>freelancers available</span>
                 {hasActiveFilters && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent">
+                  <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent min-h-[44px]">
                     <span className="text-[var(--color-white)] font-medium text-xs">Active filters</span>
-                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-white)]" aria-label="Clear filters">
+                    <button onClick={clearFilters} className="text-[var(--color-text-muted)] hover:text-[var(--color-white)] min-h-[44px] min-w-[44px] flex items-center" aria-label="Clear filters">
                       <XMarkIcon className="w-4 h-4" />
                     </button>
                   </span>
@@ -238,7 +238,7 @@ export function TalentPage() {
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
                 leftIcon={<FunnelIcon className="w-4 h-4" />}
-                className="hidden sm:flex border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                className="hidden sm:flex border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]"
               >
                 Filters
                 <ChevronDownIcon className="w-4 h-4" />
@@ -265,7 +265,7 @@ export function TalentPage() {
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
                     options={roleOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
 
@@ -276,7 +276,7 @@ export function TalentPage() {
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
                     options={[{ value: '', label: 'All Skills' }, ...skills.map(s => ({ value: s, label: s }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     multiple
                   />
                 </div>
@@ -292,20 +292,20 @@ export function TalentPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
 
                 {/* Hourly Rate Range */}
                 <div className="lg:col-span-2">
                   <label className="input-label text-[var(--color-text-muted)]">Hourly Rate (USD)</label>
-                  <div className="mt-1.5 flex items-center gap-3">
+                  <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.hourly_rate_min || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -313,7 +313,7 @@ export function TalentPage() {
                       placeholder="Max"
                       value={filters.hourly_rate_max || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                   </div>
                 </div>
@@ -325,7 +325,7 @@ export function TalentPage() {
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
                     options={availabilityOptions}
-                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
               </div>
@@ -342,7 +342,7 @@ export function TalentPage() {
             <div className="border border-white/15 bg-[var(--color-surface)]">
               <div className="p-6 border-b border-white/15 flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--color-text)]">Filters</h3>
-                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)] p-1">
+                <button onClick={() => setShowFilters(false)} className="text-[var(--color-text-subtle)] hover:text-[var(--color-white)] p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
@@ -353,7 +353,7 @@ export function TalentPage() {
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value as UserRole)}
                     options={roleOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 <div>
@@ -362,7 +362,7 @@ export function TalentPage() {
                     value={filters.skills?.join(',') || ''}
                     onChange={(e) => handleFilterChange('skills', e.target.value ? e.target.value.split(',').map(s => s.trim()) : [])}
                     options={[{ value: '', label: 'All Skills' }, ...skills.map(s => ({ value: s, label: s }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     multiple
                   />
                 </div>
@@ -376,18 +376,18 @@ export function TalentPage() {
                       handleFilterChange('sort_order', sort_order as 'asc' | 'desc');
                     }}
                     options={sortOptions}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 <div>
                   <label className="input-label text-[var(--color-text-muted)]">Hourly Rate</label>
-                  <div className="mt-1.5 flex items-center gap-3">
+                  <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                     <Input
                       type="number"
                       placeholder="Min"
                       value={filters.hourly_rate_min || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                     <span className="text-[var(--color-text-subtle)]">—</span>
                     <Input
@@ -395,7 +395,7 @@ export function TalentPage() {
                       placeholder="Max"
                       value={filters.hourly_rate_max || ''}
                       onChange={(e) => handleFilterChange('hourly_rate_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                      className="w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                      className="w-full sm:w-1/2 text-sm border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                     />
                   </div>
                 </div>
@@ -405,11 +405,11 @@ export function TalentPage() {
                     value={filters.availability || ''}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
                     options={availabilityOptions}
-                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white"
+                    className="mt-1.5 w-full border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
                   />
                 </div>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-white/15 border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black">
+                  <Button variant="outline" onClick={clearFilters} fullWidth className="pt-2 border-t border-white/15 border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]">
                     Clear All Filters
                   </Button>
                 )}
@@ -424,11 +424,11 @@ export function TalentPage() {
             ) : talent.length === 0 ? (
               <div className="text-center py-16 lg:py-24">
                 <UserIcon className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" />
-                <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No freelancers found</h3>
+                <h3 className="text-[clamp(1.25rem,2.5vw,1.75rem)] font-bold text-[var(--color-text)] mb-2">No freelancers found</h3>
                 <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
                   {hasActiveFilters ? 'Try adjusting your search or filters to find more talent' : 'No freelancers available at the moment. Check back soon!'}
                 </p>
-                {hasActiveFilters && <Button variant="outline" onClick={clearFilters} className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black">Clear Filters</Button>}
+                {hasActiveFilters && <Button variant="outline" onClick={clearFilters} className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]">Clear Filters</Button>}
               </div>
             ) : (
               <>
@@ -455,7 +455,7 @@ export function TalentPage() {
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
-                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                     >
                       Previous
                     </Button>
@@ -477,7 +477,7 @@ export function TalentPage() {
                             variant={page === pageNum ? 'primary' : 'ghost'}
                             size="sm"
                             onClick={() => setPage(pageNum)}
-                            className="w-10 h-10 text-sm font-mono"
+                            className="w-10 h-10 text-sm font-mono min-h-[44px] min-w-[44px]"
                           >
                             {pageNum}
                           </Button>
@@ -490,7 +490,7 @@ export function TalentPage() {
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       rightIcon={<ChevronDownIcon className="w-4 h-4" />}
-                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                      className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                     >
                       Next
                     </Button>
@@ -505,7 +505,7 @@ export function TalentPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                     leftIcon={<ChevronDownIcon className="w-4 h-4 rotate-180" />}
-                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                   >
                     Previous
                   </Button>
@@ -518,7 +518,7 @@ export function TalentPage() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     rightIcon={<ChevronDownIcon className="w-4 h-4" />}
-                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black"
+                    className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[44px] min-w-[44px]"
                   >
                     Next
                   </Button>
@@ -536,7 +536,7 @@ export function TalentPage() {
           size="lg"
           onClick={() => setShowFilters(true)}
           leftIcon={<FunnelIcon className="w-5 h-5" />}
-          className="shadow-xl border-white bg-white text-black hover:bg-white/90"
+          className="shadow-xl border-white bg-white text-black hover:bg-white/90 min-h-[56px]"
         >
           Filters {hasActiveFilters && <Badge className="ml-2 border-white bg-white text-black">Active</Badge>}
         </Button>
