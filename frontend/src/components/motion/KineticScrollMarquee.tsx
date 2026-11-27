@@ -40,7 +40,7 @@ export function KineticScrollMarquee({
         className="flex items-center gap-8 whitespace-nowrap will-change-transform"
         style={{
           x: row1X,
-          fontSize: 'clamp(4rem, 10vw, 6.5rem)',
+          fontSize: 'clamp(5rem, 10vw, 6.2rem)',
           lineHeight: 1,
           fontWeight: 800,
           fontFamily: "'Unbounded', 'Syne', sans-serif",
@@ -59,7 +59,7 @@ export function KineticScrollMarquee({
         className="flex items-center gap-8 whitespace-nowrap will-change-transform"
         style={{
           x: row2X,
-          fontSize: 'clamp(4rem, 10vw, 6.5rem)',
+          fontSize: 'clamp(5rem, 10vw, 6.2rem)',
           lineHeight: 1,
           fontWeight: 800,
           fontFamily: "'Unbounded', 'Syne', sans-serif",

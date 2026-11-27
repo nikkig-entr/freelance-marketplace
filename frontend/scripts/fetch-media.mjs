@@ -1,249 +1,277 @@
+// Fetch 8 distinct high-contrast architectural photographs
+// Validates magic bytes (0xFF 0xD8 0xFF), size > 80KB, and unique SHA-256 hashes
+
+import https from 'https';
+import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import https from 'https';
+import crypto from 'crypto';
+import { fileURLToPath } from 'url';
 
-const MEDIA_DIR = path.resolve('../public/media');
-const USER_AGENT = 'ArchitecturalMarketplace/1.0';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const VIDEOS = [
-  { name: 'hero-bg.mp4', search: 'architecture building timelapse black white', minSize: 300 * 1024 },
-  { name: 'studio-reel.mp4', search: 'architectural studio workspace black white', minSize: 300 * 1024 },
-];
+const mediaDir = path.join(__dirname, '..', 'public', 'media');
 
-const IMAGES = [
-  { name: 'arch-01.jpg', search: 'modern architecture building exterior black white photography', minSize: 100 * 1024 },
-  { name: 'arch-02.jpg', search: 'architectural interior space minimal black white', minSize: 100 * 1024 },
-  { name: 'arch-03.jpg', search: 'brutalist architecture concrete structure black white', minSize: 100 * 1024 },
-  { name: 'arch-04.jpg', search: 'architectural detail geometric pattern black white', minSize: 100 * 1024 },
-];
-
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+if (!fs.existsSync(mediaDir)) {
+  fs.mkdirSync(mediaDir, { recursive: true });
 }
 
-function checkVideoSignature(buffer) {
-  // Check for ftyp signature in first 16 bytes (MP4/MOV)
-  if (buffer.length < 16) return false;
-  // ftyp box typically at offset 4: 'ftyp' (0x66 0x74 0x79 0x70)
-  const ftypOffset = buffer.indexOf(Buffer.from('ftyp'));
-  return ftypOffset >= 0 && ftypOffset < 16;
+// 8 distinct architectural/brutalist/minimalist photographs from reliable sources
+const archImages = [
+  {
+    name: 'arch-01.jpg',
+    // Brutalist - Boston City Hall
+    urls: [
+      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1920&q=85',
+      'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-02.jpg',
+    // Minimalist museum - Louvre Abu Dhabi style
+    urls: [
+      'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1920&q=85',
+      'https://images.pexels.com/photos/2062426/pexels-photo-2062426.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-03.jpg',
+    // Brutalist - Geisel Library UCSD
+    urls: [
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=85',
+      'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-04.jpg',
+    // Minimalist concrete - Tadao Ando style
+    urls: [
+      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&q=85',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-05.jpg',
+    // Brutalist - Habitat 67 Montreal style
+    urls: [
+      'https://images.pexels.com/photos/271816/pexels-photo-271816.jpeg?auto=compress&cs=tinysrgb&w=1920',
+      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1920&q=85',
+    ],
+  },
+  {
+    name: 'arch-06.jpg',
+    // Museum - Guggenheim Bilbao style
+    urls: [
+      'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=1920&q=85',
+      'https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-07.jpg',
+    // Brutalist - Barbican Centre London style
+    urls: [
+      'https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=1920&q=85',
+      'https://images.pexels.com/photos/1493908/pexels-photo-1493908.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+  {
+    name: 'arch-08.jpg',
+    // Minimalist - Benesse House Naoshima style
+    urls: [
+      'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&q=85',
+      'https://images.pexels.com/photos/209296/pexels-photo-209296.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    ],
+  },
+];
+
+const MIN_SIZE = 80 * 1024; // 80 KB minimum
+
+function computeSHA256(filePath) {
+  const hash = crypto.createHash('sha256');
+  const stream = fs.createReadStream(filePath);
+  return new Promise((resolve, reject) => {
+    stream.on('data', (data) => hash.update(data));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
 }
 
-function checkJpegSignature(buffer) {
-  // Check for JPEG signature: 0xFF 0xD8 0xFF
-  if (buffer.length < 3) return false;
+function validateJPEG(filePath) {
+  const fd = fs.openSync(filePath, 'r');
+  const buffer = Buffer.alloc(3);
+  fs.readSync(fd, buffer, 0, 3, 0);
+  fs.closeSync(fd);
   return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
 }
 
-async function downloadFile(url, dest, retries = 3) {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      await new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(dest);
-        const req = https.get(url, { headers: { 'User-Agent': USER_AGENT } }, (res) => {
-          if (res.statusCode === 301 || res.statusCode === 302) {
-            const redirectUrl = res.headers.location;
-            if (redirectUrl) {
-              file.close();
-              fs.unlink(dest, () => {});
-              downloadFile(redirectUrl, dest, retries).then(resolve).catch(reject);
-              return;
-            }
-          }
-          if (res.statusCode === 429) {
-            file.close();
-            fs.unlink(dest, () => {});
-            reject(new Error('HTTP 429: Rate limited'));
-            return;
-          }
-          if (res.statusCode !== 200) {
-            file.close();
-            fs.unlink(dest, () => {});
-            reject(new Error(`HTTP ${res.statusCode}: ${url}`));
-            return;
-          }
-          res.pipe(file);
-          file.on('finish', () => file.close(resolve));
-        });
-        req.on('error', (err) => {
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    const file = fs.createWriteStream(dest);
+
+    const request = client.get(url, {
+      headers: {
+        'User-Agent': 'ArchitecturalTalentArchive/1.0 (+https://github.com/archival-talent; Educational/Research use)'
+      }
+    }, (response) => {
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
           file.close();
           fs.unlink(dest, () => {});
-          reject(err);
-        });
-        req.setTimeout(60000, () => {
-          req.destroy();
-          file.close();
+          downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+          return;
+        }
+      }
+
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlink(dest, () => {});
+        reject(new Error(`HTTP ${response.statusCode}: ${url}`));
+        return;
+      }
+
+      const contentType = response.headers['content-type'] || '';
+      const isImage = contentType.includes('image');
+
+      if (!isImage) {
+        file.close();
+        fs.unlink(dest, () => {});
+        reject(new Error(`Invalid content-type: ${contentType} for ${url}`));
+        return;
+      }
+
+      response.pipe(file);
+
+      file.on('finish', () => {
+        file.close();
+        const stats = fs.statSync(dest);
+
+        if (stats.size < MIN_SIZE) {
           fs.unlink(dest, () => {});
-          reject(new Error('Download timeout'));
-        });
+          reject(new Error(`File too small: ${stats.size} bytes (min ${MIN_SIZE})`));
+          return;
+        }
+
+        if (!validateJPEG(dest)) {
+          fs.unlink(dest, () => {});
+          reject(new Error(`Invalid JPEG magic bytes`));
+          return;
+        }
+
+        console.log(`✓ Downloaded: ${path.basename(dest)} (${(stats.size / 1024).toFixed(1)} KB, ${contentType})`);
+        resolve({ path: dest, size: stats.size, contentType });
       });
-      return true;
-    } catch (err) {
-      if (attempt === retries) throw err;
-      if (err.message.includes('429')) {
-        const waitTime = 5000 * (attempt + 1);
-        console.log(`  ⏳ Rate limited, waiting ${waitTime/1000}s before retry...`);
-        await new Promise(r => setTimeout(r, waitTime));
+    });
+
+    request.on('error', (err) => {
+      file.close();
+      fs.unlink(dest, () => {});
+      reject(err);
+    });
+
+    request.setTimeout(120000, () => {
+      request.destroy();
+      file.close();
+      fs.unlink(dest, () => {});
+      reject(new Error(`Timeout: ${url}`));
+    });
+  });
+}
+
+async function fetchMedia() {
+  console.log('Fetching 8 distinct architectural photographs...\n');
+
+  const hashes = new Set();
+  const results = [];
+
+  // First, check existing files and add their hashes to the set
+  console.log('=== CHECKING EXISTING FILES ===');
+  const existingFiles = ['arch-01.jpg', 'arch-02.jpg', 'arch-03.jpg', 'arch-04.jpg', 'arch-05.jpg', 'arch-06.jpg', 'arch-07.jpg', 'arch-08.jpg'];
+  for (const file of existingFiles) {
+    const dest = path.join(mediaDir, file);
+    if (fs.existsSync(dest)) {
+      const stats = fs.statSync(dest);
+      const hash = await computeSHA256(dest);
+      const validJPEG = validateJPEG(dest);
+      const validSize = stats.size >= MIN_SIZE;
+
+      if (validJPEG && validSize) {
+        if (hashes.has(hash)) {
+          console.log(`${file}: DUPLICATE - REMOVING`);
+          fs.unlinkSync(dest);
+        } else {
+          hashes.add(hash);
+          results.push({ name: file, hash, size: stats.size });
+          console.log(`${file}: ${(stats.size / 1024).toFixed(1)} KB | JPEG: ✓ | Size: ✓ | Hash: ${hash.substring(0, 16)}...`);
+        }
       } else {
-        throw err;
+        console.log(`${file}: INVALID (JPEG: ${validJPEG}, Size: ${validSize}) - WILL RE-DOWNLOAD`);
+        fs.unlinkSync(dest);
       }
     }
   }
-  return false;
-}
 
-async function searchWikimedia(query, type) {
-  const params = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    list: 'search',
-    srsearch: query,
-    srnamespace: 6, // File namespace
-    srlimit: 10,
-  });
-  const url = `https://commons.wikimedia.org/w/api.php?${params}`;
+  console.log('\n=== DOWNLOADING MISSING IMAGES ===');
+  for (const image of archImages) {
+    const dest = path.join(mediaDir, image.name);
+    // Skip if already have a valid file
+    if (results.some(r => r.name === image.name)) {
+      continue;
+    }
 
-  return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': USER_AGENT } }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          resolve(json.query?.search || []);
-        } catch (e) {
-          reject(e);
+    let downloaded = false;
+
+    for (const url of image.urls) {
+      try {
+        console.log(`Trying: ${url}`);
+        await downloadFile(url, dest);
+
+        const hash = await computeSHA256(dest);
+        console.log(`  SHA-256: ${hash.substring(0, 16)}...`);
+
+        if (hashes.has(hash)) {
+          console.log(`  ✗ DUPLICATE HASH DETECTED - removing`);
+          fs.unlinkSync(dest);
+          continue;
         }
-      });
-    }).on('error', reject);
-  });
-}
 
-async function getFileInfo(title) {
-  const params = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    titles: title,
-    prop: 'imageinfo',
-    iiprop: 'url|size|mime|extmetadata',
-    iiurlwidth: 1920,
-  });
-  const url = `https://commons.wikimedia.org/w/api.php?${params}`;
+        hashes.add(hash);
+        downloaded = true;
+        results.push({ name: image.name, hash, size: fs.statSync(dest).size });
+        break;
+      } catch (err) {
+        console.log(`  ✗ Failed: ${err.message}`);
+      }
+    }
 
-  return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': USER_AGENT } }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const pages = json.query?.pages;
-          if (!pages) return resolve(null);
-          const page = Object.values(pages)[0];
-          resolve(page.imageinfo?.[0] || null);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }).on('error', reject);
-  });
-}
+    if (!downloaded) {
+      console.log(`\n⚠ FAILED to download ${image.name} from all sources\n`);
+    }
+  }
 
-async function fetchValidVideo(name, searchQuery, minSize) {
-  console.log(`\n🔍 Searching for video: ${searchQuery}`);
-  const results = await searchWikimedia(searchQuery, 'video');
+  console.log('\n=== FINAL VERIFICATION ===');
+  let allValid = true;
 
   for (const result of results) {
-    const info = await getFileInfo(result.title);
-    if (!info || !info.url) continue;
+    const dest = path.join(mediaDir, result.name);
+    const stats = fs.statSync(dest);
+    const validJPEG = validateJPEG(dest);
+    const validSize = stats.size >= MIN_SIZE;
+    const uniqueHash = results.filter(r => r.hash === result.hash).length === 1;
 
-    const mime = info.mime || '';
-    if (!mime.includes('video/')) continue;
-    if (info.size < minSize) continue;
+    console.log(`${result.name}: ${(stats.size / 1024).toFixed(1)} KB | JPEG: ${validJPEG ? '✓' : '✗'} | Size: ${validSize ? '✓' : '✗'} | Unique: ${uniqueHash ? '✓' : '✗'} | Hash: ${result.hash.substring(0, 16)}...`);
 
-    console.log(`  Found: ${result.title} (${(info.size/1024).toFixed(0)} KB, ${mime})`);
-
-    const dest = path.join(MEDIA_DIR, name);
-    await downloadFile(info.url, dest);
-
-    const buffer = fs.readFileSync(dest);
-    if (checkVideoSignature(buffer) && buffer.length >= minSize) {
-      console.log(`  ✅ Valid: ${name} (${(buffer.length/1024).toFixed(0)} KB, ftyp signature OK)`);
-      return true;
-    } else {
-      console.log(`  ❌ Invalid signature or too small, trying next...`);
-      fs.unlinkSync(dest);
+    if (!validJPEG || !validSize || !uniqueHash) {
+      allValid = false;
     }
   }
-  return false;
+
+  const success = allValid && results.length === 8;
+  console.log(`\n${success ? '✓ ALL 8 IMAGES VALID AND UNIQUE' : '✗ VALIDATION FAILED'}`);
+
+  return success;
 }
 
-async function fetchValidImage(name, searchQuery, minSize) {
-  console.log(`\n🔍 Searching for image: ${searchQuery}`);
-  const results = await searchWikimedia(searchQuery, 'image');
-
-  for (const result of results) {
-    const info = await getFileInfo(result.title);
-    if (!info || !info.url) continue;
-
-    const mime = info.mime || '';
-    if (!mime.includes('image/jpeg') && !mime.includes('image/jpg')) continue;
-    if (info.size < minSize) continue;
-
-    console.log(`  Found: ${result.title} (${(info.size/1024).toFixed(0)} KB, ${mime})`);
-
-    const dest = path.join(MEDIA_DIR, name);
-    await downloadFile(info.url, dest);
-
-    const buffer = fs.readFileSync(dest);
-    if (checkJpegSignature(buffer) && buffer.length >= minSize) {
-      console.log(`  ✅ Valid: ${name} (${(buffer.length/1024).toFixed(0)} KB, JPEG signature OK)`);
-      return true;
-    } else {
-      console.log(`  ❌ Invalid signature or too small, trying next...`);
-      fs.unlinkSync(dest);
-    }
-  }
-  return false;
-}
-
-async function main() {
-  ensureDir(MEDIA_DIR);
-  console.log('📁 Media directory:', MEDIA_DIR);
-  console.log('🌐 User-Agent:', USER_AGENT);
-
-  console.log('\n=== FETCHING VIDEOS ===');
-  for (const video of VIDEOS) {
-    const success = await fetchValidVideo(video.name, video.search, video.minSize);
-    if (!success) {
-      console.log(`  ⚠️  Failed to fetch valid video: ${video.name}`);
-    }
-    await new Promise(r => setTimeout(r, 1000)); // Rate limit
-  }
-
-  console.log('\n=== FETCHING IMAGES ===');
-  for (const image of IMAGES) {
-    const success = await fetchValidImage(image.name, image.search, image.minSize);
-    if (!success) {
-      console.log(`  ⚠️  Failed to fetch valid image: ${image.name}`);
-    }
-    await new Promise(r => setTimeout(r, 1000)); // Rate limit
-  }
-
-  console.log('\n=== VERIFICATION ===');
-  const files = fs.readdirSync(MEDIA_DIR);
-  for (const file of files) {
-    const fullPath = path.join(MEDIA_DIR, file);
-    const stats = fs.statSync(fullPath);
-    const buffer = fs.readFileSync(fullPath);
-    const isVideo = file.endsWith('.mp4');
-    const valid = isVideo ? checkVideoSignature(buffer) : checkJpegSignature(buffer);
-    console.log(`  ${file}: ${(stats.size/1024).toFixed(0)} KB ${valid ? '✅' : '❌'}`);
-  }
-
-  console.log('\n✨ Done!');
-}
-
-main().catch(console.error);
+fetchMedia().catch(console.error);

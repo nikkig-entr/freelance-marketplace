@@ -35,9 +35,10 @@ export function CinemaMedia({
   const animationRef = useRef<number>();
   const [useCanvas, setUseCanvas] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const timeRef = useRef(0);
 
-  const drawCinematicCanvas = useCallback((canvas: HTMLCanvasElement, time: number) => {
+  const drawWireframeFallback = useCallback((canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -49,89 +50,85 @@ export function CinemaMedia({
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
+    // Deep charcoal background
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, width, height);
 
-    const t = time * 0.001;
-
-    // Cinematic light rays (architectural volumetric lighting)
-    const rayCount = 6;
-    for (let i = 0; i < rayCount; i++) {
-      const angle = (i / rayCount) * Math.PI * 2 + t * 0.08;
-      const rayWidth = width * 0.15;
-      const centerX = width * 0.5 + Math.sin(t * 0.3 + i * 1.7) * width * 0.15;
-      const centerY = height * 0.5 + Math.cos(t * 0.25 + i * 2.1) * height * 0.1;
-
-      const gradient = ctx.createLinearGradient(
-        centerX, centerY,
-        centerX + Math.cos(angle) * width * 1.5,
-        centerY + Math.sin(angle) * height * 1.5
-      );
-      gradient.addColorStop(0, 'rgba(255,255,255,0.08)');
-      gradient.addColorStop(0.3, 'rgba(255,255,255,0.03)');
-      gradient.addColorStop(1, 'rgba(255,255,255,0)');
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angle);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(-rayWidth * 0.5, -height, rayWidth, height * 2);
-      ctx.restore();
-    }
-
-    // Architectural grid lines (subtle perspective grid)
-    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+    // Architectural wireframe grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
     ctx.lineWidth = 0.5;
-    const gridSize = 60;
-    const gridOffsetX = (t * 15) % gridSize;
-    const gridOffsetY = (t * 10) % gridSize;
 
+    const gridSize = 50;
+    const gridOffsetX = 0;
+    const gridOffsetY = 0;
+
+    // Vertical grid lines with subtle perspective
     for (let x = -gridOffsetX; x < width + gridSize; x += gridSize) {
-      const perspective = 1 - Math.abs(x - width * 0.5) / (width * 0.8);
-      ctx.globalAlpha = 0.02 * Math.max(0.1, perspective);
+      const perspective = 1 - Math.abs(x - width * 0.5) / (width * 0.9);
+      ctx.globalAlpha = 0.03 * Math.max(0.15, perspective);
       ctx.beginPath();
       ctx.moveTo(x, 0);
-      ctx.lineTo(x + (width * 0.5 - x) * 0.3 * Math.sin(t * 0.1), height);
+      ctx.lineTo(x + (width * 0.5 - x) * 0.15, height);
       ctx.stroke();
     }
 
+    // Horizontal grid lines with subtle perspective
     for (let y = -gridOffsetY; y < height + gridSize; y += gridSize) {
-      const perspective = 1 - Math.abs(y - height * 0.5) / (height * 0.8);
-      ctx.globalAlpha = 0.015 * Math.max(0.1, perspective);
+      const perspective = 1 - Math.abs(y - height * 0.5) / (height * 0.9);
+      ctx.globalAlpha = 0.025 * Math.max(0.15, perspective);
       ctx.beginPath();
       ctx.moveTo(0, y);
-      ctx.lineTo(width, y + (height * 0.5 - y) * 0.2 * Math.cos(t * 0.08));
+      ctx.lineTo(width, y + (height * 0.5 - y) * 0.1);
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
-    // Floating architectural particles (dust motes in light)
-    const particleCount = 40;
-    for (let i = 0; i < particleCount; i++) {
-      const seed = i * 12.9898;
-      const px = (Math.sin(seed + t * 0.5) * 0.5 + 0.5) * width;
-      const py = (Math.cos(seed * 1.3 + t * 0.3) * 0.5 + 0.5) * height;
-      const size = 0.5 + Math.sin(seed * 2.1 + t) * 0.5;
-      const alpha = 0.15 + Math.sin(seed * 3.7 + t * 1.3) * 0.1;
+    // Subtle corner brackets (architectural reference marks)
+    const bracketSize = Math.min(width, height) * 0.08;
+    const bracketWeight = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = bracketWeight;
+    ctx.lineCap = 'square';
 
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-      ctx.beginPath();
-      ctx.arc(px, py, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // Top-left
+    ctx.beginPath();
+    ctx.moveTo(20, 20 + bracketSize);
+    ctx.lineTo(20, 20);
+    ctx.lineTo(20 + bracketSize, 20);
+    ctx.stroke();
 
-    // Film grain overlay
-    const grainIntensity = 0.03;
-    const grainSize = 2;
-    for (let y = 0; y < height; y += grainSize) {
-      for (let x = 0; x < width; x += grainSize) {
-        const grain = Math.random() - 0.5;
-        if (grain > 0.3) {
-          ctx.fillStyle = `rgba(255,255,255,${grain * grainIntensity})`;
-          ctx.fillRect(x, y, grainSize, grainSize);
-        }
-      }
-    }
+    // Top-right
+    ctx.beginPath();
+    ctx.moveTo(width - 20 - bracketSize, 20);
+    ctx.lineTo(width - 20, 20);
+    ctx.lineTo(width - 20, 20 + bracketSize);
+    ctx.stroke();
+
+    // Bottom-left
+    ctx.beginPath();
+    ctx.moveTo(20, height - 20 - bracketSize);
+    ctx.lineTo(20, height - 20);
+    ctx.lineTo(20 + bracketSize, height - 20);
+    ctx.stroke();
+
+    // Bottom-right
+    ctx.beginPath();
+    ctx.moveTo(width - 20 - bracketSize, height - 20);
+    ctx.lineTo(width - 20, height - 20);
+    ctx.lineTo(width - 20, height - 20 - bracketSize);
+    ctx.stroke();
+
+    // Center crosshair (very subtle)
+    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([10, 20]);
+    ctx.beginPath();
+    ctx.moveTo(width * 0.5, 0);
+    ctx.lineTo(width * 0.5, height);
+    ctx.moveTo(0, height * 0.5);
+    ctx.lineTo(width, height * 0.5);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     // Subtle vignette
     const vignette = ctx.createRadialGradient(
@@ -139,25 +136,19 @@ export function CinemaMedia({
       width * 0.5, height * 0.5, Math.max(width, height) * 0.7
     );
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
-    vignette.addColorStop(1, 'rgba(0,0,0,0.4)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.3)');
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, width, height);
-
-    // Scanline effect (subtle)
-    ctx.fillStyle = 'rgba(0,0,0,0.02)';
-    for (let y = 0; y < height; y += 4) {
-      ctx.fillRect(0, y + (Math.floor(t * 100) % 4), width, 1);
-    }
   }, []);
 
   const animateCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || !useCanvas) return;
 
-    timeRef.current += 16.67; // ~60fps
-    drawCinematicCanvas(canvas, timeRef.current);
+    timeRef.current += 16.67;
+    drawWireframeFallback(canvas);
     animationRef.current = requestAnimationFrame(animateCanvas);
-  }, [drawCinematicCanvas, useCanvas]);
+  }, [drawWireframeFallback, useCanvas]);
 
   useEffect(() => {
     if (useCanvas) {
@@ -173,19 +164,23 @@ export function CinemaMedia({
   const handleVideoError = useCallback(() => {
     setUseCanvas(true);
     setIsLoaded(true);
+    setHasError(true);
   }, []);
 
   const handleImageError = useCallback(() => {
     setUseCanvas(true);
     setIsLoaded(true);
+    setHasError(true);
   }, []);
 
   const handleVideoLoad = useCallback(() => {
     setIsLoaded(true);
+    setHasError(false);
   }, []);
 
   const handleImageLoad = useCallback(() => {
     setIsLoaded(true);
+    setHasError(false);
   }, []);
 
   const containerStyle: React.CSSProperties = {
@@ -199,7 +194,7 @@ export function CinemaMedia({
 
   if (useCanvas) {
     return (
-      <div className={className} style={containerStyle} aria-hidden="true">
+      <div className={className} style={containerStyle} aria-hidden="true" data-cinema-fallback="wireframe">
         <canvas
           ref={canvasRef}
           style={{
@@ -212,6 +207,16 @@ export function CinemaMedia({
           }}
           aria-hidden="true"
         />
+        {hasError && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+            <div className="text-center opacity-30">
+              <div className="font-mono text-xs tracking-widest uppercase text-white/40 mb-2">
+                Architectural Wireframe Fallback
+              </div>
+              <div className="w-24 h-px bg-white/10 mx-auto" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
