@@ -52,6 +52,40 @@ const statusOptions = [
   { value: 'completed', label: 'Completed' },
 ];
 
+/* Curated Showcase Commissions - Displayed when no projects found and no active filters */
+const curatedShowcaseProjects = [
+  {
+    id: 'showcase-1',
+    title: 'Brutalist Civic Center — Helsinki',
+    subtitle: 'Raw concrete geometries defining civic presence • €2.4M • Architecture',
+  },
+  {
+    id: 'showcase-2',
+    title: 'Minimalist Museum Extension — Basel',
+    subtitle: 'Light, shadow, and void as primary materials • €1.8M • Architecture',
+  },
+  {
+    id: 'showcase-3',
+    title: 'Brutalist University Library — Tokyo',
+    subtitle: 'Monolithic forms serving collective knowledge • €3.1M • Architecture',
+  },
+  {
+    id: 'showcase-4',
+    title: 'Sacred Geometry Chapel — Reykjavik',
+    subtitle: 'Spiritual space through material reduction • €950K • Architecture',
+  },
+  {
+    id: 'showcase-5',
+    title: 'Modular Housing Complex — Berlin',
+    subtitle: 'Modular habitats as urban sculpture • €4.2M • Architecture',
+  },
+  {
+    id: 'showcase-6',
+    title: 'Titanium Art Pavilion — Milan',
+    subtitle: 'Titanium curves folding into the city fabric • €1.3M • Architecture',
+  },
+];
+
 export function ProjectsPage() {
   const search = useSearch({ from: '/projects' }) as ProjectsSearch;
   const navigate = useNavigate();
@@ -228,7 +262,7 @@ export function ProjectsPage() {
             </div>
 
             {/* Monumental Headline - Constrained display, no clipping */}
-            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-6 animate-slide-up delay-1">
+            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.95] text-[clamp(2rem,5.2vw,5.5rem)] whitespace-normal max-w-full mb-6 animate-slide-up delay-1">
               <span>Discover</span>
               <br />
               <span>Projects</span>
@@ -516,7 +550,43 @@ export function ProjectsPage() {
 
                 {/* Swiss Architectural Index List - 1px hairline borders, lusion.co arrow motion */}
                 <div className="border border-white/15 overflow-hidden">
-                  {indexListItems.length === 0 ? (
+                  {indexListItems.length === 0 && !hasActiveFilters ? (
+                    /* Curated Showcase Commissions - Rich, Active, Authoritative */
+                    <>
+                      {curatedShowcaseProjects.map((project, i) => (
+                        <Link
+                          key={project.id}
+                          to={`/projects/${project.id}` as any}
+                          className="relative flex items-center gap-4 py-4 px-6 border-b border-white/15 last:border-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/5 hover:border-white/40"
+                          aria-label={`View ${project.title}`}
+                          style={{ gridColumn: '1 / -1', minHeight: '72px' }}
+                        >
+                          <span className="font-mono text-headline-5 font-extrabold text-[var(--color-text-subtle)] tabular-nums w-10 text-right select-none transition-all duration-300" aria-hidden="true">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="flex-1 min-w-0 overflow-hidden pr-12">
+                            <p className="font-heading font-semibold text-[var(--color-text)] text-headline-6 leading-snug truncate transition-colors duration-300">
+                              {project.title}
+                            </p>
+                            <p className="mt-1 text-body-sm text-[var(--color-text-muted)] line-clamp-1 truncate transition-colors duration-300">
+                              {project.subtitle}
+                            </p>
+                          </div>
+                          <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center border border-white/15 rounded-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent text-[var(--color-text-subtle)] opacity-0 group-hover:opacity-100 group-hover:bg-white group-hover:text-black group-hover:border-white"
+                            style={{
+                              transform: 'translate(-50%, -50%) scale(0.8)',
+                              opacity: 0,
+                            }}
+                            aria-hidden="true"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </Link>
+                      ))}
+                    </>
+                  ) : indexListItems.length === 0 && hasActiveFilters ? (
                     <div className="text-center py-16 lg:py-24">
                       <div className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
@@ -524,7 +594,7 @@ export function ProjectsPage() {
                         </svg>
                       </div>
                       <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No projects found</h3>
-                      <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">{hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}</p>
+                      <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">Try adjusting your search or filters to find more projects</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-0">

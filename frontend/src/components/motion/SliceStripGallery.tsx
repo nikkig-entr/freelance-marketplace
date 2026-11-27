@@ -220,7 +220,7 @@ export function SliceStripGallery() {
         </div>
       </div>
 
-      {/* Slice Strip - Horizontal Accordion */}
+      {/* Slice Strip - Horizontal Accordion - PURE PHOTOGRAPHY ONLY */}
       <div
         className="flex items-stretch gap-1.5 md:gap-1.5 overflow-x-auto scrollbar-hide pb-4 md:pb-0"
         style={{ width: '100%', maxWidth: '100vw' }}
@@ -264,7 +264,7 @@ export function SliceStripGallery() {
               layout
               transition={{ type: 'spring', stiffness: 260, damping: 28 }}
             >
-              {/* Slice Background Image - Pure, borderless, edge-to-edge */}
+              {/* Slice Background Image - Pure, borderless, edge-to-edge - NO TEXT OVERLAY */}
               <div
                 className="absolute inset-0 z-0"
                 aria-hidden="true"
@@ -294,7 +294,7 @@ export function SliceStripGallery() {
                 </div>
               )}
 
-              {/* Active slice content overlay - only visible when expanded */}
+              {/* Active slice content overlay - ONLY discipline title and number, no EXPLORE button */}
               <AnimatePresence mode="wait">
                 {isActive && (
                   <motion.div
@@ -310,21 +310,9 @@ export function SliceStripGallery() {
                       <p className="font-mono text-xs md:text-sm text-white/50 tracking-wider uppercase mb-2 md:mb-3">
                         {item.number} / {sliceItems.length}
                       </p>
-                      <p className="font-display font-bold text-white uppercase leading-[0.9] tracking-[-0.02em] text-[clamp(1.25rem,3vw,2.5rem)] md:text-[clamp(1.75rem,4vw,3.5rem)] mb-4 md:mb-6">
+                      <p className="font-display font-bold text-white uppercase leading-[0.9] tracking-[-0.02em] text-[clamp(1.25rem,3vw,2.5rem)] md:text-[clamp(1.75rem,4vw,3.5rem)]">
                         {item.discipline}
                       </p>
-                      <p className="font-[Instrument_Serif] italic font-light text-white/70 leading-relaxed tracking-[0.01em] text-sm md:text-base max-w-xs md:max-w-md mb-6 md:mb-8">
-                        {item.subtitle}
-                      </p>
-                      <a
-                        href={item.href}
-                        className="inline-flex items-center justify-center gap-2 border border-white px-5 py-3 font-mono text-xs md:text-sm uppercase tracking-[0.18em] hover:bg-white hover:text-black transition-colors min-h-[48px] w-full sm:w-auto pointer-events-auto"
-                      >
-                        EXPLORE
-                        <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </a>
                     </div>
                   </motion.div>
                 )}

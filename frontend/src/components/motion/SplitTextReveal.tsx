@@ -78,6 +78,7 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
       case 'chars':
         return text.split('');
       case 'words':
+        // Split by words but preserve spaces as explicit segments for proper spacing
         return text.split(/(\s+)/).filter((s) => s.length > 0);
       case 'lines':
         return text.split('\n');
@@ -113,6 +114,7 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
     >
       {segments.map((segment, index) => {
         const isSpace = /^\s+$/.test(segment);
+        const isLastSegment = index === segments.length - 1;
         return (
           <span
             key={index}
@@ -122,10 +124,11 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
               transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
               transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
               willChange: 'opacity, transform',
-              marginRight: splitBy === 'words' && !isSpace && index < segments.length - 1 ? '0.28em' : 0,
+              whiteSpace: isSpace ? 'pre' : 'normal',
+              marginRight: splitBy === 'words' && !isSpace && !isLastSegment ? '0.28em' : 0,
             }}
           >
-            {segment}
+            {isSpace ? ' ' : segment}
           </span>
         );
       })}

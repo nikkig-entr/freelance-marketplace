@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { createContext, useContext, ReactNode } from 'react';
 
 interface CustomCursorProps {
   enabled?: boolean;
@@ -44,7 +45,7 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
   const cursorY = useMotionValue(0);
   const cursorScale = useMotionValue(1);
 
-  // Spring config matching spec: stiffness: 480, damping: 32
+  // Spring config: stiffness: 480, damping: 32 for snappy but smooth motion
   const smoothX = useSpring(cursorX, { stiffness: 480, damping: 32, mass: 0.5 });
   const smoothY = useSpring(cursorY, { stiffness: 480, damping: 32, mass: 0.5 });
   const smoothScale = useSpring(cursorScale, { stiffness: 480, damping: 32 });
@@ -89,6 +90,42 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
     };
   }, [shouldMount, cursorX, cursorY, cursorScale]);
 
+  // Listen for cursor interaction events from elements
+  useEffect(() => {
+    if (!shouldMount) return;
+
+    const handleCursorEnter = (e: CustomEvent) => {
+      const { label, isMedia, mediaType, clickable } = e.detail;
+      setCursorState(prev => ({
+        ...prev,
+        label: label ?? '',
+        labelVisible: !!label,
+        isMedia: !!isMedia,
+        mediaType: mediaType ?? null,
+        isClickable: !!clickable,
+      }));
+    };
+
+    const handleCursorLeave = () => {
+      setCursorState(prev => ({
+        ...prev,
+        labelVisible: false,
+        label: '',
+        isMedia: false,
+        mediaType: null,
+        isClickable: false,
+      }));
+    };
+
+    window.addEventListener('cursor:enter', handleCursorEnter as EventListener);
+    window.addEventListener('cursor:leave', handleCursorLeave as EventListener);
+
+    return () => {
+      window.removeEventListener('cursor:enter', handleCursorEnter as EventListener);
+      window.removeEventListener('cursor:leave', handleCursorLeave as EventListener);
+    };
+  }, [shouldMount]);
+
   // Never render on touch devices or when disabled
   if (!shouldMount) {
     return <>{children}</>;
@@ -108,40 +145,41 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
         aria-hidden="true"
       >
         <div className="relative">
-          {/* Outer disc - expands to 72px on interactive targets */}
+          {/* Sleek minimal cursor: 10px solid dot that expands to 64px ring on hover */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/60 transition-all duration-300"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
             animate={{
-              width: cursorState.isClickable ? '72px' : cursorState.isMedia ? '64px' : '32px',
-              height: cursorState.isClickable ? '72px' : cursorState.isMedia ? '64px' : '32px',
-              borderColor: cursorState.isClickable || cursorState.isMedia ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
-              borderWidth: cursorState.isClickable || cursorState.isMedia ? 2 : 1,
+              width: cursorState.isClickable || cursorState.isMedia ? '64px' : '10px',
+              height: cursorState.isClickable || cursorState.isMedia ? '64px' : '10px',
+              borderRadius: cursorState.isClickable || cursorState.isMedia ? '9999px' : '9999px',
+              backgroundColor: cursorState.isClickable || cursorState.isMedia ? 'rgba(255,255,255,0.15)' : '#FFFFFF',
+              border: cursorState.isClickable || cursorState.isMedia ? '2px solid #FFFFFF' : 'none',
             }}
             style={{ pointerEvents: 'none' }}
           />
-          {/* Inner dot */}
+          {/* Inner dot for default state */}
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full"
             animate={{
-              scale: cursorState.isClickable ? 0 : cursorState.isMedia ? 0.5 : 1,
-              opacity: cursorState.isClickable ? 0 : 1,
+              scale: cursorState.isClickable || cursorState.isMedia ? 0 : 1,
+              opacity: cursorState.isClickable || cursorState.isMedia ? 0 : 1,
             }}
             style={{ pointerEvents: 'none' }}
           />
-          {/* Media label */}
+          {/* VIEW label for media targets */}
           {cursorState.isMedia && (
             <motion.div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono uppercase tracking-widest text-white"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-mono uppercase tracking-widest text-white"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
               style={{ pointerEvents: 'none', whiteSpace: 'nowrap' }}
             >
-              {cursorState.mediaType === 'video' ? '▶ PLAY' : '□ VIEW'}
+              {cursorState.mediaType === 'video' ? '▶ PLAY' : 'VIEW'}
             </motion.div>
           )}
         </div>
-        {/* [ EXPLORE ] label on [data-cursor] targets */}
+        {/* [ VIEW ] label on [data-cursor] targets */}
         {cursorState.labelVisible && cursorState.label && (
           <motion.div
             className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-white bg-[#050505]/95 border border-white/30 whitespace-nowrap"
@@ -192,8 +230,6 @@ export function useCursorInteraction(options: {
 }
 
 // Simple cursor context for components to update cursor state
-import { createContext, useContext, ReactNode } from 'react';
-
 interface CursorContextValue {
   setLabel: (label: string) => void;
   setLabelOptions: (options: { visible: boolean; label?: string }) => void;
@@ -250,3 +286,5 @@ export function useCustomCursor() {
   }
   return context;
 }
+
+export { CustomCursorProvider as default };

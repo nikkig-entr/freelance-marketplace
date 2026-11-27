@@ -107,20 +107,26 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
       className={className}
       aria-hidden={!isVisible && !hasAnimated}
     >
-      {segments.map((segment, index) => (
-        <span
-          key={index}
-          style={{
-            display: splitBy === 'chars' ? 'inline-block' : 'inline',
-            opacity: isVisible || hasAnimated ? 1 : 0,
-            transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
-            transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
-            willChange: 'opacity, transform',
-          }}
-        >
-          {segment}
-        </span>
-      ))}
+      {segments.map((segment, index) => {
+        const isSpace = /^\s+$/.test(segment);
+        const isLastSegment = index === segments.length - 1;
+        return (
+          <span
+            key={index}
+            style={{
+              display: splitBy === 'chars' ? 'inline-block' : 'inline',
+              opacity: isVisible || hasAnimated ? 1 : 0,
+              transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
+              transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
+              willChange: 'opacity, transform',
+              whiteSpace: isSpace ? 'pre' : 'normal',
+              marginRight: splitBy === 'words' && !isSpace && !isLastSegment ? '0.28em' : 0,
+            }}
+          >
+            {isSpace ? ' ' : segment}
+          </span>
+        );
+      })}
     </Component>
   );
 });

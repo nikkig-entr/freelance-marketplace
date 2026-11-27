@@ -96,6 +96,7 @@ export function InteractiveIndexSection() {
             const isAdjacentHovered = hoveredIndex !== null && hoveredIndex !== index;
             const isMobileExpanded = mobileExpandedIndex === index;
             const isLast = index === indexItems.length - 1;
+            const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
 
             return (
               <motion.div
@@ -128,7 +129,7 @@ export function InteractiveIndexSection() {
                   to={item.href}
                   className="flex items-center justify-between w-full py-8 md:py-10 border-t border-white/15 transition-colors hover:bg-white/[0.02]"
                   style={{
-                    paddingRight: window.matchMedia('(min-width: 1024px)').matches && isHovered ? '520px' : '24px',
+                    paddingRight: isDesktop && isHovered ? '520px' : '24px',
                   }}
                 >
                   {/* Left: Number + Title + Subtitle + Counter */}
@@ -144,9 +145,9 @@ export function InteractiveIndexSection() {
                     </div>
                   </div>
 
-                  {/* Right: Preview Image (desktop hover-only) */}
+                  {/* Right: Preview Image (desktop hover-only) - PURE BORDERLESS B&W */}
                   <AnimatePresence mode="wait">
-                    {window.matchMedia('(min-width: 1024px)').matches && isHovered && (
+                    {isDesktop && isHovered && (
                       <motion.div
                         key="preview"
                         initial={{ opacity: 0, scale: 0.95, x: 30 }}
@@ -157,22 +158,22 @@ export function InteractiveIndexSection() {
                           scale: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
                           x: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
                         }}
-                        className="absolute right-8 lg:right-12 top-1/2 -translate-y-1/2 w-[380px] xl:w-[440px] aspect-[16/10] pointer-events-none z-10"
+                        className="absolute right-8 lg:right-12 top-1/2 -translate-y-1/2 w-[380px] aspect-[16/10] pointer-events-none z-10"
                         style={{ willChange: 'transform, opacity' }}
                       >
                         <CinemaMedia
                           src={item.image}
                           aspectRatio={16 / 10}
-                          className="w-full h-full rounded-none"
+                          className="w-full h-full rounded-none object-cover"
                         />
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </Link>
 
-                {/* Mobile expanded preview */}
+                {/* Mobile expanded preview - tap to reveal */}
                 <AnimatePresence mode="wait">
-                  {!window.matchMedia('(min-width: 1024px)').matches && isMobileExpanded && (
+                  {!isDesktop && isMobileExpanded && (
                     <motion.div
                       key={`mobile-preview-${index}`}
                       initial={{ opacity: 0, height: 0 }}
@@ -185,7 +186,7 @@ export function InteractiveIndexSection() {
                         <CinemaMedia
                           src={item.image}
                           aspectRatio={16 / 9}
-                          className="w-full h-full rounded-none"
+                          className="w-full h-full rounded-none object-cover"
                         />
                       </div>
                     </motion.div>

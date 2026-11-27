@@ -20,14 +20,15 @@ interface Block {
 
 export function IglooMonolithCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const blocksRef = useRef<Block[]>([]);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [dpr, setDpr] = useState(1);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
   const timeRef = useRef(0);
-  const widthRef = useRef(0);
-  const heightRef = useRef(0);
 
   // Generate monolith blocks
   const generateBlocks = useCallback((w: number, h: number, mobile: boolean) => {
@@ -62,7 +63,7 @@ export function IglooMonolithCanvas() {
             baseY: y,
             baseZ: z,
             size: blockSize * (0.85 + Math.random() * 0.3),
-            color: '#050505',
+            color: '#141414',
             wireframeColor: '#FFFFFF',
             telemetry: String(telemetryCounter++).padStart(2, '0'),
             velocityX: 0,
@@ -76,23 +77,25 @@ export function IglooMonolithCanvas() {
     return blocks;
   }, []);
 
-  // Resize handler
+  // Resize handler using ResizeObserver on container
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-    const newWidth = window.innerWidth;
-    const newHeight = window.innerHeight;
+    const rect = container.getBoundingClientRect();
+    const newWidth = rect.width;
+    const newHeight = rect.height;
     const newDpr = Math.min(window.devicePixelRatio || 1, 2);
-    const newIsMobile = window.innerWidth < 768;
+    const newIsMobile = newWidth < 768;
 
     canvas.width = newWidth * newDpr;
     canvas.height = newHeight * newDpr;
     canvas.style.width = `${newWidth}px`;
     canvas.style.height = `${newHeight}px`;
 
-    widthRef.current = newWidth;
-    heightRef.current = newHeight;
+    setContainerWidth(newWidth);
+    setContainerHeight(newHeight);
     setDpr(newDpr);
     setIsMobile(newIsMobile);
 
@@ -102,10 +105,10 @@ export function IglooMonolithCanvas() {
 
   // Mouse move handler
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     setPointer({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -114,10 +117,10 @@ export function IglooMonolithCanvas() {
 
   // Touch handlers - passive so scrolling is NEVER blocked
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     const touch = e.touches[0];
     setPointer({
       x: touch.clientX - rect.left,
@@ -126,10 +129,10 @@ export function IglooMonolithCanvas() {
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = container.getBoundingClientRect();
     const touch = e.touches[0];
     setPointer({
       x: touch.clientX - rect.left,
@@ -144,7 +147,8 @@ export function IglooMonolithCanvas() {
   // Initialize
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -152,18 +156,23 @@ export function IglooMonolithCanvas() {
     // Initial setup
     handleResize();
 
+    // ResizeObserver for container size changes
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
     window.addEventListener('resize', handleResize);
     window.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
-    canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -209,7 +218,7 @@ export function IglooMonolithCanvas() {
     ctx.lineTo(rightX, y + half - faceOffset);
     ctx.lineTo(x + half, y + half);
     ctx.closePath();
-    ctx.fillStyle = `rgba(255,255,255,${0.02 * depthOpacity})`;
+    ctx.fillStyle = `rgba(20,20,20,${0.95 * depthOpacity})`;
     ctx.fill();
 
     // Top face
@@ -219,24 +228,24 @@ export function IglooMonolithCanvas() {
     ctx.lineTo(rightX, topY);
     ctx.lineTo(x - half + faceOffset, topY);
     ctx.closePath();
-    ctx.fillStyle = `rgba(255,255,255,${0.04 * depthOpacity})`;
+    ctx.fillStyle = `rgba(30,30,30,${0.9 * depthOpacity})`;
     ctx.fill();
 
     // Front face
     ctx.beginPath();
     ctx.rect(x - half, y - half, size, size);
-    ctx.fillStyle = `rgba(255,255,255,${0.015 * depthOpacity})`;
+    ctx.fillStyle = `rgba(10,10,10,${0.85 * depthOpacity})`;
     ctx.fill();
 
     // Wireframe edges - CRISP WHITE STROKES
     if (isHovered) {
       ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = Math.max(1, 2 * projected.scale);
-      ctx.globalAlpha = 0.9;
+      ctx.lineWidth = Math.max(1.5, 2.5 * projected.scale);
+      ctx.globalAlpha = 0.95;
     } else {
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-      ctx.lineWidth = Math.max(0.5, 1 * projected.scale);
-      ctx.globalAlpha = 0.4;
+      ctx.strokeStyle = 'rgba(255,255,255,0.72)';
+      ctx.lineWidth = Math.max(1, 1.5 * projected.scale);
+      ctx.globalAlpha = 0.5;
     }
 
     // Front face edges
@@ -290,11 +299,11 @@ export function IglooMonolithCanvas() {
 
     // Telemetry tag
     if (isHovered || (projected.scale > 0.3 && depth < 1500)) {
-      ctx.fillStyle = isHovered ? '#FFFFFF' : 'rgba(255,255,255,0.5)';
-      ctx.font = `${Math.max(8, 10 * projected.scale)}px 'JetBrains Mono', monospace`;
+      ctx.fillStyle = isHovered ? '#FFFFFF' : 'rgba(255,255,255,0.6)';
+      ctx.font = `${Math.max(9, 11 * projected.scale)}px 'JetBrains Mono', 'Fira Code', monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(block.telemetry, x, y + half + 12 * projected.scale);
+      ctx.fillText(block.telemetry, x, y + half + 14 * projected.scale);
     }
   };
 
@@ -306,21 +315,24 @@ export function IglooMonolithCanvas() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const w = widthRef.current;
-    const h = heightRef.current;
+    const w = containerWidth;
+    const h = containerHeight;
     const cx = w * 0.5;
     const cy = h * 0.5;
     const focalLength = Math.max(w, h) * 1.2;
 
     timeRef.current += 16.67;
 
-    // Clear
+    // Clear with dark background
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, w * dpr, h * dpr);
     ctx.scale(dpr, dpr);
 
     // Ambient breathing motion on mobile when idle
     const ambientFactor = isMobile && !pointer ? Math.sin(timeRef.current * 0.0003) * 0.5 : 0;
+
+    // Slow autonomous rotation of the entire monolith
+    const autoRotation = timeRef.current * 0.00008;
 
     // Project all blocks
     const projectedBlocks = blocksRef.current
@@ -368,6 +380,12 @@ export function IglooMonolithCanvas() {
         block.y += block.velocityY;
         block.z += block.velocityZ;
 
+        // Apply slow autonomous rotation
+        const rotatedX = block.x * Math.cos(autoRotation) - block.z * Math.sin(autoRotation);
+        const rotatedZ = block.x * Math.sin(autoRotation) + block.z * Math.cos(autoRotation);
+        block.x = rotatedX;
+        block.z = rotatedZ;
+
         return { block, isHovered };
       })
       .sort((a, b) => (b.block.z + b.block.velocityZ) - (a.block.z + a.block.velocityZ)); // Painter's algorithm: back to front
@@ -405,8 +423,6 @@ export function IglooMonolithCanvas() {
     }
     ctx.globalAlpha = 1;
 
-    // Corner HUD metadata (drawn by React overlay, not here)
-    // But we draw subtle scanline/vignette for cinematic feel
     // Vignette
     const vignette = ctx.createRadialGradient(
       cx, cy, 0,
@@ -424,25 +440,33 @@ export function IglooMonolithCanvas() {
     }
 
     animationRef.current = requestAnimationFrame(animate);
-  }, [pointer, isMobile, dpr]);
+  }, [pointer, isMobile, dpr, containerWidth, containerHeight]);
 
   // Start animation
   useEffect(() => {
-    animate();
+    if (containerWidth > 0 && containerHeight > 0) {
+      animate();
+    }
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [animate]);
+  }, [animate, containerWidth, containerHeight]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full -z-10"
+    <div
+      ref={containerRef}
+      className="relative w-full h-full block"
+      style={{ width: '100%', height: '100%' }}
       aria-hidden="true"
-      style={{ touchAction: 'auto' }} // Allow native scrolling
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full block"
+        style={{ touchAction: 'auto' }}
+      />
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 import { Outlet } from '@tanstack/react-router';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/sections/Footer';
 
 export function Layout() {
   return (
@@ -8,13 +9,7 @@ export function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-[var(--color-border)] py-6 bg-[var(--color-bg-elevated)]/50">
-        <div className="container">
-          <p className="text-center text-sm text-[var(--color-text-muted)]">
-            &copy; {new Date().getFullYear()} FreelanceHub. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

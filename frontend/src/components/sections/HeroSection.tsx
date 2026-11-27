@@ -6,45 +6,53 @@ import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[100dvh] flex flex-col justify-between overflow-hidden" data-lenis-prevent>
+    <section className="relative min-h-[100dvh] flex flex-col justify-between pt-24 pb-8 px-4 md:px-8 overflow-hidden" data-lenis-prevent>
       {/* Igloo Monolith Canvas - Full Bleed Background */}
-      <IglooMonolithCanvas />
+      <div className="absolute inset-0 z-0 w-full h-full">
+        <IglooMonolithCanvas />
+      </div>
 
       {/* Top HUD Metadata */}
-      <div className="absolute top-0 left-0 right-0 z-10 pt-8 md:pt-12 px-4 md:px-8 flex flex-wrap justify-between gap-2 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--color-text-subtle)] pointer-events-none">
-        <div className="flex flex-col gap-1">
-          <span>[ 00 / ARCHITECTURAL TALENT ARCHIVE ]</span>
-          <span className="opacity-50">[ // INDEPENDENT PRACTICE 2026 ]</span>
-        </div>
-        <div className="flex flex-col gap-1 items-end text-right">
-          <span>[ // CURATED NETWORK ]</span>
-          <span className="opacity-50">[ // WORLDWIDE ]</span>
-        </div>
+      <div className="relative z-10 flex justify-between font-mono text-[11px] uppercase tracking-[0.22em] text-neutral-400">
+        <span>[ 00 / ARCHITECTURAL TALENT ARCHIVE ]</span>
+        <span>[ // INDEPENDENT PRACTICE 2026 ]</span>
       </div>
 
       {/* Bottom Monumental Headline - 2 Lines Edge-to-Edge */}
-      <div className="relative z-10 w-full px-4 md:px-8 pb-8 md:pb-12">
+      <div className="relative z-10 mt-auto w-full">
         {/* Line 1: ARCHITECTURAL TALENT (Syne uppercase) */}
-        <SplitTextReveal
-          splitBy="lines"
-          delay={0}
-          stagger={0.1}
-          duration={1.2}
-          ease="cubic-bezier(0.16, 1, 0.3, 1)"
-          immediate={true}
-          as="div"
-          className="mb-4"
-        >
-          ARCHITECTURAL TALENT
-          <br />
-          CURATED FOR EXCELLENCE
-        </SplitTextReveal>
+        <h1 className="font-heading font-extrabold uppercase leading-[0.88] tracking-[-0.04em] text-white text-[clamp(2.4rem,7vw,8rem)] mb-2">
+          <SplitTextReveal
+            splitBy="words"
+            delay={0}
+            stagger={0.06}
+            duration={1}
+            ease="cubic-bezier(0.16, 1, 0.3, 1)"
+            immediate={true}
+            as="span"
+          >
+            ARCHITECTURAL TALENT
+          </SplitTextReveal>
+        </h1>
 
-        {/* Line 2: Curated for Excellence (Instrument Serif italic) - handled by splitBy="lines" above */}
+        {/* Line 2: Curated for Excellence (Instrument Serif italic) */}
+        <h2 className="font-[Instrument_Serif] italic font-normal leading-[0.92] tracking-[-0.02em] text-white text-[clamp(2.6rem,7.6vw,8.6rem)] mb-6">
+          <SplitTextReveal
+            splitBy="words"
+            delay={0.15}
+            stagger={0.06}
+            duration={1}
+            ease="cubic-bezier(0.16, 1, 0.3, 1)"
+            immediate={true}
+            as="span"
+          >
+            Curated for Excellence
+          </SplitTextReveal>
+        </h2>
 
         {/* Bottom Hairline Bar: Editorial Copy Left + CTA Right */}
-        <div className="border-t border-white/15 pt-6 mt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-5">
-          <p className="max-w-md text-sm md:text-base text-[var(--color-text-secondary)] leading-relaxed">
+        <div className="border-t border-white/15 pt-6 mt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <p className="max-w-md text-sm text-neutral-300 leading-relaxed">
             Every professional vetted. Every project matched with precision.
           </p>
           <Link
