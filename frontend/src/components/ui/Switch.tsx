@@ -20,11 +20,11 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(
             disabled={disabled}
             className={clsx(
               'sr-only peer',
-              'appearance-none w-11 h-6 bg-[var(--color-border)] rounded-full peer-focus:ring-4 peer-focus:ring-[var(--color-accent)]/30',
-              'peer-checked:after:translate-x-full peer-checked:after:border-white',
+              'appearance-none w-11 h-6 bg-[var(--color-border)] rounded-none peer-focus:ring-2 peer-focus:ring-[var(--color-white)]/30',
+              'peer-checked:after:translate-x-full peer-checked:after:border-[var(--color-text-inverse)]',
               'after:content-[""] after:absolute after:top-0.5 after:left-[2px] after:bg-[var(--color-text)] after:border-[var(--color-border)]',
-              'after:border after:rounded-full after:h-5 after:w-5 after:transition-all',
-              'peer-checked:bg-[var(--color-accent)] peer-checked:border-[var(--color-accent)]',
+              'after:border after:rounded-none after:h-5 after:w-5 after:transition-all',
+              'peer-checked:bg-[var(--color-white)] peer-checked:border-[var(--color-white)]',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
             {...props}

@@ -56,12 +56,12 @@ export function ProjectPreviewCard({ project, onHover }: ProjectPreviewCardProps
       onMouseMove={handleMouseMove}
       className={`
         relative group glass-card-hover p-6 transition-all duration-300
-        ${isHovered ? 'ring-1 ring-[var(--color-accent)]/30 scale-[1.01] z-10' : ''}
+        ${isHovered ? 'ring-1 ring-[var(--color-white)]/20 scale-[1.01] z-10' : ''}
       `}
       aria-label={`View project: ${project.title}`}
     >
       <div className="flex items-start justify-between gap-4 mb-3">
-        <h3 className="text-headline-6 font-bold text-[var(--color-text)] line-clamp-2 flex-1 pr-4 transition-colors duration-300 group-hover:text-[var(--color-accent)]">
+        <h3 className="text-headline-6 font-bold text-[var(--color-text)] line-clamp-2 flex-1 pr-4 transition-colors duration-300 group-hover:text-[var(--color-white)]">
           {project.title}
         </h3>
         <span className="badge badge-primary flex-shrink-0 transition-all duration-300">
@@ -151,7 +151,7 @@ export function PreviewTooltip({ project, position, containerRef }: PreviewToolt
       }}
       aria-hidden="true"
     >
-      <div className="glass-strong rounded-2xl overflow-hidden shadow-xl border border-[var(--color-accent)]/20 w-full h-full">
+      <div className="glass-strong rounded-none overflow-hidden shadow-xl border border-[var(--color-white)]/10 w-full h-full">
         <div className="aspect-video relative overflow-hidden">
           <img
             src={previewImage}

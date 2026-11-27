@@ -1,8 +1,6 @@
 'use client';
 
-import { IglooMonolithCanvas } from '@/components/canvas/IglooMonolithCanvas';
-import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
-import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
+import { HeroSection } from '@/components/sections/HeroSection';
 import { KineticScrollMarquee } from '@/components/motion/KineticScrollMarquee';
 import { SliceStripGallery } from '@/components/motion/SliceStripGallery';
 import { CinemaMedia } from '@/components/ui/CinemaMedia';
@@ -12,6 +10,9 @@ import { NumericPreloader } from '@/components/motion/NumericPreloader';
 import { SmoothScrollProvider } from '@/components/motion/SmoothScrollProvider';
 import { CustomCursorProvider } from '@/components/motion/CustomCursor';
 import { Link } from '@tanstack/react-router';
+import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
+import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
+import { useState, useEffect } from 'react';
 
 export function HomePage() {
   const { setPreloaderComplete } = usePreloader();
@@ -23,70 +24,7 @@ export function HomePage() {
         <NumericPreloader onComplete={() => setPreloaderComplete(true)} />
         <div className="relative min-h-screen bg-[var(--color-bg)]" data-lenis-prevent>
           {/* Section 1 — Interactive 3D Monolith Hero */}
-          <section className="relative min-h-[100dvh] flex flex-col overflow-hidden" data-lenis-prevent>
-            {/* Full-bleed 3D Monolith Canvas */}
-            <IglooMonolithCanvas />
-
-            {/* Corner HUD Metadata */}
-            <div className="absolute top-0 left-0 right-0 z-10 pt-20 md:pt-24 px-4 md:px-8 flex flex-wrap justify-between gap-2 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--color-text-subtle)] pointer-events-none">
-              <div className="flex flex-col gap-1">
-                <span>[ 00 / ARCHITECTURAL TALENT ARCHIVE ]</span>
-                <span className="opacity-50">[ INDEPENDENT PRACTICE 2026 ]</span>
-              </div>
-              <div className="flex flex-col gap-1 items-end text-right">
-                <span>[ // CURATED NETWORK ]</span>
-                <span className="opacity-50">[ // WORLDWIDE ]</span>
-              </div>
-            </div>
-
-            {/* Bottom Monumental Typography */}
-            <div className="relative z-10 mt-auto w-full overflow-hidden px-4 md:px-8 pb-6 md:pb-8">
-              {/* 2-line display: Syne uppercase + Instrument Serif italic */}
-              <SplitTextReveal
-                splitBy="lines"
-                delay={0}
-                stagger={0.1}
-                duration={1.2}
-                ease="cubic-bezier(0.16, 1, 0.3, 1)"
-                immediate={true}
-                as="div"
-                className="mb-6"
-              >
-                ARCHITECTURAL TALENT
-                <br />
-                CURATED FOR EXCELLENCE
-              </SplitTextReveal>
-
-              <SplitTextReveal
-                splitBy="lines"
-                delay={0.2}
-                stagger={0.1}
-                duration={1.2}
-                ease="cubic-bezier(0.16, 1, 0.3, 1)"
-                immediate={true}
-                as="div"
-                className="mb-8 font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em]"
-                style={{ fontSize: 'clamp(1.125rem, 2.5vw, 1.5rem)' }}
-              >
-                A meticulously curated network of world-class architects,
-                <br />
-                spatial designers, and architectural technologists.
-              </SplitTextReveal>
-
-              {/* Bottom bar: statement left, CTA right */}
-              <div className="border-t border-white/15 pt-5 md:pt-6 mt-5 md:mt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-5">
-                <p className="max-w-md text-sm md:text-base text-[var(--color-text-secondary)] leading-relaxed">
-                  Every professional vetted. Every project matched with precision.
-                </p>
-                <Link
-                  to="/projects"
-                  className="inline-flex items-center justify-center gap-2 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[48px] w-full sm:w-auto"
-                >
-                  EXPLORE ARCHIVE →
-                </Link>
-              </div>
-            </div>
-          </section>
+          <HeroSection />
 
           {/* Section 2 — Kinetic Marquee & Editorial Spread */}
           <section className="relative border-t border-white/15 overflow-hidden" data-lenis-prevent>
@@ -232,9 +170,7 @@ function DisciplineRow({
 
   return (
     <div
-      className={`relative group border-b border-white/15 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isHovered ? 'opacity-100' : 'opacity-100'
-      }`}
+      className={`relative group border-b border-white/15 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]`}
       style={{
         opacity: 1,
       }}
@@ -273,12 +209,14 @@ function DisciplineRow({
 
       {/* Mobile: inline preview strip inside active row */}
       {isMobile && isHovered && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        <div
           className="mt-4 border-t border-white/15 pt-4"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            height: isHovered ? 'auto' : 0,
+            overflow: 'hidden',
+            transition: 'opacity 0.4s cubic-bezier(0.16,1,0.3,1), height 0.4s cubic-bezier(0.16,1,0.3,1)',
+          }}
         >
           <div className="aspect-[16/9] w-full overflow-hidden">
             <CinemaMedia
@@ -287,13 +225,10 @@ function DisciplineRow({
               className="w-full h-full object-cover"
             />
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
 }
-
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
 export { HomePage as default };

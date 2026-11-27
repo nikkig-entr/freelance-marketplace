@@ -1,97 +1,58 @@
 'use client';
 
 import { Link } from '@tanstack/react-router';
-import { CinemaMedia } from '@/components/ui/CinemaMedia';
-import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
-import { EditorialText } from '@/components/ui/EditorialText';
+import { IglooMonolithCanvas } from '@/components/canvas/IglooMonolithCanvas';
+import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
 
-export function HeroSection({ isVisible = true }: { isVisible?: boolean }) {
-
+export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-end justify-center overflow-hidden" data-lenis-prevent>
-      {/* Video Background - full screen, opacity-50 */}
-      <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-        <CinemaMedia
-          src="/media/hero-bg.mp4"
-          poster="/media/arch-01.jpg"
-          autoPlay={true}
-          muted={true}
-          loop={true}
-          playsInline={true}
-          aspectRatio={16 / 9}
-          priority={true}
-          className="opacity-50"
-        />
+    <section className="relative min-h-[100dvh] flex flex-col justify-between overflow-hidden" data-lenis-prevent>
+      {/* Igloo Monolith Canvas - Full Bleed Background */}
+      <IglooMonolithCanvas />
+
+      {/* Top HUD Metadata */}
+      <div className="absolute top-0 left-0 right-0 z-10 pt-8 md:pt-12 px-4 md:px-8 flex flex-wrap justify-between gap-2 font-mono text-[10px] md:text-[11px] uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--color-text-subtle)] pointer-events-none">
+        <div className="flex flex-col gap-1">
+          <span>[ 00 / ARCHITECTURAL TALENT ARCHIVE ]</span>
+          <span className="opacity-50">[ // INDEPENDENT PRACTICE 2026 ]</span>
+        </div>
+        <div className="flex flex-col gap-1 items-end text-right">
+          <span>[ // CURATED NETWORK ]</span>
+          <span className="opacity-50">[ // WORLDWIDE ]</span>
+        </div>
       </div>
 
-      <div className="relative container pb-20 lg:pb-32" data-lenis-prevent>
-        {/* Top Indices - mono indices */}
-        <div className="flex items-center justify-between mb-12 lg:mb-20" style={{
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s'
-        }}>
-          <span className="font-mono text-xs text-[var(--color-text-subtle)] tracking-wider uppercase">
-            [ 00 / ARCHITECTURAL TALENT ARCHIVE ]
-          </span>
-          <span className="font-mono text-xs text-[var(--color-text-subtle)] tracking-wider uppercase">
-            [ EST. 2026 — WORLDWIDE ]
-          </span>
-        </div>
+      {/* Bottom Monumental Headline - 2 Lines Edge-to-Edge */}
+      <div className="relative z-10 w-full px-4 md:px-8 pb-8 md:pb-12">
+        {/* Line 1: ARCHITECTURAL TALENT (Syne uppercase) */}
+        <SplitTextReveal
+          splitBy="lines"
+          delay={0}
+          stagger={0.1}
+          duration={1.2}
+          ease="cubic-bezier(0.16, 1, 0.3, 1)"
+          immediate={true}
+          as="div"
+          className="mb-4"
+        >
+          ARCHITECTURAL TALENT
+          <br />
+          CURATED FOR EXCELLENCE
+        </SplitTextReveal>
 
-        {/* Monumental Headline - 100% width */}
-        <div className="w-full max-w-none" style={{
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-          transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s'
-        }}>
-          <MonumentalHeadline
-            splitBy="lines"
-            delay={0}
-            stagger={0.08}
-            duration={1.4}
-            ease="cubic-bezier(0.76, 0, 0.24, 1)"
-            parallax={false}
-            maskAnimation={true}
-            className="mb-8"
-            as="h1"
+        {/* Line 2: Curated for Excellence (Instrument Serif italic) - handled by splitBy="lines" above */}
+
+        {/* Bottom Hairline Bar: Editorial Copy Left + CTA Right */}
+        <div className="border-t border-white/15 pt-6 mt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-5">
+          <p className="max-w-md text-sm md:text-base text-[var(--color-text-secondary)] leading-relaxed">
+            Every professional vetted. Every project matched with precision.
+          </p>
+          <Link
+            to="/projects"
+            className="inline-flex items-center justify-center gap-2 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[48px] w-full sm:w-auto"
           >
-            Architectural Talent
-            <br />
-            Curated for Excellence
-          </MonumentalHeadline>
-
-          {/* Sub-headline with dual font contrast: Syne uppercase + Instrument Serif italic */}
-          <div className="max-w-3xl mb-12" style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s'
-          }}>
-            <p className="font-heading font-medium text-[var(--color-text-muted)] uppercase tracking-[0.15em] text-sm mb-3">
-              The Archive
-            </p>
-            <EditorialText
-              size="xl"
-              animated={false}
-              className="max-w-2xl"
-            >
-              A meticulously curated network of world-class architects, spatial designers, and architectural technologists. Every professional vetted. Every project matched with precision.
-            </EditorialText>
-          </div>
-
-          {/* CTA Button */}
-          <div className="flex items-center gap-4" style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.1s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.1s'
-          }}>
-            <Link
-              to="/projects"
-              className="inline-flex items-center justify-center gap-2 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors rounded-none"
-            >
-              EXPLORE ARCHIVE →
-            </Link>
-          </div>
+            EXPLORE ARCHIVE →
+          </Link>
         </div>
       </div>
     </section>

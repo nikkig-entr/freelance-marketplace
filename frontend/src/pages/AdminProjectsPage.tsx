@@ -45,14 +45,14 @@ const sortOptions = [
   { value: 'views_count:desc', label: 'Most Views' },
 ];
 
-const statusColors: Record<ProjectStatus, 'primary' | 'secondary' | 'outline' | 'danger'> = {
+const statusColors: Record<ProjectStatus, 'primary' | 'secondary' | 'outline'> = {
   draft: 'secondary',
   open: 'primary',
   in_progress: 'primary',
   in_review: 'secondary',
   completed: 'primary',
-  cancelled: 'danger',
-  disputed: 'danger',
+  cancelled: 'outline',
+  disputed: 'outline',
 };
 
 export function AdminProjectsPage() {
@@ -254,7 +254,7 @@ export function AdminProjectsPage() {
                         ) : (
                           <Badge variant="outline" size="sm">No</Badge>
                         )}
-                        {project.is_urgent && <Badge variant="danger" size="sm" className="ml-1">Urgent</Badge>}
+                        {project.is_urgent && <Badge variant="outline" size="sm" className="ml-1 border-[var(--color-white)]/30 text-[var(--color-white)]">Urgent</Badge>}
                       </td>
                       <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
                         {formatDate(project.created_at)}
@@ -336,7 +336,7 @@ export function AdminProjectsPage() {
                 id="is_featured"
                 checked={editForm.is_featured}
                 onChange={(e) => setEditForm({ ...editForm, is_featured: e.target.checked })}
-                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                className="h-4 w-4 rounded-none border-[var(--color-border)] text-[var(--color-white)] focus:ring-2 focus:ring-[var(--color-white)]"
               />
               <label htmlFor="is_featured" className="text-sm font-medium text-[var(--color-text)]">Featured Project</label>
             </div>
@@ -346,7 +346,7 @@ export function AdminProjectsPage() {
                 id="is_urgent"
                 checked={editForm.is_urgent}
                 onChange={(e) => setEditForm({ ...editForm, is_urgent: e.target.checked })}
-                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                className="h-4 w-4 rounded-none border-[var(--color-border)] text-[var(--color-white)] focus:ring-2 focus:ring-[var(--color-white)]"
               />
               <label htmlFor="is_urgent" className="text-sm font-medium text-[var(--color-text)]">Urgent</label>
             </div>

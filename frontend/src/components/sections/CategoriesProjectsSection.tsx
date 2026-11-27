@@ -65,7 +65,7 @@ export function CategoriesProjectsSection() {
                 Explore by Category
               </Badge>
               <h2 className="text-headline-1 text-[var(--color-text)]">
-                Find Your <span className="text-gradient-accent">Specialization</span>
+                Find Your Specialization
               </h2>
             </div>
             <Button variant="outline" asChild size="md">
@@ -81,13 +81,13 @@ export function CategoriesProjectsSection() {
                 className="group glass-card-hover p-5 text-center relative overflow-hidden"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
-                <div className="w-12 h-12 rounded-xl glass flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110">
-                  <category.icon className="w-6 h-6 text-[var(--color-accent)]" aria-hidden="true" />
+                <div className="w-12 h-12 rounded-none glass flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110">
+                  <category.icon className="w-6 h-6 text-[var(--color-white)]" aria-hidden="true" />
                 </div>
                 <h3 className="font-semibold text-[var(--color-text)] mb-1">{category.name}</h3>
                 <p className="text-sm text-[var(--color-text-muted)]">{category.count} projects</p>
                 {/* Subtle hover glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--color-accent)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--color-white)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-none" />
               </Link>
             ))}
           </div>
@@ -101,7 +101,7 @@ export function CategoriesProjectsSection() {
                 This Week's Highlights
               </Badge>
               <h2 className="text-headline-1 text-[var(--color-text)]">
-                Featured <span className="text-gradient-accent">Projects</span>
+                Featured Projects
               </h2>
             </div>
             <Button variant="outline" asChild size="md">
@@ -113,7 +113,7 @@ export function CategoriesProjectsSection() {
             {featuredProjects.map((project) => (
               <article
                 key={project.id}
-                className={`relative glass-card-hover p-6 h-full ${project.featured ? 'border-[var(--color-accent)]/30 gradient-border-accent' : ''}`}
+                className={`relative glass-card-hover p-6 h-full ${project.featured ? 'border-[var(--color-white)]/20' : ''}`}
               >
                 {project.featured && (
                   <Badge variant="primary" className="absolute -top-3 left-4">Featured</Badge>
@@ -125,7 +125,7 @@ export function CategoriesProjectsSection() {
                     <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{project.client}</p>
                   </div>
                   {project.featured && (
-                    <div className="w-2 h-2 rounded-full bg-[var(--color-accent)]" />
+                    <div className="w-2 h-2 rounded-full bg-[var(--color-white)]" />
                   )}
                 </div>
 
@@ -133,7 +133,7 @@ export function CategoriesProjectsSection() {
                   <span className="font-medium text-[var(--color-text)]">{project.budget}</span>
                   <span className="text-[var(--color-border)]">•</span>
                   <span className="flex items-center gap-1.5">
-                    <CheckIcon className="w-3.5 h-3.5 text-[var(--color-gray-500)]" />
+                    <CheckIcon className="w-3.5 h-3.5 text-[var(--color-text-subtle)]" />
                     {project.proposals} proposals
                   </span>
                 </div>
@@ -165,13 +165,13 @@ export function CategoriesProjectsSection() {
         </div>
 
         {/* Visual Showcase - Minimal Split */}
-        <div className="glass-card rounded-3xl overflow-hidden">
+        <div className="glass-card rounded-none overflow-hidden">
           <div className="lg:grid lg:grid-cols-2">
             {/* Code side */}
             <div className="relative aspect-[4/3] lg:aspect-auto min-h-[350px] p-8 lg:p-12 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-gray-800)] via-black to-[var(--color-gray-800)]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface-hover)] via-black to-[var(--color-surface-hover)]" />
               <div className="relative z-10 text-center max-w-md">
-                <Code className="w-14 h-14 text-[var(--color-accent)]/50 mx-auto mb-4" />
+                <Code className="w-14 h-14 text-[var(--color-white)]/50 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-[var(--color-text)] mb-2">Build with Code</h3>
                 <p className="text-[var(--color-text-muted)] max-w-xs mx-auto">Clean architecture, modern stacks, scalable solutions</p>
               </div>
@@ -179,9 +179,9 @@ export function CategoriesProjectsSection() {
 
             {/* Design side */}
             <div className="relative aspect-[4/3] lg:aspect-auto min-h-[350px] flex flex-col items-center justify-center p-8 lg:p-12 text-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-gray-800)] via-black to-[var(--color-gray-800)]" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-surface-hover)] via-black to-[var(--color-surface-hover)]" />
               <div className="relative z-10 max-w-md">
-                <Palette className="w-14 h-14 text-[var(--color-gray-500)]/50 mx-auto mb-4" />
+                <Palette className="w-14 h-14 text-[var(--color-text-subtle)]/50 mx-auto mb-4" />
                 <Badge variant="primary" className="mb-4 inline-block">Design & Creative</Badge>
                 <h3 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-4">
                   Craft Beautiful Experiences

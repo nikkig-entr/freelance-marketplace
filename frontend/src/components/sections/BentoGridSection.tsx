@@ -84,7 +84,7 @@ export function BentoGridSection() {
             Why Choose FreelanceHub
           </Badge>
           <h2 className="text-headline-1 text-[var(--color-text)]">
-            Built for the <span className="text-gradient-accent">Modern Freelancer</span>
+            Built for the Modern Freelancer
           </h2>
           <p className="mt-4 text-body text-[var(--color-text-muted)] max-w-2xl mx-auto">
             Six pillars that make freelancing secure, efficient, and rewarding. Real features, real results.
@@ -99,7 +99,7 @@ export function BentoGridSection() {
               className={`
                 relative glass-card-hover overflow-hidden group
                 ${item.large ? 'lg:col-span-7 lg:row-span-2' : 'lg:col-span-5'}
-                $${index === 1 ? 'lg:col-start-8' : ''}
+                ${index === 1 ? 'lg:col-start-8' : ''}
                 ${index === 2 ? 'lg:col-start-8' : ''}
                 animate-slide-up delay-${Math.min(index + 1, 5)}
               `}
@@ -128,15 +128,15 @@ export function BentoGridSection() {
                 {/* Gradient overlay - clean */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                 {/* Subtle border glow on hover */}
-                <div className="absolute inset-0 border border-transparent transition-all duration-300 group-hover:border-[var(--color-accent)]/30" />
+                <div className="absolute inset-0 border border-transparent transition-all duration-300 group-hover:border-[var(--color-white)]/20" />
               </div>
 
               {/* Content */}
               <div className="relative h-full p-6 lg:p-8 flex flex-col justify-between">
                 {/* Top: Icon */}
                 <div className="flex items-start justify-between">
-                  <div className="w-11 h-11 rounded-xl glass flex items-center justify-center">
-                    <item.icon className="w-6 h-6 text-[var(--color-accent)]" aria-hidden="true" />
+                  <div className="w-11 h-11 rounded-none glass flex items-center justify-center">
+                    <item.icon className="w-6 h-6 text-[var(--color-white)]" aria-hidden="true" />
                   </div>
                 </div>
 
@@ -155,7 +155,7 @@ export function BentoGridSection() {
                   {/* Stats */}
                   <div className="flex flex-wrap gap-3 mb-4">
                     {item.stats.map((stat, i) => (
-                      <div key={i} className="px-3 py-1.5 glass-subtle rounded-xl">
+                      <div key={i} className="px-3 py-1.5 glass-subtle rounded-none">
                         <span className="text-xs font-medium text-[var(--color-text)]">{stat}</span>
                       </div>
                     ))}
@@ -173,7 +173,7 @@ export function BentoGridSection() {
               </div>
 
               {/* Hover accent line - minimal */}
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-accent)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[var(--color-white)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </article>
           ))}
         </div>

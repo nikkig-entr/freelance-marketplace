@@ -1,7 +1,7 @@
 import { forwardRef, ButtonHTMLAttributes, isValidElement, cloneElement, Children } from 'react';
 import { clsx } from 'clsx';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -32,13 +32,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center gap-2 font-medium rounded-none transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantStyles: Record<ButtonVariant, string> = {
-      primary: 'bg-[var(--color-accent)] text-[var(--color-text-inverse)] hover:bg-[var(--color-accent-hover)] focus-visible:ring-[var(--color-accent)] shadow-lg shadow-[var(--color-accent)]/25 hover:shadow-[var(--color-accent)]/35',
+      primary: 'bg-[var(--color-white)] text-[var(--color-text-inverse)] border border-[var(--color-white)] hover:bg-[var(--color-gray-100)] hover:border-[var(--color-gray-100)] focus-visible:ring-[var(--color-white)]',
       secondary: 'glass text-[var(--color-text)] border-[var(--glass-border)] hover:bg-[var(--glass-bg-strong)] hover:border-[var(--glass-border-hover)] focus-visible:ring-[var(--color-text-muted)]',
-      outline: 'border-2 border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)] hover:bg-[var(--color-accent-muted)] focus-visible:ring-[var(--color-accent)]',
-      danger: 'bg-[var(--color-gray-800)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-gray-700)] hover:border-[var(--color-border-hover)] focus-visible:ring-[var(--color-text-muted)]',
+      outline: 'border-2 border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-white)] hover:bg-[var(--glass-bg)] focus-visible:ring-[var(--color-white)]',
       ghost: 'bg-transparent border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] focus-visible:ring-[var(--color-text-muted)]',
     };
 

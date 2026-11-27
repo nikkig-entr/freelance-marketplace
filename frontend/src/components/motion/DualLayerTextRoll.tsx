@@ -40,12 +40,11 @@ export function DualLayerTextRoll({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Layer 1 - Default text */}
+      {/* Layer 1 - Default text (slides up and out) */}
       <div
         className="flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          transform: isHovering ? 'translateY(-100%) rotateX(-90deg)' : 'translateY(0) rotateX(0)',
-          transformOrigin: 'center bottom',
+          transform: isHovering ? 'translateY(-100%)' : 'translateY(0)',
           opacity: isHovering ? 0 : 1,
         }}
       >
@@ -57,12 +56,11 @@ export function DualLayerTextRoll({
         </span>
       </div>
 
-      {/* Layer 2 - Hover text (same content, comes from top) */}
+      {/* Layer 2 - Hover text (slides up from bottom) */}
       <div
         className="absolute left-0 top-full flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          transform: isHovering ? 'translateY(-100%) rotateX(0)' : 'translateY(0) rotateX(90deg)',
-          transformOrigin: 'center top',
+          transform: isHovering ? 'translateY(-100%)' : 'translateY(0)',
           opacity: isHovering ? 1 : 0,
           whiteSpace: 'nowrap',
         }}

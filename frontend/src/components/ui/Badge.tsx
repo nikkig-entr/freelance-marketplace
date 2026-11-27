@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   dot?: boolean;
@@ -18,10 +18,9 @@ export function Badge({
   dotColor,
 }: BadgeProps) {
   const variantClasses = {
-    primary: 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] border border-[var(--color-accent)]/30',
+    primary: 'bg-[var(--color-white)] text-[var(--color-text-inverse)] border border-[var(--color-white)]',
     secondary: 'glass text-[var(--color-text-muted)] border-[var(--glass-border)]',
     outline: 'bg-transparent text-[var(--color-text)] border border-[var(--color-border)]',
-    danger: 'bg-[var(--color-gray-800)] text-[var(--color-gray-400)] border border-[var(--color-border)]',
   };
 
   const sizeClasses = {
@@ -33,7 +32,7 @@ export function Badge({
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1.5 font-medium rounded-full border',
+        'inline-flex items-center gap-1.5 font-medium rounded-none border',
         variantClasses[variant],
         sizeClasses[size],
         className
@@ -42,7 +41,7 @@ export function Badge({
       {dot && (
         <span
           className={clsx('w-1.5 h-1.5 rounded-full', dotColor)}
-          style={{ backgroundColor: dotColor || 'var(--color-accent)' }}
+          style={{ backgroundColor: dotColor || 'var(--color-white)' }}
         />
       )}
       {children}
@@ -65,21 +64,21 @@ export function StatusBadge({
     in_progress: { label: 'In Progress', variant: 'primary' },
     in_review: { label: 'In Review', variant: 'secondary' },
     completed: { label: 'Completed', variant: 'primary' },
-    cancelled: { label: 'Cancelled', variant: 'danger' },
-    disputed: { label: 'Disputed', variant: 'danger' },
+    cancelled: { label: 'Cancelled', variant: 'outline' },
+    disputed: { label: 'Disputed', variant: 'outline' },
     pending: { label: 'Pending', variant: 'secondary' },
     accepted: { label: 'Accepted', variant: 'primary' },
-    rejected: { label: 'Rejected', variant: 'danger' },
+    rejected: { label: 'Rejected', variant: 'outline' },
     withdrawn: { label: 'Withdrawn', variant: 'secondary' },
     shortlisted: { label: 'Shortlisted', variant: 'primary' },
     active: { label: 'Active', variant: 'primary' },
-    past_due: { label: 'Past Due', variant: 'danger' },
-    unpaid: { label: 'Unpaid', variant: 'danger' },
+    past_due: { label: 'Past Due', variant: 'outline' },
+    unpaid: { label: 'Unpaid', variant: 'outline' },
     trialing: { label: 'Trialing', variant: 'primary' },
     incomplete: { label: 'Incomplete', variant: 'secondary' },
-    incomplete_expired: { label: 'Expired', variant: 'danger' },
+    incomplete_expired: { label: 'Expired', variant: 'outline' },
     processing: { label: 'Processing', variant: 'primary' },
-    failed: { label: 'Failed', variant: 'danger' },
+    failed: { label: 'Failed', variant: 'outline' },
   };
 
   const config = statusConfig[status] || { label: status, variant: 'secondary' };

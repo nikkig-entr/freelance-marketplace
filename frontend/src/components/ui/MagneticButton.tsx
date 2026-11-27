@@ -94,7 +94,7 @@ export function MagneticButton({
         {rightIcon && <span className="flex-shrink-0" aria-hidden="true">{rightIcon}</span>}
       </span>
       <span
-        className="absolute inset-0 bg-[var(--color-accent)]/10 opacity-0 transition-opacity duration-300 pointer-events-none"
+        className="absolute inset-0 bg-[var(--color-white)]/10 opacity-0 transition-opacity duration-300 pointer-events-none"
         aria-hidden="true"
       />
     </button>

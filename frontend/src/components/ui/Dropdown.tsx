@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 type DropdownItem =
-  | { label: string; onClick?: () => void; icon?: ReactNode; disabled?: boolean; danger?: boolean; divider?: false; href?: never }
+  | { label: string; onClick?: () => void; icon?: ReactNode; disabled?: boolean; divider?: false; href?: never }
   | { divider: true; label?: undefined; onClick?: undefined; icon?: undefined; disabled?: undefined; danger?: undefined; href?: never };
 
 interface DropdownProps {
@@ -29,7 +29,7 @@ export function Dropdown({ trigger, items, align = 'right', className }: Dropdow
       >
         <Menu.Items
           className={clsx(
-            'absolute z-10 min-w-[160px] mt-2 origin-top-right rounded-xl bg-[var(--color-surface)] py-1 border border-[var(--color-border)] shadow-[var(--shadow-xl)] focus:outline-none',
+            'absolute z-10 min-w-[160px] mt-2 origin-top-right rounded-none bg-[var(--color-surface)] py-1 border border-[var(--color-border)] shadow-[var(--shadow-xl)] focus:outline-none',
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >
@@ -48,8 +48,8 @@ export function Dropdown({ trigger, items, align = 'right', className }: Dropdow
                     className={clsx(
                       'w-full px-4 py-2 text-left text-sm flex items-center gap-2 transition-colors',
                       active ? 'bg-[var(--color-surface-hover)]' : '',
-                      item.danger ? 'text-[var(--color-gray-500)]' : 'text-[var(--color-text)]',
-                      item.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--color-surface-hover)]'
+                      item.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--color-surface-hover)]',
+                      'text-[var(--color-text)]'
                     )}
                   >
                     {item.icon && <span className="w-5 h-5 flex-shrink-0 text-[var(--color-text-muted)]">{item.icon}</span>}
@@ -122,22 +122,21 @@ export function UserMenu({ user, onProfileClick, onSettingsClick, onLogout, onUp
         </svg>
       ),
       onClick: onLogout,
-      danger: true,
     },
   ];
 
   const trigger = (
     <button
       type="button"
-      className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-[var(--glass-bg)] transition-colors"
+      className="flex items-center gap-3 p-1.5 rounded-none hover:bg-[var(--glass-bg)] transition-colors"
       aria-expanded="false"
       aria-haspopup="true"
     >
-      <div className="w-8 h-8 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full bg-[var(--glass-bg-strong)] flex items-center justify-center">
         {user.avatar ? (
           <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
         ) : (
-          <span className="text-[var(--color-accent)] font-medium text-sm">
+          <span className="text-[var(--color-white)] font-medium text-sm">
             {user.name.charAt(0).toUpperCase()}
           </span>
         )}

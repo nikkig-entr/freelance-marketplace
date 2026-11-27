@@ -1,267 +1,330 @@
-'use client';
-
-import { Link, useLocation } from '@tanstack/react-router';
-import { useState, useRef, useEffect } from 'react';
-import { clsx } from 'clsx';
-import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useState, useEffect } from 'react';
+import {
+  HomeIcon,
+  ChatBubbleLeftRightIcon,
+  CurrencyDollarIcon,
+  Cog6ToothIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
+  PlusIcon,
+  Bars3Icon,
+  XMarkIcon,
+  DocumentTextIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline';
+import { Briefcase } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Dropdown } from '@/components/ui/Dropdown';
 
 const navigation = [
-  { name: 'PROJECTS', href: '/projects', index: '01' },
-  { name: 'TALENT', href: '/talent', index: '02' },
-  { name: 'PRICING', href: '/pricing', index: '03' },
-  { name: 'SIGN IN', href: '/login', index: '04' },
+  { name: 'Projects', href: '/projects', icon: Briefcase, roles: ['client', 'freelancer', 'admin'] },
+  { name: 'My Projects', href: '/projects/my', icon: DocumentTextIcon, roles: ['client', 'admin'] },
+  { name: 'My Bids', href: '/my/bids', icon: Briefcase, roles: ['freelancer'] },
+  { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, roles: ['client', 'freelancer', 'admin'] },
+  { name: 'Balance', href: '/balance', icon: CurrencyDollarIcon, roles: ['freelancer', 'admin'] },
+  { name: 'Billing', href: '/billing', icon: CurrencyDollarIcon, roles: ['client', 'freelancer', 'admin'] },
+  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon, roles: ['client', 'freelancer', 'admin'] },
 ];
 
-function DualLayerTextRoll({
-  children,
-  index,
-}: {
-  children: React.ReactNode;
-  index: string;
-}) {
-  const [isHovering, setIsHovering] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const handleMouseEnter = () => setIsHovering(true);
-    const handleMouseLeave = () => setIsHovering(false);
-
-    element.addEventListener('mouseenter', handleMouseEnter);
-    element.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className="relative overflow-hidden inline-block"
-      style={{ perspective: '400px' }}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      {/* Layer 1 - Default text */}
-      <div
-        className="flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{
-          transform: isHovering ? 'translateY(-100%) rotateX(-90deg)' : 'translateY(0) rotateX(0)',
-          transformOrigin: 'center bottom',
-          opacity: isHovering ? 0 : 1,
-        }}
-      >
-        <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider">
-          {index}
-        </span>
-        <span className="font-heading font-medium text-[var(--color-text-muted)] uppercase tracking-[0.1em]">
-          {children}
-        </span>
-      </div>
-
-      {/* Layer 2 - Hover text (same content, comes from top) */}
-      <div
-        className="absolute left-0 top-full flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{
-          transform: isHovering ? 'translateY(-100%) rotateX(0)' : 'translateY(0) rotateX(90deg)',
-          transformOrigin: 'center top',
-          opacity: isHovering ? 1 : 0,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <span className="font-mono text-[var(--color-white)] text-xs tracking-wider">
-          {index}
-        </span>
-        <span className="font-heading font-medium text-[var(--color-white)] uppercase tracking-[0.1em]">
-          {children}
-        </span>
-      </div>
-    </div>
-  );
-}
+const adminNavigation = [
+  { name: 'Dashboard', href: '/admin', icon: HomeIcon },
+  { name: 'Users', href: '/admin/users', icon: UserCircleIcon },
+  { name: 'Projects', href: '/admin/projects', icon: Briefcase },
+  { name: 'Withdrawals', href: '/admin/withdrawals', icon: CurrencyDollarIcon },
+  { name: 'Transactions', href: '/admin/transactions', icon: DocumentTextIcon },
+];
 
 export function Header() {
-  const { isAuthenticated } = useAuth();
+  const { user, logout, isLoading } = useAuth();
+  useWebSocket(); // Keep connection alive
+  const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileMenuOpen]);
+  const filteredNavigation = navigation.filter((item) =>
+    user ? item.roles.includes(user.role) : false
+  );
 
-  // Close mobile menu on escape key
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && mobileMenuOpen) {
-        setMobileMenuOpen(false);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'access_token' && !e.newValue) {
+        navigate({ to: '/login' });
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mobileMenuOpen]);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate({ to: '/login' });
+  };
+
+  if (isLoading) {
+    return (
+      <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-[var(--glass-blur-strong)] sticky top-0 z-40">
+        <div className="container h-full flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-white)] rounded-full animate-spin" />
+        </div>
+      </header>
+    );
+  }
 
   return (
-    <header className="h-16 fixed top-0 left-0 right-0 z-40 px-4 md:px-8 flex items-center justify-between border-b border-white/15 bg-[#050505]/90 backdrop-blur-md">
-      {/* Left: Logo */}
-      <div className="flex items-center gap-8">
-        <Link to="/" className="flex items-center gap-2" aria-label="Home">
-          <span className="font-mono text-xs tracking-[0.24em] md:tracking-[0.28em] uppercase text-[var(--color-text)]">
-            FREELANCEHUB
-          </span>
-        </Link>
+    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-[var(--glass-blur-strong)] sticky top-0 z-40">
+      <div className="container h-full">
+        <div className="flex items-center justify-between h-full">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="FreelanceHub Home">
+            <div className="w-8 h-8 bg-[var(--color-white)] rounded-none flex items-center justify-center">
+              <Briefcase className="w-5 h-5 text-[var(--color-text-inverse)]" aria-hidden="true" />
+            </div>
+            <span className="text-xl font-heading font-bold text-[var(--color-text)]">FreelanceHub</span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={clsx(
-                  'flex items-center gap-3 transition-all duration-200',
-                  isActive
-                    ? 'text-[var(--color-white)]'
-                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-white)]'
-                )}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <DualLayerTextRoll index={item.index}>
-                  {item.name}
-                </DualLayerTextRoll>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Right Side */}
-      <div className="flex items-center gap-4">
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          className="flex md:hidden min-h-[44px] px-3 border border-white/25 font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] hover:text-[var(--color-white)] hover:border-white/50 transition-colors"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-expanded={mobileMenuOpen}
-          aria-controls="mobile-menu-drawer"
-          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-        >
-          {mobileMenuOpen ? (
-            <XMarkIcon className="w-5 h-5" />
-          ) : (
-            <>
-              <span>MENU</span>
-              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 border border-current rounded-none">
-                <PlusIcon className="w-3 h-3" />
-              </span>
-            </>
-          )}
-        </button>
-
-        {/* Desktop START PROJECT Button */}
-        <Link
-          to="/projects/create"
-          className="hidden md:inline-flex items-center justify-center gap-2 border border-white px-5 py-2 font-mono text-[11px] uppercase tracking-[0.22em] hover:bg-white hover:text-black transition-colors"
-        >
-          START PROJECT
-        </Link>
-      </div>
-
-      {/* Mobile Full-Screen Swiss Architectural Drawer */}
-      {mobileMenuOpen && (
-        <div
-          ref={drawerRef}
-          id="mobile-menu-drawer"
-          className="fixed inset-0 z-50 h-[100dvh] bg-[#050505] flex flex-col"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-        >
-          {/* Drawer Header */}
-          <div className="h-16 px-4 md:px-8 flex items-center justify-between border-b border-white/15">
-            <span className="font-mono text-xs tracking-[0.24em] uppercase text-[var(--color-text-muted)]">
-              FREELANCEHUB
-            </span>
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(false)}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-white)] transition-colors"
-              aria-label="Close menu"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Navigation Links - Large Stacked Rows */}
-          <nav className="flex-1 px-4 md:px-8 py-8 md:py-12 flex flex-col justify-center gap-0 overflow-y-auto" aria-label="Main navigation">
-            {navigation.map((item) => {
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={clsx(
-                    'relative flex items-center min-h-[80px] px-0 py-4 border-b border-white/15 transition-colors',
+                  className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors rounded-none ${
                     isActive
-                      ? 'text-[var(--color-white)]'
-                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-white)]'
-                  )}
+                      ? 'text-[var(--color-text)] bg-[var(--color-white)]/10'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                  }`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider w-10 shrink-0">
-                    {item.index}
-                  </span>
-                  <span className="font-heading font-medium text-2xl md:text-3xl lg:text-4xl uppercase tracking-[0.08em]">
-                    {item.name}
-                  </span>
-                  {isActive && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-white" />
-                  )}
+                  <item.icon className="w-4 h-4" aria-hidden="true" />
+                  {item.name}
                 </Link>
               );
             })}
+
+            {user?.role === 'admin' && (
+              <div className="flex items-center gap-1 border-l border-[var(--color-border)] pl-4 ml-2">
+                <span className="text-xs font-semibold text-[var(--color-text-subtle)] uppercase tracking-wider px-2">Admin</span>
+                {adminNavigation.map((item) => {
+                  const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors rounded-none ${
+                        isActive
+                          ? 'text-[var(--color-text)] bg-[var(--color-white)]/10'
+                          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                      }`}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      <item.icon className="w-4 h-4" aria-hidden="true" />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </nav>
 
-          {/* Full-Width START PROJECT CTA at Bottom */}
-          {!isAuthenticated && (
-            <div className="px-4 md:px-8 pb-8 md:pb-12 border-t border-white/15 pt-6">
-              <Link
-                to="/projects/create"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block min-h-[56px] w-full flex items-center justify-center gap-3 border-2 border-white font-mono text-sm uppercase tracking-[0.18em] hover:bg-white hover:text-black transition-all duration-200"
-              >
-                START PROJECT
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-3">
+            {/* Create Project Button */}
+            {user && (user.role === 'client' || user.role === 'admin') && (
+              <Link to="/projects/create" className="hidden sm:flex items-center gap-2">
+                <Button variant="primary" size="sm" leftIcon={<PlusIcon className="w-4 h-4" />}>
+                  New Project
+                </Button>
               </Link>
-              <div className="mt-4 text-center">
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-white)] transition-colors uppercase tracking-wider"
-                >
-                  Already have an account? Sign in
+            )}
+
+            {/* User Menu */}
+            {user ? (
+              <Dropdown
+                trigger={
+                  <button
+                    className="flex items-center gap-2 p-1.5 hover:bg-[var(--glass-bg)] rounded-none transition-colors"
+                    aria-label="User menu"
+                  >
+                    <div className="w-8 h-8 rounded-full glass-strong flex items-center justify-center">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                      ) : (
+                        <UserCircleIcon className="w-5 h-5 text-[var(--color-white)]" />
+                      )}
+                    </div>
+                    <span className="hidden sm:block text-sm font-medium text-[var(--color-text)]">{user.full_name || user.email}</span>
+                  </button>
+                }
+                items={[
+                  {
+                    label: 'Profile',
+                    icon: <UserCircleIcon className="w-5 h-5" />,
+                    onClick: () => navigate({ to: `/profile/$userId`, params: { userId: String(user.id) } }),
+                  },
+                  {
+                    label: 'Settings',
+                    icon: <Cog6ToothIcon className="w-5 h-5" />,
+                    onClick: () => navigate({ to: '/settings' }),
+                  },
+                  {
+                    label: 'Billing',
+                    icon: <CurrencyDollarIcon className="w-5 h-5" />,
+                    onClick: () => navigate({ to: '/billing' }),
+                  },
+                  ...(user.role === 'admin'
+                    ? [
+                        {
+                          label: 'Admin Panel',
+                          icon: <ShieldCheckIcon className="w-5 h-5" />,
+                          onClick: () => navigate({ to: '/admin' }),
+                        },
+                        { divider: true } as any,
+                      ]
+                    : []),
+                  { divider: true } as any,
+                  {
+                    label: 'Sign out',
+                    icon: <ArrowRightOnRectangleIcon className="w-5 h-5" />,
+                    onClick: handleLogout,
+                  },
+                ]}
+                align="right"
+              />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link to="/login" className="hidden sm:block">
+                  <Button variant="ghost" size="sm">Sign in</Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="primary" size="sm">Get Started</Button>
                 </Link>
               </div>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] rounded-none transition-colors"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-drawer"
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isMobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Fullscreen Swiss Drawer */}
+      {isMobileMenuOpen && (
+        <div
+          id="mobile-drawer"
+          className="lg:hidden fixed inset-0 z-50 bg-[var(--color-bg)] animate-in"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
+        >
+          <div className="flex flex-col h-full">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between h-16 px-6 border-b border-[var(--color-border)]">
+              <Link to="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="w-8 h-8 bg-[var(--color-white)] rounded-none flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-[var(--color-text-inverse)]" aria-hidden="true" />
+                </div>
+                <span className="text-xl font-heading font-bold text-[var(--color-text)]">FreelanceHub</span>
+              </Link>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] rounded-none transition-colors"
+                aria-label="Close menu"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
             </div>
-          )}
+
+            {/* Drawer Navigation */}
+            <nav className="flex-1 overflow-y-auto px-6 py-6 space-y-1" aria-label="Mobile navigation">
+              {filteredNavigation.map((item) => {
+                const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-none text-base font-medium transition-colors ${
+                      isActive
+                        ? 'text-[var(--color-text)] bg-[var(--color-white)]/10'
+                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <item.icon className="w-5 h-5" aria-hidden="true" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+
+              {user?.role === 'admin' && (
+                <div className="pt-4 border-t border-[var(--color-border)]">
+                  <span className="px-4 text-xs font-semibold text-[var(--color-text-subtle)] uppercase tracking-wider block mb-3">Admin</span>
+                  {adminNavigation.map((item) => {
+                    const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`flex items-center gap-3 px-4 py-3.5 rounded-none text-base font-medium transition-colors ${
+                          isActive
+                            ? 'text-[var(--color-text)] bg-[var(--color-white)]/10'
+                            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
+                        }`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        <item.icon className="w-5 h-5" aria-hidden="true" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+
+              {user && (
+                <div className="pt-6 border-t border-[var(--color-border)]">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-none text-base font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] transition-colors"
+                  >
+                    <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </nav>
+
+            {/* Drawer Footer - CTA for non-authenticated */}
+            {!user && (
+              <div className="p-6 border-t border-[var(--color-border)] space-y-3">
+                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="primary" className="w-full" size="lg">
+                    Get Started
+                  </Button>
+                </Link>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full" size="lg">
+                    Sign in
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </header>
   );
 }
-
-export { Header as default };

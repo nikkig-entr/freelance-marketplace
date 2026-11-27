@@ -47,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={`${inputId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
+          <p id={`${inputId}-error`} className="input-hint text-[var(--color-text-muted)]" role="alert">
             {error}
           </p>
         )}
@@ -89,7 +89,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {error && (
-          <p id={`${textareaId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
+          <p id={`${textareaId}-error`} className="input-hint text-[var(--color-text-muted)]" role="alert">
             {error}
           </p>
         )}
@@ -113,7 +113,7 @@ export function Label({ required, children, className, ...props }: LabelProps) {
   return (
     <label className={clsx('input-label', className)} {...props}>
       {children}
-      {required && <span className="text-[var(--color-gray-500)] ml-1" aria-hidden="true">*</span>}
+      {required && <span className="text-[var(--color-text-muted)] ml-1" aria-hidden="true">*</span>}
     </label>
   );
 }
@@ -153,7 +153,7 @@ export function Select({
         ))}
       </select>
       {error && (
-        <p id={`${selectId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
+        <p id={`${selectId}-error`} className="input-hint text-[var(--color-text-muted)]" role="alert">
           {error}
         </p>
       )}
@@ -186,7 +186,7 @@ export function Checkbox({
         type="checkbox"
         id={checkboxId}
         className={clsx(
-          'mt-1 h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] transition-colors',
+          'mt-1 h-4 w-4 rounded-none border-[var(--color-border)] text-[var(--color-white)] focus:ring-2 focus:ring-[var(--color-white)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] transition-colors',
           className
         )}
         aria-invalid={error ? 'true' : 'false'}
@@ -197,7 +197,7 @@ export function Checkbox({
         {label}
       </label>
       {error && (
-        <p id={`${checkboxId}-error`} className="input-hint text-[var(--color-gray-500)]" role="alert">
+        <p id={`${checkboxId}-error`} className="input-hint text-[var(--color-text-muted)]" role="alert">
           {error}
         </p>
       )}

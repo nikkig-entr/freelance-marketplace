@@ -92,7 +92,7 @@ export function PricingSection() {
             Simple, Transparent Pricing
           </Badge>
           <h2 className="text-headline-1 text-[var(--color-text)]">
-            Choose Your <span className="text-gradient-accent">Plan</span>
+            Choose Your Plan
           </h2>
           <p className="mt-4 text-body text-[var(--color-text-muted)] max-w-2xl mx-auto">
             No hidden fees. No long-term contracts. Cancel anytime. All plans include secure escrow payments.
@@ -101,14 +101,14 @@ export function PricingSection() {
 
         {/* Billing Toggle - Clean */}
         <div className="flex justify-center mb-12">
-          <div className="glass-card p-1 rounded-xl flex items-center gap-1">
+          <div className="glass-card p-1 rounded-none flex items-center gap-1">
             {billingPeriods.map((period) => (
               <button
                 key={period.value}
                 onClick={() => setBilling(period.value)}
-                className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                className={`px-5 py-2.5 rounded-none text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   billing === period.value
-                    ? 'bg-[var(--color-accent)] text-[var(--color-text-inverse)] shadow-lg shadow-[var(--color-accent)]/25'
+                    ? 'bg-[var(--color-white)] text-[var(--color-text-inverse)] shadow-lg shadow-[var(--color-white)]/25'
                     : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)]'
                 }`}
               >
@@ -126,7 +126,7 @@ export function PricingSection() {
           {plans.map((plan, index) => (
             <article
               key={plan.name}
-              className={`relative glass-card-hover p-6 lg:p-8 flex flex-col h-full ${plan.popular ? 'ring-1 ring-[var(--color-accent)]/30' : ''}`}
+              className={`relative glass-card-hover p-6 lg:p-8 flex flex-col h-full ${plan.popular ? 'ring-1 ring-[var(--color-white)]/20' : ''}`}
               style={{ animationDelay: `${index * 80}ms` }}
             >
               {/* Popular Badge */}
@@ -149,10 +149,10 @@ export function PricingSection() {
                   </span>
                   <span className="text-[var(--color-text-muted)] mb-1">/month</span>
                   {billing === 'yearly' && plan.price.yearly > 0 && (
-                    <span className="text-xs text-[var(--color-gray-500)] ml-2">Billed ${plan.price.yearly * 12}/year</span>
+                    <span className="text-xs text-[var(--color-text-muted)] ml-2">Billed ${plan.price.yearly * 12}/year</span>
                   )}
                   {plan.price.monthly === 0 && (
-                    <span className="text-xs text-[var(--color-gray-500)] ml-2">Free forever</span>
+                    <span className="text-xs text-[var(--color-text-muted)] ml-2">Free forever</span>
                   )}
                 </div>
               </div>
@@ -161,9 +161,9 @@ export function PricingSection() {
               <ul className="space-y-3 flex-1 mb-8" role="list">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                    <div className={`w-5 h-5 rounded-none flex items-center justify-center flex-shrink-0 mt-0.5 ${
                       feature.included
-                        ? 'bg-[var(--color-accent)]/20 text-[var(--color-accent)]'
+                        ? 'bg-[var(--color-white)]/20 text-[var(--color-white)]'
                         : 'glass text-[var(--color-text-subtle)]'
                     }`}>
                       {feature.included ? (
@@ -196,7 +196,7 @@ export function PricingSection() {
         <div className="mt-16 text-center">
           <div className="glass-card p-6 lg:p-8 max-w-3xl mx-auto">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Crown className="w-6 h-6 text-[var(--color-accent)]" />
+              <Crown className="w-6 h-6 text-[var(--color-white)]" />
               <h3 className="text-lg font-semibold text-[var(--color-text)]">Need a custom solution?</h3>
             </div>
             <p className="text-[var(--color-text-muted)] mb-6">

@@ -31,10 +31,10 @@ const statusSizeClasses = {
 };
 
 const statusColorClasses = {
-  online: 'bg-[var(--color-accent)]',
+  online: 'bg-[var(--color-white)]',
   offline: 'bg-[var(--color-text-subtle)]',
-  busy: 'bg-[var(--color-gray-500)]',
-  away: 'bg-[var(--color-gray-400)]',
+  busy: 'bg-[var(--color-text-muted)]',
+  away: 'bg-[var(--color-text-muted)]',
 };
 
 const statusPositionClasses = {
@@ -55,14 +55,14 @@ function getInitials(name: string): string {
 
 function getColorFromName(name: string): string {
   const colors = [
-    'bg-[var(--color-accent-muted)] text-[var(--color-accent)]',
-    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-700)] text-[var(--color-text)]',
-    'bg-[var(--color-gray-800)] text-[var(--color-text)]',
+    'bg-[var(--glass-bg-strong)] text-[var(--color-text)]',
+    'bg-[var(--color-surface-hover)] text-[var(--color-text)]',
+    'bg-[var(--glass-bg)] text-[var(--color-text)]',
+    'bg-[var(--color-surface-hover)] text-[var(--color-text)]',
+    'bg-[var(--glass-bg-strong)] text-[var(--color-text)]',
+    'bg-[var(--color-surface-hover)] text-[var(--color-text)]',
+    'bg-[var(--glass-bg)] text-[var(--color-text)]',
+    'bg-[var(--color-surface-hover)] text-[var(--color-text)]',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -81,7 +81,7 @@ export function Avatar({
   status,
   statusPosition = 'bottom-right',
 }: AvatarProps) {
-  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
+  const shapeClass = shape === 'circle' ? 'rounded-full' : 'rounded-none';
   const showStatus = status && status !== 'offline';
 
   return (
@@ -110,7 +110,7 @@ export function Avatar({
           className={clsx(
             'absolute border-2 border-[var(--color-bg)]',
             statusSizeClasses[size],
-            'rounded-full',
+            shape === 'circle' ? 'rounded-full' : 'rounded-none',
             statusColorClasses[status],
             statusPositionClasses[statusPosition]
           )}
@@ -144,7 +144,8 @@ export function AvatarGroup({
         <div
           className={clsx(
             sizeClasses[size],
-            'rounded-full flex items-center justify-center font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border-2 border-[var(--color-bg)]'
+            'rounded-full',
+            'flex items-center justify-center font-medium text-[var(--color-text-muted)] bg-[var(--color-surface-hover)] border-2 border-[var(--color-bg)]'
           )}
         >
           +{remainingCount}

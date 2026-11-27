@@ -150,7 +150,7 @@ export function RerollList({ items, className = '', staggerDelay = 80, speed = 1
           speed={speed}
           href={item.href}
           onClick={item.onClick}
-          className="text-headline-5 font-semibold text-[var(--color-text)] hover:text-[var(--color-accent)]"
+          className="text-headline-5 font-semibold text-[var(--color-text)] hover:text-[var(--color-white)]"
         >
           {item.text}
         </RerollListItem>

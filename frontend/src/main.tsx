@@ -39,23 +39,23 @@ function AppRoot() {
                 toastOptions={{
                   duration: 4000,
                   style: {
-                    background: 'var(--color-graphite)',
-                    color: 'var(--color-cream)',
-                    boxShadow: 'var(--shadow-glass-strong)',
-                    borderRadius: 'var(--radius-xl)',
+                    background: 'var(--color-bg-elevated)',
+                    color: 'var(--color-text)',
+                    boxShadow: 'var(--shadow-xl)',
+                    borderRadius: '0',
                     padding: '1rem',
-                    border: '1px solid var(--glass-border)',
+                    border: '1px solid var(--color-border)',
                   },
                   success: {
                     iconTheme: {
-                      primary: 'var(--color-accent)',
-                      secondary: 'var(--color-obsidian)',
+                      primary: 'var(--color-white)',
+                      secondary: 'var(--color-bg)',
                     },
                   },
                   error: {
                     iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#fff',
+                      primary: 'var(--color-white)',
+                      secondary: 'var(--color-bg)',
                     },
                   },
                 }}

@@ -42,11 +42,11 @@ const sortOptions = [
   { value: 'amount_cents:asc', label: 'Amount Low-High' },
 ];
 
-const statusBadgeVariants: Record<WithdrawalStatus, 'primary' | 'secondary' | 'outline' | 'danger'> = {
+const statusBadgeVariants: Record<WithdrawalStatus, 'primary' | 'secondary' | 'outline'> = {
   pending: 'secondary',
   processing: 'primary',
   completed: 'primary',
-  failed: 'danger',
+  failed: 'outline',
   cancelled: 'secondary',
 };
 
@@ -208,8 +208,8 @@ export function AdminWithdrawalsPage() {
                     <tr key={withdrawal.id} className="hover:bg-[var(--color-surface-muted)]">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[var(--color-accent-muted)] flex items-center justify-center">
-                            <UserIcon className="w-5 h-5 text-[var(--color-accent)]" />
+                          <div className="w-10 h-10 rounded-full glass-strong flex items-center justify-center">
+                            <UserIcon className="w-5 h-5 text-[var(--color-white)]" />
                           </div>
                           <div>
                             <p className="font-medium text-[var(--color-text)]">User #{withdrawal.user_id}</p>
@@ -224,7 +224,7 @@ export function AdminWithdrawalsPage() {
                           {withdrawal.method.replace('_', ' ')}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-[var(--color-accent)] font-medium">
+                      <td className="px-6 py-4 text-[var(--color-white)] font-medium">
                         {formatCurrency(withdrawal.net_amount_cents)}
                       </td>
                       <td className="px-6 py-4 text-[var(--color-text-muted)]">
@@ -246,7 +246,7 @@ export function AdminWithdrawalsPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => openActionModal(withdrawal)}
-                                className="text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)] border-[var(--color-accent)]/20"
+                                className="text-[var(--color-text-muted)] hover:bg-[var(--glass-bg)]"
                               >
                                 <ClockIcon className="w-4 h-4" />
                               </Button>
@@ -273,7 +273,7 @@ export function AdminWithdrawalsPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => openActionModal(withdrawal)}
-                              className="text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)] border-[var(--color-accent)]/20"
+                              className="text-[var(--color-text-muted)] hover:bg-[var(--glass-bg)]"
                             >
                               <XCircleIcon className="w-4 h-4" />
                             </Button>
@@ -328,7 +328,7 @@ export function AdminWithdrawalsPage() {
           size="md"
         >
           <div className="space-y-4">
-            <div className="bg-[var(--color-surface-muted)] p-4 rounded-xl">
+            <div className="glass-subtle p-4 rounded-none">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-[var(--color-text-muted)]">Amount</p>
@@ -336,7 +336,7 @@ export function AdminWithdrawalsPage() {
                 </div>
                 <div>
                   <p className="text-[var(--color-text-muted)]">Net Amount</p>
-                  <p className="font-semibold text-[var(--color-accent)]">{formatCurrency(selectedWithdrawal.net_amount_cents)}</p>
+                  <p className="font-semibold text-[var(--color-white)]">{formatCurrency(selectedWithdrawal.net_amount_cents)}</p>
                 </div>
                 <div>
                   <p className="text-[var(--color-text-muted)]">Fees</p>
@@ -376,14 +376,15 @@ export function AdminWithdrawalsPage() {
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-2 border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] bg-[var(--color-bg)] text-[var(--color-text)]"
+                    className="w-full px-4 py-2 border border-[var(--color-border)] rounded-none focus:ring-2 focus:ring-[var(--color-white)] focus:border-[var(--color-white)] bg-[var(--color-bg)] text-[var(--color-text)]"
                     placeholder="Enter reason for rejection..."
                   />
                 </div>
 
                 <Button
-                  variant="danger"
+                  variant="outline"
                   fullWidth
+                  className="text-[var(--color-white)] border-[var(--color-white)] hover:bg-[var(--color-white)] hover:text-[var(--color-text-inverse)]"
                   onClick={() => {
                     if (rejectReason.trim()) {
                       rejectWithdrawal({ id: selectedWithdrawal!.id, reason: rejectReason });

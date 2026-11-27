@@ -58,16 +58,16 @@ const sortOptions = [
   { value: 'total_earned_cents:desc', label: 'Earnings High-Low' },
 ];
 
-const roleBadgeVariants: Record<UserRole, 'primary' | 'secondary' | 'danger'> = {
+const roleBadgeVariants: Record<UserRole, 'primary' | 'secondary' | 'outline'> = {
   client: 'secondary',
   freelancer: 'primary',
-  admin: 'danger',
+  admin: 'outline',
 };
 
-const statusBadgeVariants: Record<string, 'primary' | 'secondary' | 'danger' | 'outline'> = {
+const statusBadgeVariants: Record<string, 'primary' | 'secondary' | 'outline'> = {
   active: 'primary',
   inactive: 'secondary',
-  suspended: 'danger',
+  suspended: 'outline',
   pending_verification: 'outline',
   true: 'primary',
   false: 'secondary',
@@ -284,7 +284,7 @@ export function AdminUsersPage() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge variant={statusBadgeVariants[userItem.is_active ? 'true' : 'false'] as 'primary' | 'secondary' | 'danger' | 'outline'} size="sm">
+                        <Badge variant={statusBadgeVariants[userItem.is_active ? 'true' : 'false'] as 'primary' | 'secondary' | 'outline'} size="sm">
                           {userItem.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </td>
@@ -313,7 +313,7 @@ export function AdminUsersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]"
+                              className="text-[var(--color-text-muted)] hover:bg-[var(--glass-bg)]"
                               onClick={() => { setSelectedUser(userItem); setShowDeleteModal(true); }}
                             >
                               <TrashIcon className="w-4 h-4" />
@@ -404,7 +404,7 @@ export function AdminUsersPage() {
                 id="is_verified"
                 checked={editForm.is_verified}
                 onChange={(e) => setEditForm({ ...editForm, is_verified: e.target.checked })}
-                className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]"
+                className="h-4 w-4 rounded-none border-[var(--color-border)] text-[var(--color-white)] focus:ring-2 focus:ring-[var(--color-white)]"
               />
               <label htmlFor="is_verified" className="text-sm font-medium text-[var(--color-text)]">Email Verified</label>
             </div>

@@ -6,7 +6,6 @@ interface SplitTextRevealProps<C extends ElementType = 'div'> {
   children: React.ReactNode;
   splitBy?: 'chars' | 'words' | 'lines';
   className?: string;
-  style?: React.CSSProperties;
   delay?: number;
   duration?: number;
   stagger?: number;
@@ -14,8 +13,8 @@ interface SplitTextRevealProps<C extends ElementType = 'div'> {
   threshold?: number;
   rootMargin?: string;
   once?: boolean;
+  immediate?: boolean;
   as?: C;
-  immediate?: boolean; // Above-the-fold headlines animate immediately on mount
 }
 
 interface SplitTextRevealRef<C extends ElementType = 'div'> {
@@ -24,9 +23,8 @@ interface SplitTextRevealRef<C extends ElementType = 'div'> {
 
 const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRevealProps<ElementType>>(({
   children,
-  splitBy = 'lines',
+  splitBy = 'words',
   className = '',
-  style,
   delay = 0,
   duration = 0.8,
   stagger = 0.05,
@@ -34,8 +32,8 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
   threshold = 0.1,
   rootMargin = '0px',
   once = true,
-  as: Component = 'div',
   immediate = false,
+  as: Component = 'div',
 }, ref) => {
   const internalRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(immediate);
@@ -46,7 +44,7 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
   }));
 
   useEffect(() => {
-    if (immediate) return; // Skip observer for immediate content
+    if (immediate) return;
 
     const element = internalRef.current;
     if (!element) return;
@@ -98,9 +96,8 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
         className={className}
         style={{
           opacity: isVisible || hasAnimated ? 1 : 0,
-          transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(105%)',
+          transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(20px)',
           transition: `opacity ${duration}s ${ease} ${delay}s, transform ${duration}s ${ease} ${delay}s`,
-          ...style,
         }}
       >
         {children}
@@ -112,23 +109,26 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
     <Component
       ref={internalRef}
       className={className}
-      style={style}
       aria-hidden={!isVisible && !hasAnimated}
     >
-      {segments.map((segment, index) => (
-        <span
-          key={index}
-          style={{
-            display: splitBy === 'chars' ? 'inline-block' : 'inline',
-            opacity: isVisible || hasAnimated ? 1 : 0,
-            transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(105%)',
-            transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
-            willChange: 'opacity, transform',
-          }}
-        >
-          {segment}
-        </span>
-      ))}
+      {segments.map((segment, index) => {
+        const isSpace = /^\s+$/.test(segment);
+        return (
+          <span
+            key={index}
+            style={{
+              display: splitBy === 'chars' ? 'inline-block' : 'inline',
+              opacity: isVisible || hasAnimated ? 1 : 0,
+              transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
+              transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
+              willChange: 'opacity, transform',
+              marginRight: splitBy === 'words' && !isSpace && index < segments.length - 1 ? '0.28em' : 0,
+            }}
+          >
+            {segment}
+          </span>
+        );
+      })}
     </Component>
   );
 });

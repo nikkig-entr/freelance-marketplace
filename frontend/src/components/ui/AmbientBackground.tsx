@@ -15,9 +15,9 @@ const sizeClasses = {
 };
 
 const opacityClasses = {
-  subtle: 'bg-[var(--color-accent)]/1',
-  default: 'bg-[var(--color-accent)]/2',
-  strong: 'bg-[var(--color-accent)]/3',
+  subtle: 'bg-[var(--color-white)]/[0.01]',
+  default: 'bg-[var(--color-white)]/[0.02]',
+  strong: 'bg-[var(--color-white)]/[0.03]',
 };
 
 const positionClasses = {
@@ -37,7 +37,7 @@ export function AmbientBackground({
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <div
           className={`
-            absolute rounded-full blur-[150px]
+            absolute rounded-none blur-[150px]
             ${sizeClasses[size]}
             ${opacityClasses[opacity]}
             ${positionClasses[position]}

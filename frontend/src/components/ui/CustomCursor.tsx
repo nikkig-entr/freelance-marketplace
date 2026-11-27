@@ -102,15 +102,15 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
       >
         <div className="relative w-8 h-8">
           <motion.div
-            className="absolute inset-0 border border-[var(--color-cream)]/60 rounded-full transition-colors duration-300"
+            className="absolute inset-0 border border-[var(--color-text)]/30 rounded-full transition-colors duration-300"
             animate={{
-              borderColor: cursorState.isClickable ? 'var(--color-gold)' : cursorState.isMedia ? 'var(--color-gold)' : 'var(--color-cream)/60',
+              borderColor: cursorState.isClickable ? 'var(--color-white)' : cursorState.isMedia ? 'var(--color-white)' : 'var(--color-text)/30',
               borderWidth: cursorState.isClickable || cursorState.isMedia ? 2 : 1,
             }}
             style={{ pointerEvents: 'none' }}
           />
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[var(--color-cream)] rounded-full"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[var(--color-text)] rounded-full"
             animate={{
               scale: cursorState.isClickable ? 0 : cursorState.isMedia ? 0.5 : 1,
               opacity: cursorState.isClickable ? 0 : 1,
@@ -119,7 +119,7 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
           />
           {cursorState.isMedia && (
             <motion.div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono uppercase tracking-widest text-[var(--color-gold)]"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono uppercase tracking-widest text-[var(--color-white)]"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
@@ -131,7 +131,7 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
         </div>
         {cursorState.labelVisible && cursorState.label && (
           <motion.div
-            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[var(--color-gold)] bg-[var(--color-obsidian)]/95 border border-[var(--color-gold)]/30 rounded whitespace-nowrap shadow-[var(--shadow-glass-strong)] backdrop-blur-xl"
+            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[var(--color-white)] bg-[var(--color-bg)]/95 border border-[var(--color-white)]/20 rounded-none whitespace-nowrap shadow-[var(--shadow-xl)] backdrop-blur-xl"
             initial={{ opacity: 0, x: -10, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 10, scale: 0.9 }}
