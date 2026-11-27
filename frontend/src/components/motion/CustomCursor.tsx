@@ -37,17 +37,20 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
   const isCoarsePointer = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
   const isFinePointer = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
 
+  // Strictly desktop-only: only mount on fine pointer devices
+  const shouldMount = enabled && !prefersReducedMotion && !isCoarsePointer && isFinePointer;
+
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
   const cursorScale = useMotionValue(1);
 
-  const smoothX = useSpring(cursorX, { stiffness: 200, damping: 25, mass: 0.5 });
-  const smoothY = useSpring(cursorY, { stiffness: 200, damping: 25, mass: 0.5 });
-  const smoothScale = useSpring(cursorScale, { stiffness: 300, damping: 30 });
+  // Spring config matching spec: stiffness: 480, damping: 32
+  const smoothX = useSpring(cursorX, { stiffness: 480, damping: 32, mass: 0.5 });
+  const smoothY = useSpring(cursorY, { stiffness: 480, damping: 32, mass: 0.5 });
+  const smoothScale = useSpring(cursorScale, { stiffness: 480, damping: 32 });
 
   useEffect(() => {
-    // STRICTLY DESKTOP ONLY - never mount on touch devices
-    if (!enabled || prefersReducedMotion || isCoarsePointer || !isFinePointer) return;
+    if (!shouldMount) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       cursorX.set(e.clientX);
@@ -84,10 +87,10 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [enabled, prefersReducedMotion, isCoarsePointer, isFinePointer, cursorX, cursorY, cursorScale]);
+  }, [shouldMount, cursorX, cursorY, cursorScale]);
 
   // Never render on touch devices or when disabled
-  if (!enabled || prefersReducedMotion || isCoarsePointer || !isFinePointer) {
+  if (!shouldMount) {
     return <>{children}</>;
   }
 
@@ -104,15 +107,19 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
         }}
         aria-hidden="true"
       >
-        <div className="relative w-8 h-8">
+        <div className="relative">
+          {/* Outer disc - expands to 72px on interactive targets */}
           <motion.div
-            className="absolute inset-0 border border-white/60 rounded-full transition-all duration-300"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/60 transition-all duration-300"
             animate={{
-              borderColor: cursorState.isClickable ? '#FFFFFF' : cursorState.isMedia ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
+              width: cursorState.isClickable ? '72px' : cursorState.isMedia ? '64px' : '32px',
+              height: cursorState.isClickable ? '72px' : cursorState.isMedia ? '64px' : '32px',
+              borderColor: cursorState.isClickable || cursorState.isMedia ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
               borderWidth: cursorState.isClickable || cursorState.isMedia ? 2 : 1,
             }}
             style={{ pointerEvents: 'none' }}
           />
+          {/* Inner dot */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full"
             animate={{
@@ -121,6 +128,7 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
             }}
             style={{ pointerEvents: 'none' }}
           />
+          {/* Media label */}
           {cursorState.isMedia && (
             <motion.div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono uppercase tracking-widest text-white"
@@ -133,15 +141,16 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
             </motion.div>
           )}
         </div>
+        {/* [ EXPLORE ] label on [data-cursor] targets */}
         {cursorState.labelVisible && cursorState.label && (
           <motion.div
-            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-widest text-white bg-[#050505]/95 border border-white/30 whitespace-nowrap"
+            className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-white bg-[#050505]/95 border border-white/30 whitespace-nowrap"
             initial={{ opacity: 0, x: -10, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 10, scale: 0.9 }}
             style={{ pointerEvents: 'none' }}
           >
-            {cursorState.label}
+            [ {cursorState.label} ]
           </motion.div>
         )}
       </motion.div>
@@ -195,7 +204,7 @@ interface CursorContextValue {
 const CursorContext = createContext<CursorContextValue | null>(null);
 
 export function CursorProvider({ children }: { children: ReactNode }) {
-  const [_cursorState, setCursorState] = useState<CursorState>({
+  const [, setCursorState] = useState<CursorState>({
     x: 0,
     y: 0,
     visible: false,

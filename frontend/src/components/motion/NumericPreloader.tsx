@@ -8,9 +8,9 @@ interface NumericPreloaderProps {
 }
 
 const PANEL_COUNT = 5;
-const COUNTER_DURATION = 700;
-const CURTAIN_DURATION = 520;
-const STAGGER_DELAY = 45;
+const COUNTER_DURATION = 650;
+const CURTAIN_DURATION = 700;
+const STAGGER_DELAY = 60;
 
 export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
   const [counter, setCounter] = useState(0);
@@ -35,7 +35,7 @@ export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
     // Block pointer events initially
     document.body.style.pointerEvents = 'none';
 
-    // Animate counter 000 → 100
+    // Animate counter 000 → 100 over 650ms
     const startTime = performance.now();
     const animateCounter = (now: number) => {
       const elapsed = now - startTime;
@@ -56,6 +56,7 @@ export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
       const panels = panelsRef.current;
       panels.forEach((panel, index) => {
         if (panel) {
+          // Use framer-motion style transitions via requestAnimationFrame
           panel.style.transition = `transform ${CURTAIN_DURATION}ms cubic-bezier(0.76, 0, 0.24, 1)`;
           panel.style.transform = 'translateY(0)';
           panel.style.transitionDelay = `${index * STAGGER_DELAY}ms`;
@@ -71,16 +72,16 @@ export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
     // Re-enable pointer events after curtain starts
     const pointerTimer = setTimeout(() => {
       document.body.style.pointerEvents = '';
-    }, 200);
+    }, 150);
 
     // Complete unmount after curtain animation
-    const totalDuration = COUNTER_DURATION + CURTAIN_DURATION + (PANEL_COUNT - 1) * STAGGER_DELAY + 200;
+    const totalDuration = COUNTER_DURATION + CURTAIN_DURATION + (PANEL_COUNT - 1) * STAGGER_DELAY + 150;
     const completeTimer = setTimeout(() => {
       setIsUnmounting(true);
       setTimeout(() => {
         setIsUnmounted(true);
         onComplete();
-      }, 150);
+      }, 100);
     }, totalDuration);
 
     return () => {
@@ -100,27 +101,28 @@ export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
       role="status"
       aria-label="Loading"
       aria-busy="true"
+      style={{ height: '100dvh' }}
     >
       {/* Counter Display */}
       <motion.div
         className="font-mono tabular-nums text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-[-0.02em] leading-none text-[var(--color-text)]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        exit={{ opacity: 0, y: -20, transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] } }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         style={{ willChange: 'opacity, transform' }}
       >
         {String(counter).padStart(3, '0')}
       </motion.div>
 
-      {/* Vertical Curtain Panels - 5 architectural columns */}
+      {/* Vertical Curtain Panels - 5 architectural columns retracting upward */}
       <AnimatePresence mode="wait">
         {!isUnmounting && (
           <motion.div
             key="curtain"
             className="fixed inset-0 -z-10 pointer-events-none"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] } }}
+            exit={{ opacity: 0, transition: { duration: 0.1, ease: [0.16, 1, 0.3, 1] } }}
           >
             <div className="grid grid-cols-5 h-full w-full bg-[#050505]">
               {Array.from({ length: PANEL_COUNT }).map((_, i) => (
