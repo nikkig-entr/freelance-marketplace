@@ -74,8 +74,10 @@ export function RegisterPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-4">
             Join the Archive
           </span>
-          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(2.5rem,5vw,4rem)] max-w-xl">
-            Create your professional profile
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+            <span>Create</span>
+            <br />
+            <span>your profile</span>
           </h1>
         </div>
       </div>
@@ -92,8 +94,10 @@ export function RegisterPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-2">
             Join the Archive
           </span>
-          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(1.75rem,5vw,2.5rem)]">
-            Create your profile
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+            <span>Create</span>
+            <br />
+            <span>your profile</span>
           </h1>
         </div>
       </div>
@@ -107,10 +111,12 @@ export function RegisterPage() {
                 FREELANCEHUB
               </span>
             </Link>
-            <h1 className="font-heading font-bold text-[var(--color-text)] uppercase tracking-[-0.02em] text-[clamp(2rem,4vw,3rem)] mb-4">
-              Create account
+            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4 animate-slide-up delay-1">
+              <span>Create</span>
+              <br />
+              <span>account</span>
             </h1>
-            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em]">
+            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-body">
               Join thousands of architects and designers in the archive
             </p>
           </div>
@@ -122,7 +128,7 @@ export function RegisterPage() {
               placeholder="John Doe"
               autoComplete="name"
               error={errors.full_name?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
               {...register('full_name')}
             />
 
@@ -132,7 +138,7 @@ export function RegisterPage() {
               placeholder="you@example.com"
               autoComplete="email"
               error={errors.email?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
               {...register('email')}
             />
 
@@ -153,7 +159,7 @@ export function RegisterPage() {
                     {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                 }
-                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
                 {...register('password')}
               />
             </div>
@@ -164,7 +170,7 @@ export function RegisterPage() {
               placeholder="••••••••"
               autoComplete="new-password"
               error={errors.password_confirm?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
               {...register('password_confirm')}
             />
 
@@ -172,13 +178,13 @@ export function RegisterPage() {
               <label className="input-label">Role</label>
               <select
                 {...register('role')}
-                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg appearance-none text-[var(--color-text)] focus:ring-0 focus:border-white min-h-[48px]"
+                className="w-full border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg appearance-none text-[var(--color-text)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
                 aria-invalid={errors.role ? 'true' : 'false'}
               >
                 <option value="freelancer">I want to find work (Freelancer)</option>
                 <option value="client">I want to hire talent (Client)</option>
               </select>
-              {errors.role && <p className="input-hint text-[var(--color-gray-500)]" role="alert">{errors.role.message}</p>}
+              {errors.role && <p className="input-hint text-[var(--color-text-subtle)]" role="alert">{errors.role.message}</p>}
             </div>
 
             <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[56px]">

@@ -65,9 +65,9 @@ function StatRow({ label, value, href, icon: Icon }: {
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-white/15 p-6">
+    <div className="border border-white/15 p-6 min-h-[120px]">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 border border-white/15 flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 border border-white/15 flex items-center justify-center flex-shrink-0 min-h-[44px] min-w-[44px]">
           <Icon className="w-6 h-6 text-[var(--color-text-muted)]" />
         </div>
         <div className="min-w-0">
@@ -78,7 +78,7 @@ function StatRow({ label, value, href, icon: Icon }: {
       {href && (
         <Link
           to={href}
-          className="mt-4 inline-flex items-center gap-1.5 text-sm font-mono text-[var(--color-text-subtle)] hover:text-[var(--color-white)] transition-colors"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-mono text-[var(--color-text-subtle)] hover:text-[var(--color-white)] transition-colors min-h-[44px]"
         >
           View
           <ArrowRightIcon className="w-4 h-4" />
@@ -184,13 +184,13 @@ function EmptyState({ icon: Icon, title, description, action }: {
 }) {
   return (
     <div className="py-16 text-center border border-white/15 p-6">
-      <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-6">
+      <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-6 min-h-[44px] min-w-[44px]">
         <Icon className="w-8 h-8 text-[var(--color-text-subtle)]" />
       </div>
       <h3 className="font-heading font-medium text-[var(--color-text)] mb-2">{title}</h3>
       <p className="text-[var(--color-text-muted)] mb-6 max-w-sm mx-auto">{description}</p>
       {action && (
-        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px]">
+        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px] w-full sm:w-auto">
           <Link to={action.href}>{action.label}</Link>
         </Button>
       )}
@@ -317,8 +317,10 @@ export function DashboardPage() {
         <section className="pt-4 lg:pt-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 lg:gap-6">
             <div>
-              <h1 className="font-heading font-bold text-[var(--color-text)] text-[clamp(1.75rem,3.5vw,2.5rem)] tracking-tight">
-                Welcome back, <span className="text-[var(--color-white)]">{user.full_name?.split(' ')[0] || 'there'}</span>
+              <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4 animate-slide-up delay-1">
+                <span>Welcome</span>
+                <br />
+                <span>back</span>
               </h1>
               <p className="mt-2 text-[var(--color-text-muted)] max-w-xl font-[Instrument_Serif] italic text-sm lg:text-base">
                 {isFreelancer
@@ -343,7 +345,7 @@ export function DashboardPage() {
           </div>
         </section>
 
-        {/* Stats Section - Grid stacks on mobile */}
+        {/* Stats Section - Single-column on mobile, min 44px touch targets */}
         <section>
           <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Overview</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
@@ -383,7 +385,7 @@ export function DashboardPage() {
             </Button>
           </div>
 
-          <div className="border border-white/15 overflow-hidden">
+          <div className="border border-white/15 overflow-hidden overflow-x-auto">
             <ActivityList
               activities={activities.slice(0, 10)}
               hoveredId={hoveredActivityId}
@@ -450,35 +452,35 @@ export function DashboardPage() {
                   <p className="mt-1 font-heading font-bold text-[var(--color-text)] text-2xl lg:text-3xl tabular-nums capitalize">{user.plan}</p>
                 </div>
                 {user.plan !== 'agency' && (
-                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[48px]">
+                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[48px] w-full sm:w-auto">
                     <Link to="/billing">Upgrade Plan</Link>
                   </Button>
                 )}
               </div>
               <div className="border-t border-white/15 pt-6">
                 <ul className="space-y-3">
-                  <li className="flex items-center gap-3">
-                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                  <li className="flex items-center gap-3 min-h-[44px]">
+                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
                     <span className="text-[var(--color-text-muted)]">
                       {user.plan === 'starter' ? '5 bids per week' : user.plan === 'pro' ? '50 bids per week' : 'Unlimited bids'}
                     </span>
                   </li>
-                  <li className="flex items-center gap-3">
+                  <li className="flex items-center gap-3 min-h-[44px]">
                     {user.plan !== 'starter' && (
                       <>
-                        <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                        <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
                         <span className="text-[var(--color-text-muted)]">AI-powered tools</span>
                       </>
                     )}
                     {user.plan === 'starter' && (
                       <>
-                        <span className="w-5 h-5 flex-shrink-0" />
+                        <span className="w-5 h-5 flex-shrink-0 min-w-[20px] min-h-[20px]" />
                         <span className="text-[var(--color-text-subtle)]">AI-powered tools (Pro+)</span>
                       </>
                     )}
                   </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
+                  <li className="flex items-center gap-3 min-h-[44px]">
+                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
                     <span className="text-[var(--color-text-muted)]">
                       {user.plan === 'starter' ? '5% platform fee' : user.plan === 'pro' ? '3% platform fee' : '1% platform fee'}
                     </span>

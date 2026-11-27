@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link } from '@tanstack/react/router';
 import { Button } from '@/components/ui/Button';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
 
 const plans = [
   {
@@ -64,7 +65,7 @@ const plans = [
 
 function FeatureItem({ text, included }: { text: string; included: boolean }) {
   return (
-    <li className="flex items-center gap-3 py-3 border-b border-white/15 last:border-0">
+    <li className="flex items-center gap-3 py-3 border-b border-white/15 last:border-0 transition-colors duration-200">
       {included ? (
         <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0" />
       ) : (
@@ -79,7 +80,7 @@ function FeatureItem({ text, included }: { text: string; included: boolean }) {
 
 function PlanCard({ plan, isCurrentPlan }: { plan: typeof plans[0]; isCurrentPlan?: boolean }) {
   return (
-    <div className={`relative flex flex-col h-full border ${plan.popular ? 'border-white' : 'border-white/15'} ${isCurrentPlan ? 'ring-2 ring-white' : ''} transition-all duration-300`}>
+    <div className={`relative flex flex-col h-full border ${plan.popular ? 'border-white' : 'border-white/15'} ${isCurrentPlan ? 'ring-2 ring-white' : ''} transition-all duration-300 hover:border-white/40`}>
       {plan.popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-white text-black font-mono text-xs uppercase tracking-wider">
           Most Popular
@@ -88,11 +89,13 @@ function PlanCard({ plan, isCurrentPlan }: { plan: typeof plans[0]; isCurrentPla
       <div className="p-6 lg:p-8 flex-1 flex flex-col">
         <div className="mb-6">
           <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase mb-2">{plan.id.toUpperCase()}</p>
-          <h3 className="font-heading font-bold text-[var(--color-text)] text-2xl lg:text-3xl uppercase tracking-[-0.02em] mb-2">{plan.name}</h3>
+          <DualLayerTextRoll index="PLAN" className="mb-2">
+            {plan.name}
+          </DualLayerTextRoll>
           <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed">{plan.description}</p>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 border-t border-white/15 pt-6">
           <div className="flex items-baseline gap-1">
             <span className="font-heading font-extrabold text-[var(--color-text)] text-5xl lg:text-6xl tabular-nums">${plan.price}</span>
             <span className="font-mono text-[var(--color-text-muted)] text-base">{plan.period}</span>
@@ -102,7 +105,7 @@ function PlanCard({ plan, isCurrentPlan }: { plan: typeof plans[0]; isCurrentPla
           )}
         </div>
 
-        <ul className="space-y-0 mb-8 flex-1">
+        <ul className="space-y-0 mb-8 flex-1 border-t border-white/15 pt-6">
           {plan.features.map((feature, index) => (
             <FeatureItem key={index} {...feature} />
           ))}
@@ -113,7 +116,7 @@ function PlanCard({ plan, isCurrentPlan }: { plan: typeof plans[0]; isCurrentPla
           variant={plan.popular ? 'primary' : 'secondary'}
           fullWidth
           size="lg"
-          className="min-h-[56px] border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+          className="min-h-[56px] border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
         >
           <Link to="/register">{plan.cta}</Link>
         </Button>
@@ -137,10 +140,12 @@ export function PricingPage() {
               </span>
             </div>
 
-            <h1 className="font-heading font-extrabold text-[var(--color-text)] uppercase tracking-[-0.04em] leading-[0.86] text-[clamp(2.5rem,6.5vw,6rem)] mb-6">
-              Simple, transparent
+            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-6 animate-slide-up delay-1">
+              <span>Simple,</span>
               <br />
-              pricing
+              <span>transparent</span>
+              <br />
+              <span>pricing</span>
             </h1>
 
             <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1.125rem,2vw,1.5rem)] max-w-2xl">
@@ -150,7 +155,7 @@ export function PricingPage() {
         </div>
       </header>
 
-      {/* Plans Grid */}
+      {/* Plans Grid - Swiss Architectural Index, stacks on mobile */}
       <main className="container pb-16 lg:pb-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {plans.map((plan) => (

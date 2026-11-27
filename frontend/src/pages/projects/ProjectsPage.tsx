@@ -5,12 +5,12 @@ import { useSearch, useNavigate } from '@tanstack/react-router';
 import { projectService } from '@/services/api';
 import { Project, ProjectStatus } from '@/types';
 import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
-import { MonumentalHeadline } from '@/components/ui/MonumentalHeadline';
 import { EditorialText } from '@/components/ui/EditorialText';
-import { IndexList, IndexListSkeleton } from '@/components/ui/IndexList';
+import { IndexListSkeleton } from '@/components/ui/IndexList';
 
 interface ProjectFilters {
   search?: string;
@@ -149,6 +149,71 @@ export function ProjectsPage() {
     search: { tab: 'details' },
   }));
 
+  // Swiss Index Row Component - lusion.co style arrow motion
+  function SwissIndexRow({ item }: { item: typeof indexListItems[0] }) {
+    const [isHovered, setIsHovered] = useState(false);
+    const rowRef = useRef<HTMLAnchorElement>(null);
+
+    return (
+      <Link
+        ref={rowRef}
+        to={item.href}
+        search={item.search}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`
+          relative flex items-center gap-4 py-4 px-6
+          border-b border-white/15 last:border-0
+          transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+          ${isHovered ? 'bg-white/5 border-white/40' : ''}
+        `}
+        aria-label={`View ${item.title}`}
+        style={{
+          gridColumn: '1 / -1',
+          minHeight: '72px',
+        }}
+      >
+        <span
+          className="font-mono text-headline-5 font-extrabold text-[var(--color-text-subtle)] tabular-nums w-10 text-right select-none transition-all duration-300"
+          aria-hidden="true"
+        >
+          {String(item.index).padStart(2, '0')}
+        </span>
+        <div className="flex-1 min-w-0 overflow-hidden pr-12">
+          <p className="font-heading font-semibold text-[var(--color-text)] text-headline-6 leading-snug truncate transition-colors duration-300">
+            {item.title}
+          </p>
+          {item.subtitle && (
+            <p className="mt-1 text-body-sm text-[var(--color-text-muted)] line-clamp-1 truncate transition-colors duration-300">
+              {item.subtitle}
+            </p>
+          )}
+        </div>
+        {/* lusion.co style arrow - slides diagonally/horizontally on hover */}
+        <div
+          className={`
+            absolute right-6 top-1/2 -translate-y-1/2
+            w-10 h-10 flex items-center justify-center
+            border border-white/15 rounded-none
+            transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+            ${isHovered ? 'bg-white text-black border-white' : 'bg-transparent text-[var(--color-text-subtle)] opacity-0'}
+          `}
+          style={{
+            transform: isHovered
+              ? 'translate(-50%, -50%) scale(1)'
+              : 'translate(-50%, -50%) scale(0.8)',
+            opacity: isHovered ? 1 : 0,
+          }}
+          aria-hidden="true"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       {/* Hero Header - Monochrome Swiss Grid */}
@@ -163,19 +228,11 @@ export function ProjectsPage() {
             </div>
 
             {/* Monumental Headline - Constrained display, no clipping */}
-            <MonumentalHeadline
-              splitBy="lines"
-              delay={0.1}
-              stagger={0.12}
-              duration={1.3}
-              parallax={true}
-              parallaxStrength={0.06}
-              maskAnimation={true}
-              className="mb-6"
-            >
-              Discover
-              Projects
-            </MonumentalHeadline>
+            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-6 animate-slide-up delay-1">
+              <span>Discover</span>
+              <br />
+              <span>Projects</span>
+            </h1>
 
             {/* Editorial subheadline */}
             <EditorialText
@@ -254,15 +311,36 @@ export function ProjectsPage() {
                   />
                 </div>
 
-                {/* Category Filter */}
-                <div>
+                {/* Category Filter Tabs - Sharp 1px-bordered rectangular pills */}
+                <div className="lg:col-span-5">
                   <label className="input-label text-[var(--color-text-muted)]">Category</label>
-                  <Select
-                    value={filters.category_id || ''}
-                    onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
-                    options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
-                  />
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFilterChange('category_id', undefined)}
+                      className={`px-4 py-2.5 min-h-[44px] font-mono text-[11px] uppercase tracking-[0.2em] border transition-all duration-200 ${
+                        !filters.category_id
+                          ? 'bg-white text-black border-white'
+                          : 'bg-transparent text-[var(--color-text)] border-white/20 hover:border-white/40'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleFilterChange('category_id', cat.id)}
+                        className={`px-4 py-2.5 min-h-[44px] font-mono text-[11px] uppercase tracking-[0.2em] border transition-all duration-200 ${
+                          filters.category_id === cat.id
+                            ? 'bg-white text-black border-white'
+                            : 'bg-transparent text-[var(--color-text)] border-white/20 hover:border-white/40'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Sort Filter */}
@@ -344,12 +422,33 @@ export function ProjectsPage() {
                 </div>
                 <div>
                   <label className="input-label text-[var(--color-text-muted)]">Category</label>
-                  <Select
-                    value={filters.category_id || ''}
-                    onChange={(e) => handleFilterChange('category_id', e.target.value ? parseInt(e.target.value) : undefined)}
-                    options={[{ value: '', label: 'All Categories' }, ...categories.map(c => ({ value: String(c.id), label: c.name }))]}
-                    className="mt-1.5 border-b border-white/30 bg-transparent text-[var(--color-text)] focus:border-white min-h-[48px]"
-                  />
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFilterChange('category_id', undefined)}
+                      className={`px-4 py-2.5 min-h-[44px] font-mono text-[11px] uppercase tracking-[0.2em] border transition-all duration-200 ${
+                        !filters.category_id
+                          ? 'bg-white text-black border-white'
+                          : 'bg-transparent text-[var(--color-text)] border-white/20 hover:border-white/40'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleFilterChange('category_id', cat.id)}
+                        className={`px-4 py-2.5 min-h-[44px] font-mono text-[11px] uppercase tracking-[0.2em] border transition-all duration-200 ${
+                          filters.category_id === cat.id
+                            ? 'bg-white text-black border-white'
+                            : 'bg-transparent text-[var(--color-text)] border-white/20 hover:border-white/40'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="input-label text-[var(--color-text-muted)]">Sort By</label>
@@ -415,12 +514,26 @@ export function ProjectsPage() {
                   </p>
                 </div>
 
-                {/* Index-style Project List - Clean, no horizontal overflow */}
-                <IndexList
-                  items={indexListItems}
-                  emptyMessage="No projects found"
-                  emptyDescription={hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}
-                />
+                {/* Swiss Architectural Index List - 1px hairline borders, lusion.co arrow motion */}
+                <div className="border border-white/15 overflow-hidden">
+                  {indexListItems.length === 0 ? (
+                    <div className="text-center py-16 lg:py-24">
+                      <div className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                      <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No projects found</h3>
+                      <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">{hasActiveFilters ? 'Try adjusting your search or filters to find more projects' : 'No open projects at the moment. Check back soon!'}</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
+                      {indexListItems.map((item) => (
+                        <SwissIndexRow key={item.id} item={item} />
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (

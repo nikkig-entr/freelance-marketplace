@@ -59,8 +59,10 @@ export function LoginPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-4">
             Sign In
           </span>
-          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(2.5rem,5vw,4rem)] max-w-xl">
-            Welcome back to the archive
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+            <span>Welcome</span>
+            <br />
+            <span>back</span>
           </h1>
         </div>
       </div>
@@ -77,8 +79,10 @@ export function LoginPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-2">
             Sign In
           </span>
-          <h1 className="font-heading font-bold text-[var(--color-white)] uppercase tracking-[-0.02em] leading-[0.95] text-[clamp(1.75rem,5vw,2.5rem)]">
-            Welcome back
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+            <span>Welcome</span>
+            <br />
+            <span>back</span>
           </h1>
         </div>
       </div>
@@ -92,10 +96,12 @@ export function LoginPage() {
                 FREELANCEHUB
               </span>
             </Link>
-            <h1 className="font-heading font-bold text-[var(--color-text)] uppercase tracking-[-0.02em] text-[clamp(2rem,4vw,3rem)] mb-4">
-              Sign in
+            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4 animate-slide-up delay-1">
+              <span>Sign</span>
+              <br />
+              <span>in</span>
             </h1>
-            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em]">
+            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-body">
               Enter your credentials to access the archive
             </p>
           </div>
@@ -107,7 +113,7 @@ export function LoginPage() {
               placeholder="you@example.com"
               autoComplete="email"
               error={errors.email?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
               {...register('email')}
             />
 
@@ -128,7 +134,7 @@ export function LoginPage() {
                     {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                 }
-                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white"
+                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
                 {...register('password')}
               />
             </div>
