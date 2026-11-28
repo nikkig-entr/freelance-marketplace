@@ -2,12 +2,7 @@ import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import { useState, useEffect } from 'react';
-import {
-  ArrowRightOnRectangleIcon,
-  Bars3Icon,
-  XMarkIcon,
-  ShieldCheckIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowRightOnRectangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Dropdown } from '@/components/ui/Dropdown';
@@ -22,10 +17,10 @@ const navigation = [
 
 const adminNavigation = [
   { name: 'Dashboard', href: '/admin', icon: Briefcase },
-  { name: 'Users', href: '/admin/users', icon: ShieldCheckIcon },
+  { name: 'Users', href: '/admin/users', icon: Briefcase },
   { name: 'Projects', href: '/admin/projects', icon: Briefcase },
-  { name: 'Withdrawals', href: '/admin/withdrawals', icon: ShieldCheckIcon },
-  { name: 'Transactions', href: '/admin/transactions', icon: ShieldCheckIcon },
+  { name: 'Withdrawals', href: '/admin/withdrawals', icon: Briefcase },
+  { name: 'Transactions', href: '/admin/transactions', icon: Briefcase },
 ];
 
 export function Header() {
@@ -56,19 +51,19 @@ export function Header() {
 
   if (isLoading) {
     return (
-      <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-[var(--glass-blur-strong)] sticky top-0 z-40">
+      <header className="h-16 border-b border-white/15 bg-[#050505]/90 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
         <div className="container h-full flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-white)] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-white/15 border-t-white rounded-none animate-spin" />
         </div>
       </header>
     );
   }
 
   return (
-    <header className="h-16 border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-[var(--glass-blur-strong)] sticky top-0 z-40">
+    <header className="h-16 border-b border-white/15 bg-[#050505]/90 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
       <div className="container h-full">
         <div className="flex items-center justify-between h-full">
-          {/* Logo - Uppercase FREELANCEHUB */}
+          {/* Left: uppercase FREELANCEHUB */}
           <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="FREELANCEHUB Home">
             <div className="w-8 h-8 bg-white rounded-none flex items-center justify-center">
               <Briefcase className="w-5 h-5 text-black" aria-hidden="true" />
@@ -78,7 +73,7 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Right Navigation */}
           <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
             {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
@@ -124,7 +119,7 @@ export function Header() {
               </div>
             )}
 
-            {/* Start Project Button */}
+            {/* Start Project CTA - Sharp rectangular button */}
             {(user && (user.role === 'client' || user.role === 'admin')) || !user ? (
               <Link
                 to={user ? '/projects/create' : '/register'}
@@ -135,14 +130,14 @@ export function Header() {
             ) : null}
           </nav>
 
-          {/* Right Side Actions - User Menu */}
+          {/* Right Side Actions - User Menu / Mobile Toggle */}
           <div className="flex items-center gap-3">
-            {/* User Menu */}
+            {/* User Menu - Desktop */}
             {user ? (
               <Dropdown
                 trigger={
                   <button
-                    className="flex items-center gap-2 p-1.5 hover:bg-[var(--glass-bg)] rounded-none transition-colors"
+                    className="flex items-center gap-2 p-1.5 hover:bg-[var(--glass-bg)] rounded-none transition-colors min-h-[44px]"
                     aria-label="User menu"
                   >
                     <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
@@ -163,14 +158,14 @@ export function Header() {
                   },
                   {
                     label: 'Settings',
-                    icon: <ShieldCheckIcon className="w-5 h-5" />,
+                    icon: <Briefcase className="w-5 h-5" />,
                     onClick: () => navigate({ to: '/settings' }),
                   },
                   ...(user.role === 'admin'
                     ? [
                         {
                           label: 'Admin Panel',
-                          icon: <ShieldCheckIcon className="w-5 h-5" />,
+                          icon: <Briefcase className="w-5 h-5" />,
                           onClick: () => navigate({ to: '/admin' }),
                         },
                         { divider: true } as any,
@@ -187,19 +182,28 @@ export function Header() {
               />
             ) : (
               <Link to="/register">
-                <Button variant="primary" size="sm">Get Started</Button>
+                <Button variant="primary" size="sm" className="min-h-[44px]">Get Started</Button>
               </Link>
             )}
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-none transition-colors"
+              className="md:hidden p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-none transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-drawer"
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              {isMobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+              {isMobileMenuOpen ? (
+                <XMarkIcon className="w-6 h-6" />
+              ) : (
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em] flex items-center gap-1.5 border border-white/25 px-3 min-h-[44px]">
+                  MENU
+                  <span className="text-neutral-500">[</span>
+                  <span className="text-white">+</span>
+                  <span className="text-neutral-500">]</span>
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -225,7 +229,7 @@ export function Header() {
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-none transition-colors"
+                className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-none transition-colors min-h-[44px] min-w-[44px]"
                 aria-label="Close menu"
               >
                 <XMarkIcon className="w-6 h-6" />
@@ -285,7 +289,7 @@ export function Header() {
                 <div className="pt-6 border-t border-white/15">
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-none text-base font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-none text-base font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition-colors min-h-[44px]"
                   >
                     <ArrowRightOnRectangleIcon className="w-5 h-5" />
                     Sign out
@@ -298,12 +302,12 @@ export function Header() {
             {!user && (
               <div className="p-6 border-t border-white/15 space-y-3">
                 <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" className="w-full" size="lg">
+                  <Button variant="primary" size="lg" className="w-full min-h-[48px]">
                     Get Started
                   </Button>
                 </Link>
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white hover:text-black" size="lg">
+                  <Button variant="outline" size="lg" className="w-full min-h-[48px] border-white/30 text-white hover:bg-white hover:text-black">
                     Sign in
                   </Button>
                 </Link>

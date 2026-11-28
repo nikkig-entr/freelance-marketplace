@@ -103,7 +103,7 @@ export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
       aria-busy="true"
       style={{ height: '100dvh' }}
     >
-      {/* Counter Display */}
+      {/* Counter Display - Bottom Left */}
       <motion.div
         className="font-mono tabular-nums text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-[-0.02em] leading-none text-[var(--color-text)]"
         initial={{ opacity: 0, y: 20 }}

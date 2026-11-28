@@ -8,7 +8,6 @@ import { InteractiveIndexSection } from '@/components/sections/InteractiveIndexS
 import { usePreloader } from '@/contexts/PreloaderContext';
 import { NumericPreloader } from '@/components/motion/NumericPreloader';
 import { SmoothScrollProvider } from '@/components/motion/SmoothScrollProvider';
-import { CustomCursorProvider } from '@/components/motion/CustomCursor';
 
 export function HomePage() {
   const { setPreloaderComplete } = usePreloader();
@@ -16,26 +15,24 @@ export function HomePage() {
   // Wrap everything in motion providers
   return (
     <SmoothScrollProvider>
-      <CustomCursorProvider>
-        <NumericPreloader onComplete={() => setPreloaderComplete(true)} />
-        <div className="relative min-h-screen bg-[var(--color-bg)]" data-lenis-prevent>
-          {/* Section 1 — Interactive 3D Monolith Hero */}
-          <HeroSection />
+      <NumericPreloader onComplete={() => setPreloaderComplete(true)} />
+      <div className="relative min-h-screen bg-[var(--color-bg)]" data-lenis-prevent>
+        {/* Section 1 — Interactive 3D Monolith Hero */}
+        <HeroSection />
 
-          {/* Section 2 — Editorial Parallax Stage: Hollow typography + B&W photography + mix-blend-difference */}
-          <EditorialParallaxStage />
+        {/* Section 2 — Editorial Parallax Stage: Hollow typography + B&W photography + mix-blend-difference */}
+        <EditorialParallaxStage />
 
-          {/* Section 3 — Interactive Vertical-Slice Strip */}
-          <SliceStripGallery />
+        {/* Section 3 — Interactive Vertical-Slice Strip */}
+        <SliceStripGallery />
 
-          {/* Section 4 — Geometric Compass: Morphing SVG Sculpture */}
-          <GeometricCompassSection />
+        {/* Section 4 — Geometric Compass: Morphing SVG Sculpture */}
+        <GeometricCompassSection />
 
-          {/* Section 5 — Interactive Index: Hover-only discipline index */}
-          <InteractiveIndexSection />
+        {/* Section 5 — Interactive Index: Hover-only discipline index */}
+        <InteractiveIndexSection />
 
-        </div>
-      </CustomCursorProvider>
+      </div>
     </SmoothScrollProvider>
   );
 }

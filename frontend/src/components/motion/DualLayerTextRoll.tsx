@@ -51,7 +51,7 @@ export function DualLayerTextRoll({
         <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider">
           {index}
         </span>
-        <span className="font-heading font-medium text-[var(--color-text-muted)] uppercase tracking-[0.1em]">
+        <span className="font-mono font-medium text-[var(--color-text-muted)] uppercase tracking-[0.22em]">
           {children}
         </span>
       </div>
@@ -65,10 +65,10 @@ export function DualLayerTextRoll({
           whiteSpace: 'nowrap',
         }}
       >
-        <span className="font-mono text-[var(--color-white)] text-xs tracking-wider">
+        <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider">
           {index}
         </span>
-        <span className="font-heading font-medium text-[var(--color-white)] uppercase tracking-[0.1em]">
+        <span className="font-mono font-medium text-[var(--color-text)] uppercase tracking-[0.22em]">
           {children}
         </span>
       </div>

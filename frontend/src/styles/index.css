@@ -14,7 +14,7 @@
 
 @layer base {
   :root {
-    /* Pure Monochrome Palette */
+    /* Pure Monochrome Palette - Awwwards SOTD Standard */
     --bg-primary: #050505;
     --bg-elevated: #0D0D0D;
     --text-primary: #FFFFFF;
@@ -191,11 +191,16 @@
     font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
   }
 
-  /* ZERO BORDER RADIUS EVERYWHERE */
+  /* ZERO BORDER RADIUS EVERYWHERE - except SVG <circle> elements inside geometric compass */
   * {
     @apply border-[var(--color-border)];
     border-radius: 0px !important;
     box-sizing: border-box;
+  }
+
+  /* Allow SVG circles to have natural rounding (for geometric compass) */
+  svg circle {
+    border-radius: initial !important;
   }
 
   /* Font families */
@@ -221,11 +226,11 @@
 
   /* Selection - pure white on black */
   ::selection {
-    @apply bg-[var(--color-white)] text-[var(--color-black)];
+    @apply bg-[var(--color-white)] text-[var(--color-bg)];
   }
 
   ::-moz-selection {
-    @apply bg-[var(--color-white)] text-[var(--color-black)];
+    @apply bg-[var(--color-white)] text-[var(--color-bg)];
   }
 
   /* Scrollbar - minimal */
@@ -252,7 +257,7 @@
 
   /* Images & Video - GRAYSCALE FILTER + FALLBACK */
   img, video, canvas {
-    filter: grayscale(100%) contrast(1.15);
+    filter: grayscale(100%) contrast(1.16);
     max-width: 100%;
     height: auto;
   }
@@ -447,7 +452,7 @@
 
   /* Primary - White filled */
   .btn-primary {
-    @apply btn bg-[var(--color-white)] text-[var(--color-black)] border-transparent hover:bg-[var(--color-gray-100)] focus:ring-[var(--color-white)];
+    @apply btn bg-[var(--color-white)] text-[var(--color-bg)] border-transparent hover:bg-[var(--color-gray-100)] focus:ring-[var(--color-white)];
   }
 
   .btn-primary:active {
@@ -528,7 +533,7 @@
   }
 
   .badge-primary {
-    @apply badge bg-[var(--color-white)] text-[var(--color-black)] border-[var(--color-white)];
+    @apply badge bg-[var(--color-white)] text-[var(--color-bg)] border-[var(--color-white)];
   }
 
   .badge-secondary {
