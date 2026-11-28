@@ -1,6 +1,9 @@
 'use client';
 
 import { forwardRef, useRef, useEffect, useState, useImperativeHandle, ElementType, ComponentRef } from 'react';
+import { motion } from 'framer-motion';
+
+type CubicBezierEasing = [number, number, number, number];
 
 interface SplitTextRevealProps<C extends ElementType = 'div'> {
   children: React.ReactNode;
@@ -9,7 +12,7 @@ interface SplitTextRevealProps<C extends ElementType = 'div'> {
   delay?: number;
   duration?: number;
   stagger?: number;
-  ease?: string;
+  ease?: CubicBezierEasing;
   threshold?: number;
   rootMargin?: string;
   once?: boolean;
@@ -21,6 +24,8 @@ interface SplitTextRevealRef<C extends ElementType = 'div'> {
   element: ComponentRef<C> | null;
 }
 
+const DEFAULT_EASE: CubicBezierEasing = [0.16, 1, 0.3, 1];
+
 const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRevealProps<ElementType>>(({
   children,
   splitBy = 'words',
@@ -28,14 +33,14 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
   delay = 0,
   duration = 0.8,
   stagger = 0.05,
-  ease = 'cubic-bezier(0.16, 1, 0.3, 1)',
+  ease = DEFAULT_EASE,
   threshold = 0.1,
   rootMargin = '0px',
   once = true,
   immediate = false,
   as: Component = 'div',
 }, ref) => {
-  const internalRef = useRef<HTMLElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(immediate);
   const [hasAnimated, setHasAnimated] = useState(immediate);
 
@@ -93,55 +98,39 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
 
   if (!textContent || typeof children !== 'string') {
     return (
-      <Component
+      <motion.div
         ref={internalRef}
         className={className}
-        style={{
-          opacity: isVisible || hasAnimated ? 1 : 0,
-          transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(20px)',
-          transition: `opacity ${duration}s ${ease} ${delay}s, transform ${duration}s ${ease} ${delay}s`,
-        }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={isVisible || hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration, ease, delay }}
       >
         {children}
-      </Component>
+      </motion.div>
     );
   }
 
   return (
     <Component
       ref={internalRef}
-      className={className}
+      className={`inline-flex flex-wrap gap-x-[0.28em] gap-y-[0.06em] ${className}`}
       aria-hidden={!isVisible && !hasAnimated}
     >
       {segments.map((segment, index) => {
         const isSpace = /^\s+$/.test(segment);
-        const isComma = segment === ',';
-        const isLastSegment = index === segments.length - 1;
-        const nextSegment = segments[index + 1];
-        const nextIsSpace = nextSegment ? /^\s+$/.test(nextSegment) : false;
         return (
-          <span
+          <motion.span
             key={index}
+            initial={{ opacity: 0, y: '100%' }}
+            animate={isVisible || hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: '100%' }}
+            transition={{ duration, ease, delay: delay + index * stagger }}
             style={{
-              display: splitBy === 'chars' ? 'inline-block' : 'inline',
-              opacity: isVisible || hasAnimated ? 1 : 0,
-              transform: isVisible || hasAnimated ? 'translateY(0)' : 'translateY(100%)',
-              transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
               willChange: 'opacity, transform',
               whiteSpace: isSpace ? 'pre' : 'normal',
-              // Word spacing: 0.28em between words, comma gets trailing space, last segment gets no margin
-              marginRight:
-                splitBy === 'words' && !isSpace && !isLastSegment
-                  ? isComma
-                    ? '0.28em' // comma gets same spacing as word
-                    : nextIsSpace
-                    ? 0 // space follows, no extra margin
-                    : '0.28em'
-                  : 0,
             }}
           >
             {isSpace ? ' ' : segment}
-          </span>
+          </motion.span>
         );
       })}
     </Component>

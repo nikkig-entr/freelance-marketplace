@@ -127,7 +127,7 @@ export function HeroSection() {
               delay={0}
               stagger={0.05}
               duration={1.2}
-              ease="cubic-bezier(0.16, 1, 0.3, 1)"
+              ease={[0.16, 1, 0.3, 1] as const}
               immediate={true}
               as="span"
             >
@@ -142,7 +142,7 @@ export function HeroSection() {
               delay={0.1}
               stagger={0.05}
               duration={1.2}
-              ease="cubic-bezier(0.16, 1, 0.3, 1)"
+              ease={[0.16, 1, 0.3, 1] as const}
               immediate={true}
               as="span"
             >

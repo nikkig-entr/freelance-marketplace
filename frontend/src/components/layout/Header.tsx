@@ -5,7 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import { useState, useEffect, useRef } from 'react';
 import { XIcon } from 'lucide-react';
-import { BrandLogo } from '@/components/ui/BrandLogo';
+import { BrandLogo, BrandWordmark } from '@/components/ui/BrandLogo';
+import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
 import { useLenis } from '@/hooks/useLenis';
 
 const navigation = [
@@ -129,7 +130,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`relative flex items-center gap-2 px-4 py-2.5 text-xs font-mono uppercase tracking-[0.22em] transition-all duration-200 ${
+                  className={`relative flex items-center gap-2 px-4 py-2.5 transition-all duration-200 ${
                     isActive
                       ? 'text-[var(--color-text)]'
                       : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
@@ -137,8 +138,7 @@ export function Header() {
                   aria-current={isActive ? 'page' : undefined}
                   onClick={closeMobileMenu}
                 >
-                  <span className="text-[var(--color-text-subtle)] w-8 text-right select-none">{item.index}</span>
-                  <span className="relative z-10">{item.name}</span>
+                  <DualLayerTextRoll index={item.index}>{item.name}</DualLayerTextRoll>
                   {/* Active indicator - hairline underline */}
                   {isActive && (
                     <span
@@ -269,23 +269,31 @@ export function Header() {
               </div>
             ) : null}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - MENU [ + ] / CLOSE [ × ] */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--glass-bg)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center px-3 border border-[var(--color-border)] font-mono text-[11px] uppercase tracking-[0.2em] transition-colors hover:bg-[var(--glass-bg)]"
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-drawer"
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {isMobileMenuOpen ? (
-                <XIcon className="w-6 h-6" strokeWidth={2} />
+                <>
+                  <XIcon className="w-4 h-4 mr-1.5" strokeWidth={2} />
+                  <span>
+                    CLOSE
+                    <span className="text-[var(--color-text-subtle)]"> [ </span>
+                    <span className="text-[var(--color-text)]">×</span>
+                    <span className="text-[var(--color-text-subtle)]"> ]</span>
+                  </span>
+                </>
               ) : (
-                <span className="font-mono text-[11px] uppercase tracking-[0.2em] flex items-center gap-1.5 border border-[var(--color-border)] px-3 min-h-[44px]">
-                  MENU
-                  <span className="text-[var(--color-text-subtle)]">[</span>
+                <>
+                  <span>MENU</span>
+                  <span className="text-[var(--color-text-subtle)] ml-1.5">[ </span>
                   <span className="text-[var(--color-text)]">+</span>
-                  <span className="text-[var(--color-text-subtle)]">]</span>
-                </span>
+                  <span className="text-[var(--color-text-subtle)]"> ]</span>
+                </>
               )}
             </button>
           </div>
@@ -305,8 +313,7 @@ export function Header() {
             {/* Drawer Header */}
             <div className="flex items-center justify-between h-16 px-6 border-b border-[var(--color-border)]">
               <Link to="/" className="flex items-center gap-3" onClick={closeMobileMenu}>
-                <BrandLogo size={28} strokeWidth={2} />
-                <span className="font-mono text-xs font-bold tracking-[0.28em] uppercase text-[var(--color-text)] select-none">FREELANCEHUB</span>
+                <BrandWordmark size={28} strokeWidth={2} gap={10} />
               </Link>
               <button
                 onClick={closeMobileMenu}

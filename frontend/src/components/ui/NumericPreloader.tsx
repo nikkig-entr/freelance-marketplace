@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, useContext } from 'react';
+import { useEffect, useRef, useState, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PreloaderContext, type PreloaderContextValue } from '@/contexts/PreloaderContext';
 import { BrandLogo } from '@/components/ui/BrandLogo';
@@ -10,11 +10,11 @@ interface NumericPreloaderProps {
 }
 
 const CURTAIN_COUNT = 5;
-const CURTAIN_DURATION = 850;
-const STAGGER_DELAY = 60;
-const COUNTER_DURATION = 850;
-const LOGO_DRAW_DURATION = 0.75;
-const FAILSAFE_TIMEOUT = 1400;
+const COUNTER_DURATION = 550;      // 550ms counter: 000 → 100
+const LOGO_DRAW_DURATION = 0.55;   // 550ms logo path draw
+const CURTAIN_DURATION = 0.42;     // 420ms curtain retraction
+const STAGGER_DELAY = 60;          // 60ms stagger between curtains
+const FAILSAFE_TIMEOUT = 1200;     // 1200ms hard failsafe
 const CURTAIN_EASE = [0.76, 0, 0.24, 1] as const;
 const COUNTER_EASE = (t: number) => 1 - Math.pow(1 - t, 4);
 const LOGO_EASE = [0.16, 1, 0.3, 1] as const;
@@ -76,7 +76,7 @@ export function NumericPreloader({
         const curtainDelay = i * STAGGER_DELAY;
         const curtainElapsed = elapsed - curtainDelay;
         if (curtainElapsed <= 0) return false;
-        const progress = Math.min(curtainElapsed / CURTAIN_DURATION, 1);
+        const progress = Math.min(curtainElapsed / (CURTAIN_DURATION * 1000), 1);
         return progress >= 1;
       });
 
@@ -86,7 +86,7 @@ export function NumericPreloader({
           setIsUnmounted(true);
           setPreloaderComplete?.(true);
           onComplete?.();
-        }, 150);
+        }, 100);
         return;
       }
 
@@ -96,7 +96,7 @@ export function NumericPreloader({
     curtainAnimationRef.current = requestAnimationFrame(animateCurtains);
   }, [setPreloaderComplete, onComplete]);
 
-  // Initialize on mount
+  // Initialize on mount - StrictMode-safe
   useEffect(() => {
     if (typeof window === 'undefined') {
       setIsUnmounted(true);
@@ -123,7 +123,7 @@ export function NumericPreloader({
       setLogoDrawProgress(1);
     }, LOGO_DRAW_DURATION * 1000);
 
-    // Hard failsafe: force completion at 1400ms if animation hasn't finished
+    // Hard failsafe: force completion at 1200ms if animation hasn't finished
     failsafeTimerRef.current = setTimeout(() => {
       if (counterRef.current < 100) {
         counterRef.current = 100;
@@ -160,7 +160,7 @@ export function NumericPreloader({
         initial={{ opacity: 1 }}
         exit={{
           opacity: 0,
-          transition: { duration: 0.25, ease: LOGO_EASE }
+          transition: { duration: 0.2, ease: LOGO_EASE }
         }}
         className={`fixed inset-0 z-[99999] bg-[#050505] ${isRetracting ? 'pointer-events-none' : ''}`}
         role="status"
@@ -239,7 +239,7 @@ export function NumericPreloader({
                   animate={{ y: '-100%' }}
                   exit={{ y: '-100%' }}
                   transition={{
-                    duration: CURTAIN_DURATION / 1000,
+                    duration: CURTAIN_DURATION,
                     ease: CURTAIN_EASE,
                     delay: i * (STAGGER_DELAY / 1000),
                   }}

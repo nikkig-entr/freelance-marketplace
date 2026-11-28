@@ -1,193 +1,259 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { PreloaderContext, type PreloaderContextValue } from '@/contexts/PreloaderContext';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 interface NumericPreloaderProps {
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-/**
- * Museum-Grade Launch Curtain - lusion.co / igloo.inc Caliber
- *
- * Sequence:
- * 1. 5 vertical columns (curtains) cover the #050505 stage
- * 2. BrandMark draws via SVG pathLength (0→1 over 300ms)
- * 3. Numeric counter: 000 → 100 in 550ms with exponential easing
- * 4. Columns retract upward in 450ms (staggered 60ms, ease: [0.76, 0, 0.24, 1])
- * 5. Total ~1050ms, onComplete fires immediately
- */
-export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
+const CURTAIN_COUNT = 5;
+const COUNTER_DURATION = 550;      // 550ms counter: 000 → 100
+const LOGO_DRAW_DURATION = 0.55;   // 550ms logo path draw
+const CURTAIN_DURATION = 0.42;     // 420ms curtain retraction
+const STAGGER_DELAY = 60;          // 60ms stagger between curtains
+const FAILSAFE_TIMEOUT = 1200;     // 1200ms hard failsafe
+const CURTAIN_EASE = [0.76, 0, 0.24, 1] as const;
+const COUNTER_EASE = (t: number) => 1 - Math.pow(1 - t, 4);
+const LOGO_EASE = [0.16, 1, 0.3, 1] as const;
+
+export function NumericPreloader({
+  onComplete,
+}: NumericPreloaderProps) {
+  const context = useContext(PreloaderContext) as PreloaderContextValue;
+  const { setPreloaderComplete } = context;
+  const [isUnmounted, setIsUnmounted] = useState(false);
   const [counter, setCounter] = useState(0);
-  const [phase, setPhase] = useState<'idle' | 'drawing' | 'counting' | 'retracting' | 'complete'>('idle');
-  const [curtainStates, setCurtainStates] = useState<boolean[]>([true, true, true, true, true]);
   const [logoDrawProgress, setLogoDrawProgress] = useState(0);
-  const [retracting, setRetracting] = useState(false);
-
+  const [showCurtains, setShowCurtains] = useState(false);
+  const [isRetracting, setIsRetracting] = useState(false);
+  const counterRef = useRef(0);
+  const animationRef = useRef<number>();
   const startTimeRef = useRef<number>(0);
-  const animationRef = useRef<number>(0);
+  const curtainAnimationRef = useRef<number>();
+  const failsafeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const unmountTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Exponential easing for logo drawing
-  const exponentialEase = useCallback((t: number): number => {
-    return 1 - Math.pow(1 - t, 4);
+  // Exponential ease-out counter animation using requestAnimationFrame
+  const animateCounter = useCallback(() => {
+    const now = performance.now();
+    const elapsed = now - startTimeRef.current;
+    const progress = Math.min(elapsed / COUNTER_DURATION, 1);
+    const easedProgress = COUNTER_EASE(progress);
+
+    const currentValue = Math.round(easedProgress * 100);
+    if (currentValue !== counterRef.current) {
+      counterRef.current = currentValue;
+      setCounter(currentValue);
+    }
+
+    if (progress < 1) {
+      animationRef.current = requestAnimationFrame(animateCounter);
+    } else {
+      // Counter complete - trigger logo draw completion and curtains
+      setLogoDrawProgress(1);
+      setShowCurtains(true);
+      startCurtainAnimation();
+    }
   }, []);
 
-  // Counter easing: fast exponential to 100 in 550ms
-  const counterEase = useCallback((t: number): number => {
-    if (t < 0.1) return Math.pow(t / 0.1, 2) * 0.1;
-    return 1 - Math.pow(1 - t, 3.2);
-  }, []);
+  // Staggered curtain retraction animation
+  const startCurtainAnimation = useCallback(() => {
+    setIsRetracting(true);
+    // Disable pointer events on body as soon as retraction begins
+    if (typeof document !== 'undefined') {
+      document.body.style.pointerEvents = 'none';
+    }
+    const curtainStartTime = performance.now();
 
-  // Main animation loop - TOTAL: ~1050ms
-  useEffect(() => {
-    startTimeRef.current = performance.now();
-    setPhase('drawing');
+    const animateCurtains = () => {
+      const elapsed = performance.now() - curtainStartTime;
 
-    const animate = (now: number) => {
-      const elapsed = now - startTimeRef.current;
+      // Check if all curtains are complete
+      const allComplete = Array.from({ length: CURTAIN_COUNT }).every((_, i) => {
+        const curtainDelay = i * STAGGER_DELAY;
+        const curtainElapsed = elapsed - curtainDelay;
+        if (curtainElapsed <= 0) return false;
+        const progress = Math.min(curtainElapsed / (CURTAIN_DURATION * 1000), 1);
+        return progress >= 1;
+      });
 
-      if (phase === 'drawing') {
-        // Logo SVG drawing: 0→1 over 300ms (faster)
-        const drawProgress = Math.min(elapsed / 300, 1);
-        setLogoDrawProgress(exponentialEase(drawProgress));
-
-        if (elapsed >= 300) {
-          setPhase('counting');
-          startTimeRef.current = now;
-        }
-      } else if (phase === 'counting') {
-        // Numeric counter: 000→100 over 550ms
-        const countProgress = Math.min(elapsed / 550, 1);
-        const eased = counterEase(countProgress);
-        setCounter(Math.round(eased * 100));
-
-        if (elapsed >= 550) {
-          setCounter(100);
-          setPhase('retracting');
-          setRetracting(true); // pointer-events-none starts here
-          startTimeRef.current = now;
-        }
-      } else if (phase === 'retracting') {
-        // 5 columns retract upward in 450ms with 60ms stagger, ease: [0.76, 0, 0.24, 1]
-        const retractDuration = 450;
-        const stagger = 60;
-
-        setCurtainStates(prev => {
-          const next = [...prev];
-          let anyRetracting = false;
-
-          next.forEach((_, i) => {
-            const columnStart = i * stagger;
-            const columnElapsed = elapsed - columnStart;
-
-            if (columnElapsed > 0 && columnElapsed < retractDuration) {
-              anyRetracting = true;
-            } else if (columnElapsed >= retractDuration) {
-              next[i] = false;
-            }
-          });
-
-          if (!anyRetracting && next.every(s => !s)) {
-            setPhase('complete');
-            setRetracting(false);
-            // Total should be ~300 + 550 + 450 = 1300ms but we overlap phases
-            // Actually: drawing(300) + counting(550) + retracting(450 + 4*60 stagger) = ~1090ms
-            // Fire onComplete immediately when all retracted
-            onComplete();
-            return next;
-          }
-
-          return next;
-        });
+      if (allComplete) {
+        // All curtains done - unmount preloader after brief delay
+        unmountTimerRef.current = setTimeout(() => {
+          setIsUnmounted(true);
+          setPreloaderComplete?.(true);
+          onComplete?.();
+        }, 100);
+        return;
       }
 
-      if (phase !== 'complete') {
-        animationRef.current = requestAnimationFrame(animate);
-      }
+      curtainAnimationRef.current = requestAnimationFrame(animateCurtains);
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    curtainAnimationRef.current = requestAnimationFrame(animateCurtains);
+  }, [setPreloaderComplete, onComplete]);
+
+  // Initialize on mount - StrictMode-safe
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsUnmounted(true);
+      setPreloaderComplete?.(true);
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      setIsUnmounted(true);
+      setPreloaderComplete?.(true);
+      return;
+    }
+
+    // Block pointer events initially
+    document.body.style.pointerEvents = 'none';
+
+    // Start counter animation
+    startTimeRef.current = performance.now();
+    animationRef.current = requestAnimationFrame(animateCounter);
+
+    // Start logo draw animation with Framer Motion timing
+    const logoDrawTimer = setTimeout(() => {
+      setLogoDrawProgress(1);
+    }, LOGO_DRAW_DURATION * 1000);
+
+    // Hard failsafe: force completion at 1200ms if animation hasn't finished
+    failsafeTimerRef.current = setTimeout(() => {
+      if (counterRef.current < 100) {
+        counterRef.current = 100;
+        setCounter(100);
+      }
+      setLogoDrawProgress(1);
+      if (!showCurtains) {
+        setShowCurtains(true);
+        startCurtainAnimation();
+      }
+    }, FAILSAFE_TIMEOUT);
 
     return () => {
-      cancelAnimationFrame(animationRef.current);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (curtainAnimationRef.current) cancelAnimationFrame(curtainAnimationRef.current);
+      if (logoDrawTimer) clearTimeout(logoDrawTimer);
+      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
+      if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current);
+      // Restore pointer events on cleanup
+      if (typeof document !== 'undefined') {
+        document.body.style.pointerEvents = '';
+      }
     };
-  }, [phase, exponentialEase, counterEase, onComplete]);
+  }, [animateCounter, setPreloaderComplete, showCurtains, startCurtainAnimation]);
 
-  // Accessibility: respect prefers-reduced-motion
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-      setPhase('complete');
-      setCounter(100);
-      setLogoDrawProgress(1);
-      setCurtainStates([false, false, false, false, false]);
-      onComplete();
-    }
-  }, [onComplete]);
-
-  // Counter display formatting: 000, 001... 099, 100
-  const counterDisplay = counter < 10 ? `00${counter}` : counter < 100 ? `0${counter}` : '100';
-
-  // Curtain transforms: translateY(0) → translateY(-100%)
-  // CSS handles the actual animation via transition on each column
+  if (isUnmounted) {
+    return null;
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-bg)]"
-      role="status"
-      aria-label="Loading"
-      aria-live="polite"
-      style={{ pointerEvents: retracting ? 'none' : 'auto' }}
-    >
-      {/* 5 Vertical Curtain Columns */}
-      <div className="absolute inset-0 flex" aria-hidden="true">
-        {curtainStates.map((isVisible, i) => (
-          <div
-            key={i}
-            className="relative flex-1 bg-[var(--color-bg)] transition-transform duration-450 ease-[cubic-bezier(0.76,0,0.24,1)]"
-            style={{
-              transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
-              transitionDelay: `${i * 60}ms`,
-              willChange: 'transform',
-            }}
-          />
-        ))}
-      </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="preloader"
+        initial={{ opacity: 1 }}
+        exit={{
+          opacity: 0,
+          transition: { duration: 0.2, ease: LOGO_EASE }
+        }}
+        className={`fixed inset-0 z-[99999] bg-[#050505] ${isRetracting ? 'pointer-events-none' : ''}`}
+        role="status"
+        aria-label="Initializing archive"
+        aria-busy="true"
+      >
+        {/* Center stage - Logo + Counter + Telemetry */}
+        <div className="flex flex-col items-center justify-center h-full w-full">
+          {/* BrandLogo with draw-in animation */}
+          <div className="relative flex items-center justify-center mb-8">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: LOGO_DRAW_DURATION, ease: LOGO_EASE }}
+            >
+              <BrandLogo
+                size={120}
+                style={{
+                  filter: 'drop-shadow(0 0 40px rgba(255,255,255,0.1))',
+                }}
+              />
+            </motion.div>
 
-      {/* Center Content - BrandMark + Counter */}
-      <div className="relative z-10 flex flex-col items-center gap-8 pointer-events-none">
-        {/* Geometric Compass Monogram - draws via stroke-dashoffset */}
-        <svg width="96" height="96" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="text-[var(--color-text)]">
-          <defs>
-            <path
-              id="brand-path"
-              d="M24 4 C15.163 4 8 11.163 8 20 C8 28.837 15.163 36 24 36 C32.837 36 40 28.837 40 20 C40 11.163 32.837 4 24 4 Z
-                 M24 12 L24 36
-                 M12 24 L36 24
-                 M15.172 15.172 L32.828 32.828
-                 M32.828 15.172 L15.172 32.828
-                 M24 18 L30 24 L24 30 L18 24 Z
-                 M24 20 C22.343 20 21 21.343 21 23 C21 24.657 22.343 26 24 26 C25.657 26 27 24.657 27 23 C27 21.343 25.657 20 24 20 Z"
-            />
-          </defs>
-          <use
-            href="#brand-path"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray="600"
-            strokeDashoffset={`${600 * (1 - logoDrawProgress)}`}
-            vectorEffect="non-scaling-stroke"
-            style={{ transition: 'stroke-dashoffset 300ms cubic-bezier(0.16, 1, 0.3, 1)' }}
-          />
-        </svg>
+            {/* Architectural crosshair ticks - animated */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[200px] h-[200px] flex items-center justify-center">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <motion.div
+                    key={`tick-${i}`}
+                    className="absolute w-px h-8 bg-white/30"
+                    style={{
+                      transform: `rotate(${i * 90}deg) translateY(-100px)`,
+                      transformOrigin: 'center center',
+                    }}
+                    initial={{ opacity: 0, scaleY: 0 }}
+                    animate={{
+                      opacity: logoDrawProgress,
+                      scaleY: logoDrawProgress
+                    }}
+                    transition={{
+                      duration: LOGO_DRAW_DURATION * 0.8,
+                      ease: LOGO_EASE,
+                      delay: 0.1 + i * 0.05
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
 
-        {/* Numeric Counter: 000 → 100 */}
-        <div className="font-mono text-[32px] tracking-[0.4em] text-[var(--color-text)] tabular-nums select-none" style={{ fontFamily: 'var(--font-mono), monospace' }}>
-          {counterDisplay}%
+          {/* Counter: 000 → 100 */}
+          <div className="font-mono text-[clamp(3rem,8vw,6rem)] font-extrabold tracking-[0.15em] text-white tabular-nums select-none">
+            {String(counter).padStart(3, '0')}
+          </div>
+
+          {/* Telemetry */}
+          <motion.p
+            className="font-mono text-xs tracking-[0.3em] uppercase text-white/40 mt-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: LOGO_EASE, delay: 0.3 }}
+          >
+            [ INITIALIZING ARCHIVE ]
+          </motion.p>
         </div>
-      </div>
-    </div>
+
+        {/* 5 Vertical Architectural Curtains - Staggered Wave Retraction */}
+        <AnimatePresence mode="wait">
+          {showCurtains && (
+            <div className="absolute inset-0 flex items-stretch pointer-events-none" aria-hidden="true">
+              {Array.from({ length: CURTAIN_COUNT }).map((_, i) => (
+                <motion.div
+                  key={`curtain-${i}`}
+                  className="flex-1 bg-[#050505] border-r border-white/[0.04] last:border-0"
+                  initial={{ y: '0%' }}
+                  animate={{ y: '-100%' }}
+                  exit={{ y: '-100%' }}
+                  transition={{
+                    duration: CURTAIN_DURATION,
+                    ease: CURTAIN_EASE,
+                    delay: i * (STAGGER_DELAY / 1000),
+                  }}
+                  style={{
+                    willChange: 'transform',
+                    transformOrigin: 'center top',
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

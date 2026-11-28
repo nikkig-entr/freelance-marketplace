@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface DualLayerTextRollProps {
   children: React.ReactNode;
@@ -8,45 +8,35 @@ interface DualLayerTextRollProps {
   className?: string;
 }
 
+/**
+ * Dual-Layer Text Roll - Hover-activated vertical text translation
+ *
+ * Two stacked copies of text translate vertically on hover:
+ * - Layer 1 (default): y: '0%' -> '-100%' (slides up and out)
+ * - Layer 2 (hover): y: '100%' -> '0%' (slides up from bottom)
+ * - Duration: 0.36s, Ease: [0.16, 1, 0.3, 1]
+ * - overflow-hidden relative inline-flex flex-col leading-none
+ */
 export function DualLayerTextRoll({
   children,
   index,
   className = '',
 }: DualLayerTextRollProps) {
-  const [isHovering, setIsHovering] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const handleMouseEnter = () => setIsHovering(true);
-    const handleMouseLeave = () => setIsHovering(false);
-
-    element.addEventListener('mouseenter', handleMouseEnter);
-    element.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, []);
-
   return (
-    <div
-      ref={ref}
-      className={`relative overflow-hidden inline-block ${className}`}
+    <motion.div
+      className={`relative overflow-hidden inline-flex flex-col leading-none ${className}`}
       style={{ perspective: '400px' }}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      whileHover={{
+        // Triggered by Framer Motion's whileHover
+      }}
     >
-      {/* Layer 1 - Default text (slides up and out) */}
-      <div
-        className="flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{
-          transform: isHovering ? 'translateY(-100%)' : 'translateY(0)',
-          opacity: isHovering ? 0 : 1,
-        }}
+      {/* Layer 1 - Default text (slides up and out on hover) */}
+      <motion.div
+        className="flex items-center gap-3"
+        initial={false}
+        animate={{ y: 0, opacity: 1 }}
+        whileHover={{ y: '-100%', opacity: 0 }}
+        transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
       >
         <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider">
           {index}
@@ -54,16 +44,15 @@ export function DualLayerTextRoll({
         <span className="font-mono font-medium text-[var(--color-text-muted)] uppercase tracking-[0.22em]">
           {children}
         </span>
-      </div>
+      </motion.div>
 
-      {/* Layer 2 - Hover text (slides up from bottom) */}
-      <div
-        className="absolute left-0 top-full flex items-center gap-3 transition-transform duration-360 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{
-          transform: isHovering ? 'translateY(-100%)' : 'translateY(0)',
-          opacity: isHovering ? 1 : 0,
-          whiteSpace: 'nowrap',
-        }}
+      {/* Layer 2 - Hover text (slides up from bottom on hover) */}
+      <motion.div
+        className="absolute left-0 top-full flex items-center gap-3 whitespace-nowrap"
+        initial={false}
+        animate={{ y: 0, opacity: 0 }}
+        whileHover={{ y: '-100%', opacity: 1 }}
+        transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
       >
         <span className="font-mono text-[var(--color-text-subtle)] text-xs tracking-wider">
           {index}
@@ -71,8 +60,8 @@ export function DualLayerTextRoll({
         <span className="font-mono font-medium text-[var(--color-text)] uppercase tracking-[0.22em]">
           {children}
         </span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

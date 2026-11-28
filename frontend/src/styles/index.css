@@ -177,7 +177,8 @@
   }
 
   html {
-    @apply antialiased scroll-smooth;
+    @apply antialiased;
+    scroll-behavior: auto !important; /* CRITICAL: prevents native CSS smooth scroll from fighting Lenis JS interpolation */
     font-size: 16px;
   }
 

@@ -38,15 +38,15 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   const lenisRef = useRef<LenisInstance | null>(null);
 
   useEffect(() => {
-    // Initialize Lenis with crisp, lightweight responsiveness for 120fps feel
+    // Initialize Lenis with crisp, responsive inertia for 120fps buttery feel
     const lenis = new Lenis({
-      // Core smoothing parameters - tuned for instant response
-      lerp: 0.11,           // Crisp, responsive easing (was 0.072)
-      duration: 0.9,        // Faster deceleration (was 1.35)
+      // Core smoothing parameters - tuned for zero-jitter
+      lerp: 0.095,           // Crisp, responsive inertia
+      duration: 0.9,         // Faster deceleration
 
       // Wheel behavior
       wheelMultiplier: 1.0,  // Natural wheel response
-      touchMultiplier: 1.5,  // Balanced touch response (was 2.0)
+      touchMultiplier: 1.5,  // Balanced touch response
 
       // Scroll boundaries
       infinite: false,       // No infinite scroll
@@ -54,9 +54,9 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
       // Performance
       smoothWheel: true,     // Smooth wheel scrolling
 
-      // Synchronization - native scroll on mobile touch
-      syncTouch: false,      // Don't sync touch (use native)
-      syncTouchLerp: 0.11,
+      // Synchronization - native scroll on mobile touch (no touch jitter)
+      syncTouch: false,      // Don't sync touch (use native 120Hz hardware momentum)
+      syncTouchLerp: 0.095,
 
       // Gesture direction
       gestureDirection: 'vertical',

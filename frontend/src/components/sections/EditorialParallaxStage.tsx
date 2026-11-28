@@ -159,7 +159,7 @@ export function EditorialParallaxStage() {
                 delay={0.2}
                 stagger={0.1}
                 duration={1}
-                ease="cubic-bezier(0.16, 1, 0.3, 1)"
+                ease={[0.16, 1, 0.3, 1] as const}
                 as="h3"
                 className="font-editorial italic font-light text-[var(--color-text-muted)] leading-[0.95] text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
               >

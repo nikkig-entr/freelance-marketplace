@@ -3,6 +3,10 @@
 import { forwardRef, useRef, useEffect, useState, useImperativeHandle, ElementType, ComponentRef } from 'react';
 import { SplitTextReveal } from './SplitTextReveal';
 
+type CubicBezierEasing = [number, number, number, number];
+
+const DEFAULT_EASE: CubicBezierEasing = [0.76, 0, 0.24, 1];
+
 interface MonumentalHeadlineProps<C extends ElementType = 'h1'> {
   children: React.ReactNode;
   className?: string;
@@ -11,7 +15,7 @@ interface MonumentalHeadlineProps<C extends ElementType = 'h1'> {
   delay?: number;
   stagger?: number;
   duration?: number;
-  ease?: string;
+  ease?: CubicBezierEasing;
   parallax?: boolean;
   parallaxStrength?: number;
   maskAnimation?: boolean;
@@ -29,7 +33,7 @@ const MonumentalHeadline = forwardRef<MonumentalHeadlineRef, MonumentalHeadlineP
   delay = 0,
   stagger = 0.08,
   duration = 1.2,
-  ease = 'cubic-bezier(0.76, 0, 0.24, 1)',
+  ease = DEFAULT_EASE,
   parallax = true,
   parallaxStrength = 0.15,
   maskAnimation = true,

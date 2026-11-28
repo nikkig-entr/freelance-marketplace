@@ -21,7 +21,7 @@ export function CTASection() {
             delay={0.2}
             stagger={0.1}
             duration={1.2}
-            ease="cubic-bezier(0.76, 0, 0.24, 1)"
+            ease={[0.76, 0, 0.24, 1] as const}
             maskAnimation={true}
             className="mb-8"
           >

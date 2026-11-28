@@ -80,7 +80,7 @@ export function EditorialManifestoSection() {
                 delay={0.3}
                 stagger={0.03}
                 duration={1.2}
-                ease="cubic-bezier(0.16, 1, 0.3, 1)"
+                ease={[0.16, 1, 0.3, 1] as const}
                 once={true}
                 as="div"
                 className="font-editorial italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1.125rem,2.5vw,1.5rem)]"
