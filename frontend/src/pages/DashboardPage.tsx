@@ -1,4 +1,6 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,7 +13,6 @@ import {
   CheckCircleIcon,
   CubeIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
 import { projectService, bidService, messageService, balanceService } from '@/services/api';
 import { Project, Bid, Message } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,9 +66,9 @@ function StatRow({ label, value, href, icon: Icon }: {
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="border border-white/15 p-6 min-h-[120px]">
+    <div className="border border-[var(--color-border)] p-6 min-h-[120px] bg-[var(--color-surface)] transition-all duration-300 hover:border-[var(--color-white)]/40 hover:bg-[var(--color-bg)]">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 border border-white/15 flex items-center justify-center flex-shrink-0 min-h-[44px] min-w-[44px]">
+        <div className="w-12 h-12 border border-[var(--color-border)] flex items-center justify-center flex-shrink-0 min-h-[44px] min-w-[44px]">
           <Icon className="w-6 h-6 text-[var(--color-text-muted)]" />
         </div>
         <div className="min-w-0">
@@ -112,9 +113,9 @@ function ActivityRow({
     <div
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
-      className={`flex items-start gap-4 py-4 border-b border-white/15 last:border-0 transition-all duration-300 ${isHovered ? 'bg-white/5' : ''}`}
+      className={`flex items-start gap-4 py-4 border-b border-[var(--color-border)] last:border-0 transition-all duration-300 ${isHovered ? 'bg-[var(--glass-bg)]' : ''}`}
     >
-      <div className="w-10 h-10 border border-white/15 flex items-center justify-center flex-shrink-0 transition-colors duration-200 min-w-[44px] min-h-[44px]">
+      <div className="w-10 h-10 border border-[var(--color-border)] flex items-center justify-center flex-shrink-0 transition-colors duration-200 min-w-[44px] min-h-[44px]">
         <Icon className="w-5 h-5 text-[var(--color-text-muted)]" />
       </div>
       <div className="flex-1 min-w-0">
@@ -183,18 +184,48 @@ function EmptyState({ icon: Icon, title, description, action }: {
   action?: { label: string; href: string; variant?: 'primary' | 'outline' };
 }) {
   return (
-    <div className="py-16 text-center border border-white/15 p-6">
-      <div className="w-16 h-16 border border-white/15 flex items-center justify-center mx-auto mb-6 min-h-[44px] min-w-[44px]">
+    <div className="py-16 text-center border border-[var(--color-border)] p-6 bg-[var(--color-surface)]">
+      <div className="w-16 h-16 border border-[var(--color-border)] flex items-center justify-center mx-auto mb-6 min-h-[44px] min-w-[44px]">
         <Icon className="w-8 h-8 text-[var(--color-text-subtle)]" />
       </div>
       <h3 className="font-heading font-medium text-[var(--color-text)] mb-2">{title}</h3>
       <p className="text-[var(--color-text-muted)] mb-6 max-w-sm mx-auto">{description}</p>
       {action && (
-        <Button asChild variant={action.variant || 'primary'} size="lg" className="border border-white px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px] w-full sm:w-auto">
-          <Link to={action.href}>{action.label}</Link>
-        </Button>
+        <Link
+          to={action.href}
+          className={`inline-flex items-center justify-center gap-2 min-h-[56px] px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] border transition-all duration-300 ${action.variant === 'primary' ? 'bg-[var(--color-white)] text-[var(--color-bg)] border-[var(--color-white)] hover:bg-[var(--color-white)]/90' : 'text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--glass-bg)] hover:border-[var(--color-border-hover)]'}`}
+        >
+          {action.label}
+        </Link>
       )}
     </div>
+  );
+}
+
+function QuickActionButton({ icon: Icon, label, href }: { icon: React.ComponentType<{ className?: string }>; label: string; href: string }) {
+  return (
+    <Link
+      to={href}
+      className="flex items-center gap-3 py-5 border border-[var(--color-border)] px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-[var(--glass-bg)] hover:border-[var(--color-border-hover)] transition-all duration-300 min-h-[56px] bg-[var(--color-surface)]"
+    >
+      <Icon className="w-6 h-6 text-[var(--color-text-muted)] flex-shrink-0" />
+      <span className="font-medium text-[var(--color-text)]">{label}</span>
+    </Link>
+  );
+}
+
+function PlanFeature({ icon: Icon, label, enabled }: { icon: React.ComponentType<{ className?: string }>; label: string; enabled: boolean }) {
+  return (
+    <li className="flex items-center gap-3 min-h-[44px]">
+      {enabled ? (
+        <Icon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
+      ) : (
+        <span className="w-5 h-5 flex-shrink-0 min-w-[20px] min-h-[20px]" />
+      )}
+      <span className={enabled ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-subtle)]'}>
+        {label}
+      </span>
+    </li>
   );
 }
 
@@ -203,6 +234,7 @@ export function DashboardPage() {
   const isFreelancer = user?.role === 'freelancer';
   const isClient = user?.role === 'client';
   const [hoveredActivityId, setHoveredActivityId] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Fetch data
   const { data: projectsData } = useQuery<PaginatedProjects>({
@@ -310,19 +342,52 @@ export function DashboardPage() {
     : projectsData?.items.reduce((acc: number, p: Project) => acc + p.bids_count, 0) || 0;
   const unreadMessagesCount = messagesData?.items.filter((m: Message) => !m.is_read).length || 0;
 
+  // Plan features based on user plan
+  const planFeatures = {
+    starter: {
+      bids: '5 bids per week',
+      aiTools: false,
+      fee: '5% platform fee',
+    },
+    pro: {
+      bids: '50 bids per week',
+      aiTools: true,
+      fee: '3% platform fee',
+    },
+    agency: {
+      bids: 'Unlimited bids',
+      aiTools: true,
+      fee: '1% platform fee',
+    },
+  };
+
+  const currentPlan = planFeatures[user.plan as keyof typeof planFeatures] || planFeatures.starter;
+
+  // Entrance animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="container py-6 lg:py-8 space-y-10 lg:space-y-16">
         {/* Welcome Header */}
-        <section className="pt-4 lg:pt-8">
+        <section className="pt-4 lg:pt-8"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 lg:gap-6">
             <div>
-              <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4 animate-slide-up delay-1">
+              <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4">
                 <span>Welcome</span>
                 <br />
                 <span>back</span>
               </h1>
-              <p className="mt-2 text-[var(--color-text-muted)] max-w-xl font-[Instrument_Serif] italic text-sm lg:text-base">
+              <p className="mt-2 text-[var(--color-text-muted)] max-w-xl font-editorial italic text-sm lg:text-base">
                 {isFreelancer
                   ? 'Track your bids, messages, and project activity in one place.'
                   : 'Overview of your projects, incoming bids, and conversations.'}
@@ -330,62 +395,62 @@ export function DashboardPage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3 flex-wrap w-full sm:w-auto">
               {isFreelancer && (
-                <Button asChild size="lg" className="border border-white px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black min-h-[56px] w-full sm:w-auto">
-                  <PlusIcon className="w-5 h-5 mr-2" />
+                <Link
+                  to="/projects/create"
+                  className="inline-flex items-center justify-center gap-2 min-h-[56px] px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] border-2 border-[var(--color-white)] text-[var(--color-white)] hover:bg-[var(--color-white)] hover:text-[var(--color-bg)] transition-all duration-300 w-full sm:w-auto"
+                >
+                  <PlusIcon className="w-5 h-5" />
                   Post a Project
-                </Button>
-              )}
-              <Button variant="secondary" asChild size="lg" className="border border-white/15 px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px] w-full sm:w-auto">
-                <Link to="/projects">
-                  <MagnifyingGlassIcon className="w-5 h-5 mr-2" />
-                  Browse Projects
                 </Link>
-              </Button>
+              )}
+              <Link
+                to="/projects"
+                className="inline-flex items-center justify-center gap-2 min-h-[56px] px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--glass-bg)] hover:border-[var(--color-border-hover)] transition-all duration-300 w-full sm:w-auto"
+              >
+                <MagnifyingGlassIcon className="w-5 h-5" />
+                Browse Projects
+              </Link>
             </div>
           </div>
         </section>
 
         {/* Stats Section - Single-column on mobile, min 44px touch targets */}
-        <section>
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Overview</h2>
+        <section
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s',
+          }}
+        >
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-[var(--color-border)] pb-3">Overview</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <StatRow
-              label="Active Projects"
-              value={activeProjectsCount}
-              icon={CubeIcon}
-              href="/projects"
-            />
-            <StatRow
-              label="Pending Bids"
-              value={pendingBidsCount}
-              icon={CheckCircleIcon}
-              href="/projects"
-            />
-            <StatRow
-              label="Unread Messages"
-              value={unreadMessagesCount}
-              icon={ChatBubbleLeftRightIcon}
-              href="/projects"
-            />
-            <StatRow
-              label="Available Balance"
-              value={`$${(displayBalance.balance_cents / 100).toLocaleString()}`}
-              icon={CurrencyDollarIcon}
-              href="/balance"
-            />
+            <StatRow label="Active Projects" value={activeProjectsCount} icon={CubeIcon} href="/projects" />
+            <StatRow label="Pending Bids" value={pendingBidsCount} icon={CheckCircleIcon} href="/projects" />
+            <StatRow label="Unread Messages" value={unreadMessagesCount} icon={ChatBubbleLeftRightIcon} href="/projects" />
+            <StatRow label="Available Balance" value={`$${(displayBalance.balance_cents / 100).toLocaleString()}`} icon={CurrencyDollarIcon} href="/balance" />
           </div>
         </section>
 
         {/* Activity Feed Section */}
-        <section>
+        <section
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
+          }}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] border-b border-white/15 pb-3">Recent Activity</h2>
-            <Button variant="ghost" asChild size="sm" className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text-subtle)] hover:text-[var(--color-white)] min-h-[44px]">
-              <Link to="/projects">View all</Link>
-            </Button>
+            <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] border-b border-[var(--color-border)] pb-3">Recent Activity</h2>
+            <Link
+              to="/projects"
+              className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text-subtle)] hover:text-[var(--color-white)] transition-colors min-h-[44px] flex items-center"
+            >
+              View all
+              <ArrowRightIcon className="w-4 h-4 ml-1" />
+            </Link>
           </div>
 
-          <div className="border border-white/15 overflow-hidden overflow-x-auto">
+          <div className="border border-[var(--color-border)] overflow-hidden overflow-x-auto bg-[var(--color-surface)]">
             <ActivityList
               activities={activities.slice(0, 10)}
               hoveredId={hoveredActivityId}
@@ -411,80 +476,52 @@ export function DashboardPage() {
         </section>
 
         {/* Quick Actions Section - Grid stacks on mobile */}
-        <section>
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Quick Actions</h2>
+        <section
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s',
+          }}
+        >
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-[var(--color-border)] pb-3">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
-              <Link to="/projects/create">
-                <PlusIcon className="w-6 h-6 mr-3" />
-                <span className="font-medium">Post a Project</span>
-              </Link>
-            </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
-              <Link to="/projects">
-                <MagnifyingGlassIcon className="w-6 h-6 mr-3" />
-                <span className="font-medium">Browse Projects</span>
-              </Link>
-            </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
-              <Link to="/projects">
-                <ChatBubbleLeftRightIcon className="w-6 h-6 mr-3" />
-                <span className="font-medium">Messages</span>
-              </Link>
-            </Button>
-            <Button variant="secondary" fullWidth asChild size="lg" className="py-5 border border-white/15 px-4 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[56px]">
-              <Link to="/balance">
-                <CurrencyDollarIcon className="w-6 h-6 mr-3" />
-                <span className="font-medium">Balance</span>
-              </Link>
-            </Button>
+            <QuickActionButton icon={PlusIcon} label="Post a Project" href="/projects/create" />
+            <QuickActionButton icon={MagnifyingGlassIcon} label="Browse Projects" href="/projects" />
+            <QuickActionButton icon={ChatBubbleLeftRightIcon} label="Messages" href="/projects" />
+            <QuickActionButton icon={CurrencyDollarIcon} label="Balance" href="/balance" />
           </div>
         </section>
 
         {/* Plan Info Section */}
-        <section className="pb-6 lg:pb-10">
-          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-white/15 pb-3">Your Plan</h2>
+        <section className="pb-6 lg:pb-10"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s',
+          }}
+        >
+          <h2 className="font-heading font-semibold text-[var(--color-text)] text-[clamp(1.25rem,2.5vw,1.75rem)] mb-6 border-b border-[var(--color-border)] pb-3">Your Plan</h2>
           <div className="max-w-2xl">
-            <div className="border border-white/15 p-6">
+            <div className="border border-[var(--color-border)] p-6 bg-[var(--color-surface)]">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">Current Plan</p>
                   <p className="mt-1 font-heading font-bold text-[var(--color-text)] text-2xl lg:text-3xl tabular-nums capitalize">{user.plan}</p>
                 </div>
                 {user.plan !== 'agency' && (
-                  <Button variant="secondary" asChild size="lg" className="whitespace-nowrap border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white/10 min-h-[48px] w-full sm:w-auto">
-                    <Link to="/billing">Upgrade Plan</Link>
-                  </Button>
+                  <Link
+                    to="/billing"
+                    className="inline-flex items-center justify-center min-h-[48px] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--glass-bg)] hover:border-[var(--color-border-hover)] transition-colors whitespace-nowrap w-full sm:w-auto"
+                  >
+                    Upgrade Plan
+                  </Link>
                 )}
               </div>
-              <div className="border-t border-white/15 pt-6">
+              <div className="border-t border-[var(--color-border)] pt-6">
                 <ul className="space-y-3">
-                  <li className="flex items-center gap-3 min-h-[44px]">
-                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
-                    <span className="text-[var(--color-text-muted)]">
-                      {user.plan === 'starter' ? '5 bids per week' : user.plan === 'pro' ? '50 bids per week' : 'Unlimited bids'}
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-3 min-h-[44px]">
-                    {user.plan !== 'starter' && (
-                      <>
-                        <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
-                        <span className="text-[var(--color-text-muted)]">AI-powered tools</span>
-                      </>
-                    )}
-                    {user.plan === 'starter' && (
-                      <>
-                        <span className="w-5 h-5 flex-shrink-0 min-w-[20px] min-h-[20px]" />
-                        <span className="text-[var(--color-text-subtle)]">AI-powered tools (Pro+)</span>
-                      </>
-                    )}
-                  </li>
-                  <li className="flex items-center gap-3 min-h-[44px]">
-                    <CheckCircleIcon className="w-5 h-5 text-[var(--color-white)] flex-shrink-0 min-w-[20px] min-h-[20px]" />
-                    <span className="text-[var(--color-text-muted)]">
-                      {user.plan === 'starter' ? '5% platform fee' : user.plan === 'pro' ? '3% platform fee' : '1% platform fee'}
-                    </span>
-                  </li>
+                  <PlanFeature icon={CheckCircleIcon} label={currentPlan.bids} enabled={true} />
+                  <PlanFeature icon={CheckCircleIcon} label="AI-powered tools" enabled={currentPlan.aiTools} />
+                  <PlanFeature icon={CheckCircleIcon} label={currentPlan.fee} enabled={true} />
                 </ul>
               </div>
             </div>

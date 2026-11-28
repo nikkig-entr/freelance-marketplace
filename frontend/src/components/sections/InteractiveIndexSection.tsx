@@ -4,7 +4,6 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@tanstack/react-router';
 import { CinemaMedia } from '@/components/ui/CinemaMedia';
-import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
 
 const indexItems = [
   {
@@ -71,7 +70,7 @@ export function InteractiveIndexSection() {
   return (
     <section
       ref={containerRef}
-      className="w-full py-16 md:py-24 px-4 md:px-8 border-b border-white/15"
+      className="w-full py-16 md:py-24 px-4 md:px-8 border-b border-[var(--color-border)]"
       data-lenis-prevent
     >
       <div className="container w-full">
@@ -96,7 +95,6 @@ export function InteractiveIndexSection() {
             const isAdjacentHovered = hoveredIndex !== null && hoveredIndex !== index;
             const isMobileExpanded = mobileExpandedIndex === index;
             const isLast = index === indexItems.length - 1;
-            const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
 
             return (
               <motion.div
@@ -127,17 +125,25 @@ export function InteractiveIndexSection() {
                 {/* Row Content */}
                 <Link
                   to={item.href}
-                  className="flex items-center justify-between w-full py-8 md:py-10 border-t border-white/15 transition-colors hover:bg-white/[0.02]"
+                  className="flex items-center justify-between w-full py-8 md:py-10 border-t border-[var(--color-border)] transition-colors hover:bg-[var(--glass-bg)]"
                   style={{
-                    paddingRight: isDesktop && isHovered ? '520px' : '24px',
+                    paddingRight: window.matchMedia('(min-width: 1024px)').matches && isHovered ? '520px' : '24px',
                   }}
                 >
                   {/* Left: Number + Title + Subtitle + Counter */}
                   <div className="flex flex-col gap-3 md:gap-4 min-w-0 pr-8 md:pr-12">
-                    <DualLayerTextRoll index={item.number} className="whitespace-nowrap">
+                    <span className="font-mono text-xs text-[var(--color-text-subtle)] tracking-widest uppercase">
+                      {item.number}
+                    </span>
+                    <motion.h3
+                      className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.95] text-[var(--color-white)] text-[clamp(1.5rem,3vw,2.5rem)]"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
+                    >
                       {item.title}
-                    </DualLayerTextRoll>
-                    <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(0.875rem,1.2vw,1rem)] max-w-[480px]">
+                    </motion.h3>
+                    <p className="font-editorial italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(0.875rem,1.2vw,1rem)] max-w-[480px]">
                       {item.subtitle}
                     </p>
                     <div className="font-mono text-xs text-[var(--color-text-subtle)] tracking-wider uppercase self-start mt-2">
@@ -147,7 +153,7 @@ export function InteractiveIndexSection() {
 
                   {/* Right: Preview Image (desktop hover-only) - PURE BORDERLESS B&W */}
                   <AnimatePresence mode="wait">
-                    {isDesktop && isHovered && (
+                    {window.matchMedia('(min-width: 1024px)').matches && isHovered && (
                       <motion.div
                         key="preview"
                         initial={{ opacity: 0, scale: 0.95, x: 30 }}
@@ -173,14 +179,14 @@ export function InteractiveIndexSection() {
 
                 {/* Mobile expanded preview - tap to reveal */}
                 <AnimatePresence mode="wait">
-                  {!isDesktop && isMobileExpanded && (
+                  {!window.matchMedia('(min-width: 1024px)').matches && isMobileExpanded && (
                     <motion.div
                       key={`mobile-preview-${index}`}
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                      className="mt-6 border-t border-white/15 pt-6 overflow-hidden"
+                      className="mt-6 border-t border-[var(--color-border)] pt-6 overflow-hidden"
                     >
                       <div className="aspect-[16/9] w-full">
                         <CinemaMedia
@@ -195,7 +201,7 @@ export function InteractiveIndexSection() {
 
                 {/* Bottom hairline for last row */}
                 {isLast && (
-                  <div className="border-b border-white/15" />
+                  <div className="border-b border-[var(--color-border)]" />
                 )}
               </motion.div>
             );

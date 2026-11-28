@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +24,7 @@ export function LoginPage() {
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const {
     register,
@@ -47,10 +48,15 @@ export function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col lg:flex-row">
-      {/* Left Side - Image + Headline - Full bleed on mobile */}
-      <div className="relative lg:w-1/2 hidden lg:block bg-[var(--color-bg)] overflow-hidden min-h-[100dvh]">
+      {/* Left Side - Architectural Image - Dark Theme */}
+      <div className="relative lg:w-1/2 hidden lg:block overflow-hidden min-h-[100dvh]">
         <CinemaMedia
           src="/media/arch-02.jpg"
           aspectRatio={1}
@@ -61,7 +67,13 @@ export function LoginPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-4">
             Sign In
           </span>
-          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s',
+            }}
+          >
             <span>Welcome</span>
             <br />
             <span>back</span>
@@ -70,7 +82,7 @@ export function LoginPage() {
       </div>
 
       {/* Mobile Hero - condensed */}
-      <div className="lg:hidden relative bg-[var(--color-bg)] min-h-[40vh] overflow-hidden">
+      <div className="lg:hidden relative overflow-hidden min-h-[40vh]">
         <CinemaMedia
           src="/media/arch-02.jpg"
           aspectRatio={16/9}
@@ -81,7 +93,13 @@ export function LoginPage() {
           <span className="font-mono text-xs text-[var(--color-white)]/70 tracking-wider uppercase block mb-2">
             Sign In
           </span>
-          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full">
+          <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s',
+            }}
+          >
             <span>Welcome</span>
             <br />
             <span>back</span>
@@ -89,21 +107,27 @@ export function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[var(--color-bg)] min-h-[100dvh] lg:min-h-auto">
-        <div className="w-full max-w-md">
+      {/* Right Side - Form - HIGH-CONTRAST INVERTED: White bg, Black text */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 min-h-[100dvh] lg:min-h-auto bg-white overflow-y-auto">
+        <div className="w-full max-w-md"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
+          }}
+        >
           <div className="mb-10 lg:mb-12">
             <Link to="/" className="inline-flex items-center gap-2 mb-8">
-              <span className="font-mono text-xs tracking-[0.25em] uppercase text-[var(--color-text)]">
+              <span className="font-mono text-xs tracking-[0.25em] uppercase text-black">
                 FREELANCEHUB
               </span>
             </Link>
-            <h1 className="font-heading font-extrabold text-[var(--color-white)] uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4 animate-slide-up delay-1">
+            <h1 className="font-heading font-extrabold text-black uppercase tracking-[-0.03em] leading-[0.92] text-[clamp(2.2rem,5.8vw,6rem)] break-words max-w-full mb-4">
               <span>Sign</span>
               <br />
               <span>in</span>
             </h1>
-            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-body mt-6">
+            <p className="font-editorial italic font-light text-black/50 leading-relaxed tracking-[0.01em] text-body mt-6">
               Enter your credentials to access the archive
             </p>
           </div>
@@ -115,7 +139,7 @@ export function LoginPage() {
               placeholder="you@example.com"
               autoComplete="email"
               error={errors.email?.message}
-              className="border-0 border-b border-white/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
+              className="border-0 border-b border-black/30 bg-transparent px-0 py-4 text-base sm:text-lg placeholder-black/30 focus:ring-0 focus:border-black min-h-[48px] text-[16px] text-black"
               {...register('email')}
             />
 
@@ -129,27 +153,27 @@ export function LoginPage() {
                 rightIcon={
                   <button
                     type="button"
-                    className="text-[var(--color-text-subtle)] hover:text-[var(--color-text)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    className="text-black/30 hover:text-black transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                 }
-                className="border-0 border-b border-white/30 bg-transparent px-0 py-4 pr-12 text-base sm:text-lg placeholder-[var(--color-text-subtle)] focus:ring-0 focus:border-white min-h-[48px] text-[16px]"
+                className="border-0 border-b border-black/30 bg-transparent px-0 py-4 pr-12 text-base sm:text-lg placeholder-black/30 focus:ring-0 focus:border-black min-h-[48px] text-[16px] text-black"
                 {...register('password')}
               />
             </div>
 
-            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] bg-white text-black hover:bg-white/90 hover:text-black transition-colors min-h-[56px]">
+            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border-2 border-black px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] bg-black text-white hover:bg-black/90 hover:text-white transition-colors min-h-[56px]">
               Sign In
             </Button>
           </form>
 
           <div className="mt-10 lg:mt-12 text-center">
-            <p className="text-[var(--color-text-muted)]">
+            <p className="text-black/50">
               Don&apos;t have an account?&nbsp;
-              <Link to="/register" className="font-medium text-[var(--color-text)] hover:underline transition-colors">
+              <Link to="/register" className="font-medium text-black hover:underline transition-colors">
                 Sign up
               </Link>
             </p>

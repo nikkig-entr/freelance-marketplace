@@ -135,13 +135,13 @@ export function SliceStripGallery() {
   return (
     <section
       ref={containerRef}
-      className="relative py-14 md:py-20 px-4 md:px-8 border-b border-white/15 overflow-hidden"
+      className="relative py-14 md:py-20 px-4 md:px-8 border-b border-[var(--color-border)] overflow-hidden"
       data-lenis-prevent
     >
       {/* Precision Tick-Mark Ruler & Active Index Readout */}
       <div className="flex items-center justify-between mb-8 md:mb-12 px-2 md:px-0">
         {/* Tick marks - precision ruler */}
-        <div className="flex items-center gap-1 md:gap-1.5 flex-1 md:mr-8" aria-hidden="true" role="img" aria-label="Slice position indicator">
+        <div className="flex items-center gap-1 md:gap-1.5 flex-1 md:mr-8 relative" aria-hidden="true" role="img" aria-label="Slice position indicator">
           {Array.from({ length: 32 }).map((_, i) => (
             <motion.div
               key={`tick-${i}`}
@@ -160,7 +160,7 @@ export function SliceStripGallery() {
           {/* Active tick indicator */}
           {activeIndex !== null && (
             <motion.div
-              className="absolute h-px w-1.5 md:w-2 bg-white"
+              className="absolute h-px w-1.5 md:w-2 bg-[var(--color-white)]"
               style={{
                 left: `${(activeIndex / (sliceItems.length - 1)) * 100}%`,
                 transform: 'translateX(-50%) scaleY(3)',
@@ -175,7 +175,7 @@ export function SliceStripGallery() {
         </div>
 
         {/* Active index readout */}
-        <div className="flex items-center gap-3 font-mono text-xs md:text-sm text-[var(--color-text-muted)] tracking-wider uppercase whitespace-nowrap flex-shrink-0">
+        <div className="flex items-center gap-3 font-mono text-xs md:text-sm text-[var(--color-text-subtle)] tracking-wider uppercase whitespace-nowrap flex-shrink-0">
           <span className="text-[var(--color-white)] font-medium">
             {activeIndex !== null ? String(activeIndex + 1).padStart(2, '0') : '—'}
           </span>
@@ -188,7 +188,7 @@ export function SliceStripGallery() {
       <div className="flex items-baseline justify-between gap-8 mb-8 md:mb-10 px-2 md:px-0">
         <div className="flex-1 min-w-0">
           <motion.span
-            className="font-display font-extrabold tracking-[-0.03em] leading-[0.9] text-white text-[clamp(1.5rem,4vw,3rem)] md:text-[clamp(2rem,5vw,4rem)]"
+            className="font-display font-extrabold tracking-[-0.03em] leading-[0.9] text-[var(--color-white)] text-[clamp(1.5rem,4vw,3rem)] md:text-[clamp(2rem,5vw,4rem)]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -198,7 +198,7 @@ export function SliceStripGallery() {
         </div>
         <div className="flex flex-col items-end gap-1 min-w-[200px]">
           <motion.span
-            className="font-display font-extrabold tracking-[-0.03em] leading-[0.9] text-white text-[clamp(1.5rem,4vw,3rem)] md:text-[clamp(2rem,5vw,4rem)] text-right"
+            className="font-display font-extrabold tracking-[-0.03em] leading-[0.9] text-[var(--color-white)] text-[clamp(1.5rem,4vw,3rem)] md:text-[clamp(2rem,5vw,4rem)] text-right"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
@@ -241,8 +241,6 @@ export function SliceStripGallery() {
                   : 'h-[440px] min-w-[80px]'
               }`}
               style={{
-                // Desktop: flex-1 collapsed, flex-[4.5] expanded
-                // Mobile: min-w-[44px] collapsed, flex-1 expanded
                 flex: isActive ? (isMobile ? 1 : 4.5) : 1,
                 minWidth: isMobileCollapsed ? '44px' : undefined,
               }}
@@ -277,18 +275,18 @@ export function SliceStripGallery() {
                 />
                 {/* Subtle dark gradient only for active slice readability - no text overlay on inactive */}
                 {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/60 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/60 via-transparent to-transparent pointer-events-none" />
                 )}
                 {/* Active slice edge glow */}
                 {isActive && (
-                  <div className="absolute inset-0 border-l border-r border-white/30 pointer-events-none" />
+                  <div className="absolute inset-0 border-l border-r border-[var(--color-white)]/30 pointer-events-none" />
                 )}
               </div>
 
               {/* Mobile collapsed indicator - only number visible */}
               {isMobileCollapsed && (
                 <div className="relative z-10 flex items-center justify-center h-full">
-                  <span className="font-mono text-xs md:text-sm tracking-wider text-white/70 writing-mode vertical-rl text-orientation: mixed">
+                  <span className="font-mono text-xs md:text-sm tracking-wider text-[var(--color-white)]/70 writing-mode vertical-rl text-orientation: mixed">
                     {item.number}
                   </span>
                 </div>
@@ -307,10 +305,10 @@ export function SliceStripGallery() {
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
                   >
                     <div className="w-full max-w-full">
-                      <p className="font-mono text-xs md:text-sm text-white/50 tracking-wider uppercase mb-2 md:mb-3">
+                      <p className="font-mono text-xs md:text-sm text-[var(--color-white)]/50 tracking-wider uppercase mb-2 md:mb-3">
                         {item.number} / {sliceItems.length}
                       </p>
-                      <p className="font-display font-bold text-white uppercase leading-[0.9] tracking-[-0.02em] text-[clamp(1.25rem,3vw,2.5rem)] md:text-[clamp(1.75rem,4vw,3.5rem)]">
+                      <p className="font-display font-bold text-[var(--color-white)] uppercase leading-[0.9] tracking-[-0.02em] text-[clamp(1.25rem,3vw,2.5rem)] md:text-[clamp(1.75rem,4vw,3.5rem)]">
                         {item.discipline}
                       </p>
                     </div>

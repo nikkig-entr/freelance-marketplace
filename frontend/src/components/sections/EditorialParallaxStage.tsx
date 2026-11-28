@@ -1,31 +1,33 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link } from '@tanstack/react-router';
 import { CinemaMedia } from '@/components/ui/CinemaMedia';
 import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
+import { useLenis } from '@/hooks/useLenis';
 
 export function EditorialParallaxStage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const lenis = useLenis();
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
-  // Framer Motion scroll values
-  const { scrollY } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  });
+  // Scroll progress from Lenis
+  useEffect(() => {
+    if (!lenis) return;
 
-  // Horizontal transform for opposing typography bands (wider range for more dramatic effect)
-  const translateX1 = useTransform(scrollY, [0, 1], ['0%', '-40%']);
-  const translateX2 = useTransform(scrollY, [0, 1], ['0%', '40%']);
+    const handleScroll = () => {
+      const progress = lenis.limit > 0 ? lenis.scroll / lenis.limit : 0;
+      setScrollProgress(Math.max(0, Math.min(1, progress)));
+    };
 
-  // Vertical parallax for photographs (opposing speeds)
-  const photo1Y = useTransform(scrollY, [0, 1], ['60%', '-60%']);
-  const photo2Y = useTransform(scrollY, [0, 1], ['-40%', '80%']);
+    lenis.on('scroll', handleScroll);
+    handleScroll();
 
-  // Opacity fade for mix-blend-difference headline
-  const headlineOpacity = useTransform(scrollY, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+    return () => lenis.off('scroll', handleScroll);
+  }, [lenis]);
 
   // Intersection observer for entrance animation
   useEffect(() => {
@@ -45,20 +47,43 @@ export function EditorialParallaxStage() {
     return () => observer.disconnect();
   }, []);
 
+  // Reduced motion
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduceMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  // Calculate transforms based on scroll progress
+  const translateX1 = reduceMotion ? 0 : scrollProgress * -40; // -40%
+  const translateX2 = reduceMotion ? 0 : scrollProgress * 40;  // 40%
+  const photo1Y = reduceMotion ? 0 : (scrollProgress - 0.5) * 120; // 60% to -60%
+  const photo2Y = reduceMotion ? 0 : (scrollProgress - 0.3) * 120; // -40% to 80%
+  const headlineOpacity = reduceMotion ? 1 :
+    scrollProgress < 0.3 ? scrollProgress / 0.3 :
+    scrollProgress > 0.7 ? (1 - scrollProgress) / 0.3 : 1;
+
   return (
     <section
       ref={containerRef}
-      className="relative border-t border-white/15 overflow-hidden"
+      className="relative border-t border-[var(--color-border)] overflow-hidden"
       data-lenis-prevent
+      style={{ willChange: 'transform' }}
     >
       {/* Parallax Container - overflow hidden for clipping */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden" style={{ willChange: 'transform' }}>
         {/* BACKGROUND LAYER: B&W Photography with vertical parallax */}
-        <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true" style={{ willChange: 'transform' }}>
           {/* Photo 1: arch-01 - moves up */}
           <motion.div
             className="absolute left-0 top-0 w-full h-full"
-            style={{ y: photo1Y }}
+            style={{
+              y: `${photo1Y}%`,
+              transform: `translateY(${photo1Y}%)`,
+              willChange: 'transform',
+            }}
           >
             <CinemaMedia
               src="/media/arch-01.jpg"
@@ -70,7 +95,11 @@ export function EditorialParallaxStage() {
           {/* Photo 2: arch-02 - moves down */}
           <motion.div
             className="absolute left-0 top-0 w-full h-full"
-            style={{ y: photo2Y }}
+            style={{
+              y: `${photo2Y}%`,
+              transform: `translateY(${photo2Y}%)`,
+              willChange: 'transform',
+            }}
           >
             <CinemaMedia
               src="/media/arch-02.jpg"
@@ -81,11 +110,15 @@ export function EditorialParallaxStage() {
         </div>
 
         {/* MIDDLE LAYER: Hollow display typography bands - opposing horizontal scroll */}
-        <div className="relative h-[60vh] min-h-[400px] max-h-[550px] flex items-center justify-center overflow-hidden pointer-events-none">
+        <div className="relative h-[60vh] min-h-[400px] max-h-[550px] flex items-center justify-center overflow-hidden pointer-events-none" style={{ willChange: 'transform' }}>
           {/* Band 1: SELECTED ARCHIVE - hollow, moves left */}
           <motion.div
             className="absolute left-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
-            style={{ x: translateX1 }}
+            style={{
+              x: `${translateX1}%`,
+              transform: `translateX(${translateX1}%)`,
+              willChange: 'transform',
+            }}
           >
             <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none">
               SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE
@@ -95,7 +128,11 @@ export function EditorialParallaxStage() {
           {/* Band 2: INDEPENDENT PRACTICE - hollow, moves right */}
           <motion.div
             className="absolute right-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
-            style={{ x: translateX2 }}
+            style={{
+              x: `${translateX2}%`,
+              transform: `translateX(${translateX2}%)`,
+              willChange: 'transform',
+            }}
           >
             <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none text-right">
               INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE
@@ -106,11 +143,13 @@ export function EditorialParallaxStage() {
         {/* FOREGROUND LAYER: mix-blend-difference headline - inverts over photos */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center pointer-events-none mix-blend-difference"
-          style={{ opacity: headlineOpacity }}
+          style={{ opacity: headlineOpacity, willChange: 'opacity' }}
+          animate={{ opacity: headlineOpacity }}
+          transition={{ duration: 0.3 }}
         >
           <div className="text-center px-4">
             <motion.h3
-              className="font-heading font-extrabold uppercase tracking-[-0.03em] leading-[0.88] text-white text-[clamp(2.5rem,6vw,5.5rem)] select-none"
+              className="font-heading font-extrabold uppercase tracking-[-0.03em] leading-[0.88] text-[var(--color-white)] text-[clamp(2.5rem,6vw,5.5rem)] select-none"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -122,11 +161,12 @@ export function EditorialParallaxStage() {
       </div>
 
       {/* EDITORIAL MANIFESTO - Clean 12-column grid with hairlines */}
-      <div className="container relative z-10 border-b border-white/15">
+      <div className="container relative z-10 border-b border-[var(--color-border)]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 py-16 md:py-20">
           {/* Left Column - Editorial Manifesto (span 5) */}
           <div className="lg:col-span-5 pt-4 lg:pt-8">
-            <div className="mb-8 lg:mb-12"
+            <div
+              className="mb-8 lg:mb-12"
               style={{
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
@@ -143,7 +183,7 @@ export function EditorialParallaxStage() {
                 duration={1}
                 ease="cubic-bezier(0.16, 1, 0.3, 1)"
                 as="h3"
-                className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-[0.95] text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
+                className="font-editorial italic font-light text-[var(--color-text-muted)] leading-[0.95] text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
               >
                 We believe the future
                 <br />
@@ -154,7 +194,7 @@ export function EditorialParallaxStage() {
             </div>
 
             <p
-              className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1.125rem,2vw,1.5rem)] mb-12 max-w-none"
+              className="font-editorial italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1.125rem,2vw,1.5rem)] mb-12 max-w-none"
               style={{
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
@@ -165,7 +205,8 @@ export function EditorialParallaxStage() {
             </p>
 
             {/* Architectural hairline divider */}
-            <div className="w-16 h-px bg-[var(--color-text-subtle)] mb-6"
+            <div
+              className="w-16 h-px bg-[var(--color-text-subtle)] mb-6"
               style={{
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
@@ -174,7 +215,7 @@ export function EditorialParallaxStage() {
             />
             <Link
               to="/projects"
-              className="inline-flex items-center justify-center gap-2 border border-white px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[48px] w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-2 border border-[var(--color-white)] px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text)] hover:bg-[var(--color-white)] hover:text-[var(--color-bg)] transition-all duration-300 min-h-[48px] w-full sm:w-auto"
               style={{
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
@@ -186,7 +227,9 @@ export function EditorialParallaxStage() {
           </div>
 
           {/* Right Column - Cinema Frame (span 7) */}
-          <div className="lg:col-span-7 relative" data-cursor="PLAY REEL"
+          <div
+            className="lg:col-span-7 relative"
+            data-cursor="PLAY REEL"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0)' : 'translateY(40px)',

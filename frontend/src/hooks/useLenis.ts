@@ -1,46 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
-import Lenis from 'lenis';
+// Define Lenis interface for proper typing
+export interface LenisInstance {
+  scroll: number;
+  limit: number;
+  on: (event: string, callback: () => void) => void;
+  off: (event: string, callback: () => void) => void;
+  scrollTo: (target: HTMLElement | string | number, options?: { offset?: number; immediate?: boolean; duration?: number; easing?: (t: number) => number }) => void;
+  raf: (time: number) => void;
+  destroy: () => void;
+  stop: () => void;
+  start: () => void;
+}
 
 interface WindowWithLenis extends Window {
-  __lenis?: Lenis;
+  __LENIS__?: LenisInstance;
 }
 
-export function useLenis() {
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
-    const lenis = new Lenis({
-      lerp: 0.072,
-      duration: 1.35,
-      smoothWheel: true,
-      syncTouch: false,
-      wheelMultiplier: 0.95,
-      infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-}
-
-export function lenisScrollTo(target: string | number | HTMLElement, options?: { offset?: number; duration?: number }) {
-  if (typeof window === 'undefined') return;
-
-  const lenis = (window as WindowWithLenis).__lenis;
-  if (lenis) {
-    lenis.scrollTo(target, options);
-  }
+export function useLenis(): LenisInstance | null {
+  if (typeof window === 'undefined') return null;
+  return (window as WindowWithLenis).__LENIS__ ?? null;
 }

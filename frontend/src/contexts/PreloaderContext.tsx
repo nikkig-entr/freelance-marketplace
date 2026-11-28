@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { NumericPreloader } from '@/components/motion/NumericPreloader';
 
 export interface PreloaderContextValue {
   isPreloaderComplete: boolean;
@@ -15,9 +16,18 @@ export function PreloaderProvider({ children }: { children: ReactNode }) {
     setIsPreloaderComplete(complete);
   }, []);
 
+  // Handle preloader completion
+  const handlePreloaderComplete = useCallback(() => {
+    setIsPreloaderComplete(true);
+  }, []);
+
   return (
     <PreloaderContext.Provider value={{ isPreloaderComplete, setPreloaderComplete: stableSetPreloaderComplete }}>
-      {children}
+      {!isPreloaderComplete ? (
+        <NumericPreloader onComplete={handlePreloaderComplete} minDuration={2800} />
+      ) : (
+        <div style={{ willChange: 'transform' }}>{children}</div>
+      )}
     </PreloaderContext.Provider>
   );
 }

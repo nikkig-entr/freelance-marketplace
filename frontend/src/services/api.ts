@@ -266,6 +266,8 @@ export const userService = {
   uploadAvatar: (file: File, onProgress?: (progress: number) => void) =>
     api.uploadFile('/users/avatar', file, onProgress),
   deleteAccount: <T = void>() => api.delete<T>('/users/me'),
+  getCategories: <T = { items: Array<{ id: number; name: string }> }>() => api.get<T>('/users/categories'),
+  listTalent: <T = { items: User[]; total: number; total_pages: number }>(params?: GenericParams) => api.get<T>('/users/talent', params),
 };
 
 export const adminService = {

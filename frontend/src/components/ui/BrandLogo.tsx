@@ -1,119 +1,202 @@
 'use client';
 
-import { forwardRef, SVGProps } from 'react';
+import { forwardRef } from 'react';
 
-interface BrandLogoProps extends Omit<SVGProps<SVGSVGElement>, 'children' | 'viewBox'> {
+interface BrandLogoProps extends React.SVGAttributes<SVGSVGElement> {
   size?: number;
-  showWordmark?: boolean;
-  className?: string;
+  strokeWidth?: number;
 }
 
+/**
+ * Bespoke Geometric Compass Monogram
+ * - 48x48 viewBox for perfect scaling
+ * - 2px stroke (configurable via strokeWidth prop)
+ * - Zero fill, pure stroke geometry
+ * - Architectural precision: cardinal axes + diagonal bisectors
+ * - Center diamond = convergence point (marketplace meeting place)
+ * - 8 outer vertices = 8 architectural photos / 8 directions
+ */
 export const BrandLogo = forwardRef<SVGSVGElement, BrandLogoProps>(
   (
     {
       size = 48,
-      showWordmark = false,
+      strokeWidth = 2,
       className = '',
       style,
+      'aria-label': ariaLabel = 'FreelanceHub',
       ...props
     },
     ref
-  ) => (
-    <svg
-      ref={ref}
-      viewBox="0 0 48 48"
-      width={size}
-      height={size}
-      className={className}
-      style={{ ...style, flexShrink: 0 }}
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-      {...props}
-    >
-      {/* Outer architectural compass ring - 1px precision stroke */}
-      <circle
-        cx="24"
-        cy="24"
-        r="22"
-        stroke="#FFFFFF"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+  ) => {
+    const viewBox = '0 0 48 48';
+    const center = 24;
+    const outerRadius = 20;    // Outer circle radius
+    const innerRadius = 12;    // Inner diamond radius
+    const cardinalRadius = 16; // Cardinal points radius
 
-      {/* Crosshair axes - architectural precision */}
-      <g stroke="#FFFFFF" strokeWidth="0.75" strokeLinecap="round" opacity="0.6">
-        {/* Vertical axis */}
-        <line x1="24" y1="6" x2="24" y2="14" />
-        <line x1="24" y1="34" x2="24" y2="42" />
-        {/* Horizontal axis */}
-        <line x1="6" y1="24" x2="14" y2="24" />
-        <line x1="34" y1="24" x2="42" y2="24" />
-      </g>
+    return (
+      <svg
+        ref={ref}
+        width={size}
+        height={size}
+        viewBox={viewBox}
+        fill="none"
+        aria-label={ariaLabel}
+        role="img"
+        className={`shrink-0 transition-opacity duration-300 ${className}`}
+        style={{
+          ...style,
+          strokeWidth: strokeWidth,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+        }}
+        {...props}
+      >
+        {/* Outer Circle - The Boundary */}
+        <circle
+          cx={center}
+          cy={center}
+          r={outerRadius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+        />
 
-      {/* Isometric stepped monolith silhouette - architectural core */}
-      <g stroke="#FFFFFF" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        {/* Base platform */}
-        <path d="M14 32 L34 32" />
-        <path d="M16 30 L32 30" />
-        <path d="M18 28 L30 28" />
-        <path d="M20 26 L28 26" />
+        {/* Cardinal Axes - N/S/E/W Crosshair */}
+        <line
+          x1={center}
+          y1={center - outerRadius}
+          x2={center}
+          y2={center + outerRadius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+          opacity="0.6"
+        />
+        <line
+          x1={center - outerRadius}
+          y1={center}
+          x2={center + outerRadius}
+          y2={center}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+          opacity="0.6"
+        />
 
-        {/* Central tower - stepped elevation */}
-        <path d="M22 26 L22 14" />
-        <path d="M26 26 L26 16" />
-        <path d="M20 26 L20 18" />
+        {/* Diagonal Bisectors - NE/NW/SE/SW */}
+        <line
+          x1={center - cardinalRadius * 0.7071}
+          y1={center - cardinalRadius * 0.7071}
+          x2={center + cardinalRadius * 0.7071}
+          y2={center + cardinalRadius * 0.7071}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+          opacity="0.4"
+        />
+        <line
+          x1={center + cardinalRadius * 0.7071}
+          y1={center - cardinalRadius * 0.7071}
+          x2={center - cardinalRadius * 0.7071}
+          y2={center + cardinalRadius * 0.7071}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+          opacity="0.4"
+        />
 
-        {/* Top capstone */}
-        <path d="M19 14 L27 14" />
-        <path d="M20 12 L26 12" />
-        <path d="M21 10 L25 10" />
-        <path d="M22 8 L24 8" />
+        {/* Center Diamond - Convergence Point */}
+        <path
+          d={`M ${center} ${center - innerRadius}
+             L ${center + innerRadius} ${center}
+             L ${center} ${center + innerRadius}
+             L ${center - innerRadius} ${center}
+             Z`}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          vectorEffect="non-scaling-stroke"
+        />
 
-        {/* Right wing - receding steps */}
-        <path d="M26 26 L32 26" />
-        <path d="M28 24 L32 24" />
-        <path d="M30 22 L32 22" />
+        {/* 8 Outer Vertices - The 8 Directions / 8 Photos */}
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const x = center + outerRadius * Math.cos(rad);
+          const y = center + outerRadius * Math.sin(rad);
+          return (
+            <circle
+              key={i}
+              cx={x}
+              cy={y}
+              r={strokeWidth * 1.5}
+              fill="currentColor"
+              opacity={0.8}
+            />
+          );
+        })}
 
-        {/* Left wing - receding steps */}
-        <path d="M20 26 L14 26" />
-        <path d="M18 24 L14 24" />
-        <path d="M16 22 L14 22" />
-      </g>
-
-      {/* Central crosshair intersection - precision anchor */}
-      <circle
-        cx="24"
-        cy="21"
-        r="1.5"
-        fill="#FFFFFF"
-        opacity="0.9"
-      />
-
-      {showWordmark && (
-        <g transform="translate(24, 52)" className="brand-wordmark">
-          <text
-            x="0"
-            y="0"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#FFFFFF"
-            fontFamily="'JetBrains Mono', 'Fira Code', monospace"
-            fontSize="4.2"
-            fontWeight="600"
-            letterSpacing="0.12em"
-            textLength="120"
-            lengthAdjust="spacingAndGlyphs"
-          >
-            FREELANCEHUB
-          </text>
-        </g>
-      )}
-    </svg>
-  )
+        {/* Subtle inner ring - depth indicator */}
+        <circle
+          cx={center}
+          cy={center}
+          r={innerRadius * 0.5}
+          stroke="currentColor"
+          strokeWidth={strokeWidth * 0.5}
+          vectorEffect="non-scaling-stroke"
+          opacity="0.3"
+        />
+      </svg>
+    );
+  }
 );
 
 BrandLogo.displayName = 'BrandLogo';
+
+/**
+ * Wordmark variant - Logo + "FREELANCEHUB" text
+ * Used in footer and mobile drawer header
+ */
+export function BrandWordmark({
+  size = 32,
+  gap = 12,
+  className = '',
+  style,
+  ...restProps
+}: {
+  size?: number;
+  gap?: number;
+  className?: string;
+  style?: React.CSSProperties;
+} & Omit<BrandLogoProps, 'size'>) {
+  // Only pass valid div props (filter out SVG-specific props)
+  const divProps: React.HTMLAttributes<HTMLDivElement> = {
+    style,
+    ...restProps,
+  } as React.HTMLAttributes<HTMLDivElement>;
+
+  return (
+    <div className={`inline-flex items-center gap-${gap / 4} ${className}`} {...divProps}>
+      <BrandLogo size={size} {...restProps} />
+      <span className="font-mono text-xs tracking-[0.35em] uppercase text-[var(--color-text)] select-none">
+        FREELANCEHUB
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Minimal variant - Just the logo mark
+ * Used in header, preloader, favicon contexts
+ */
+export function BrandMark({
+  size = 48,
+  className = '',
+  ...props
+}: {
+  size?: number;
+  className?: string;
+} & Omit<BrandLogoProps, 'size'>) {
+  return <BrandLogo size={size} className={className} {...props} />;
+}
 
 export default BrandLogo;

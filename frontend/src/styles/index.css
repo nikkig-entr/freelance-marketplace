@@ -33,6 +33,10 @@
     --color-text-muted: var(--text-secondary);
     --color-text-subtle: var(--text-muted);
     --color-text-inverse: var(--bg-primary);
+    --color-white: #FFFFFF;
+    --color-gray-100: #F5F5F5;
+    --color-gray-700: #333333;
+    --color-gray-800: #1F1F1F;
 
     /* Focus ring - white only */
     --focus-ring: var(--color-white);

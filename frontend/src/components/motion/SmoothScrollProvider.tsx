@@ -1,53 +1,135 @@
 'use client';
 
-import { useEffect } from 'react';
-import Lenis from 'lenis';
+import { useEffect, useRef } from 'react';
+import Lenis from '@studio-freight/lenis';
 
-interface WindowWithLenis extends Window {
-  __lenis?: Lenis;
+interface SmoothScrollProviderProps {
+  children: React.ReactNode;
 }
 
-export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
+// Define Lenis interface for proper typing
+interface LenisInstance {
+  scroll: number;
+  limit: number;
+  on: (event: string, callback: () => void) => void;
+  off: (event: string, callback: () => void) => void;
+  scrollTo: (target: HTMLElement | string | number, options?: { offset?: number; immediate?: boolean; duration?: number; easing?: (t: number) => number }) => void;
+  raf: (time: number) => void;
+  destroy: () => void;
+  stop: () => void;
+  start: () => void;
+}
+
+interface LenisOptions {
+  lerp?: number;
+  duration?: number;
+  wheelMultiplier?: number;
+  touchMultiplier?: number;
+  infinite?: boolean;
+  smoothWheel?: boolean;
+  syncTouch?: boolean;
+  syncTouchLerp?: number;
+  gestureDirection?: 'vertical' | 'horizontal' | 'both';
+  overshoot?: boolean;
+  easing?: (t: number) => number;
+}
+
+export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
+  const lenisRef = useRef<LenisInstance | null>(null);
+
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
-    // Initialize Lenis with exact parameters for Awwwards-grade smooth scroll
+    // Initialize Lenis with buttery smooth config per spec
     const lenis = new Lenis({
-      lerp: 0.072,
-      duration: 1.35,
-      smoothWheel: true,
-      syncTouch: false, // CRITICAL: Keep native iOS/Android touch momentum 100% glitch-free
-      wheelMultiplier: 0.95,
-      infinite: false,
-    });
+      // Core smoothing parameters
+      lerp: 0.072,           // Extremely smooth, museum-grade easing
+      duration: 1.35,        // Long, graceful deceleration
 
-    // Expose globally for lenisScrollTo utility
-    (window as WindowWithLenis).__lenis = lenis;
+      // Wheel behavior
+      wheelMultiplier: 1.0,  // Natural wheel response
+      touchMultiplier: 2.0,  // Slightly more responsive on touch
 
+      // Scroll boundaries
+      infinite: false,       // No infinite scroll
+
+      // Performance
+      smoothWheel: true,     // Smooth wheel scrolling
+
+      // Synchronization
+      syncTouch: false,      // Don't sync touch (causes issues)
+      syncTouchLerp: 0.072,
+
+      // Gesture direction
+      gestureDirection: 'vertical',
+
+      // Prevent overscroll bounce
+      overshoot: false,
+
+      // Easing function - custom for architectural feel
+      easing: (t: number) => {
+        // Custom cubic-bezier(0.16, 1, 0.3, 1) equivalent
+        // This is the "material" easing used by Apple, Framer, etc.
+        return 1 - Math.pow(1 - t, 3);
+      },
+    } as LenisOptions);
+
+    lenisRef.current = lenis as unknown as LenisInstance;
+
+    // Expose to window for debugging / external access
+    (window as Window & { __LENIS__?: LenisInstance }).__LENIS__ = lenis as unknown as LenisInstance;
+
+    // Animation frame loop
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    const rafId = requestAnimationFrame(raf);
 
-    return () => {
-      lenis.destroy();
-      delete (window as WindowWithLenis).__lenis;
+    // Handle anchor links with smooth scroll
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLAnchorElement;
+      const anchor = target.closest('a[href^="#"]');
+
+      if (anchor) {
+        const href = anchor.getAttribute('href');
+        if (href && href !== '#') {
+          const targetEl = document.querySelector(href);
+          if (targetEl instanceof HTMLElement) {
+            e.preventDefault();
+            lenis.scrollTo(targetEl, {
+              offset: 0,
+              immediate: false,
+              duration: 1.35,
+              easing: (t: number) => 1 - Math.pow(1 - t, 3),
+            });
+          }
+        }
+      }
     };
+
+    document.addEventListener('click', handleAnchorClick, { passive: false });
+
+    // Cleanup
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      document.removeEventListener('click', handleAnchorClick);
+      delete (window as Window & { __LENIS__?: LenisInstance }).__LENIS__;
+    };
+  }, []);
+
+  // Prevent scroll restoration on navigation (handled by router)
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
   }, []);
 
   return <>{children}</>;
 }
 
-export function lenisScrollTo(target: string | number | HTMLElement, options?: { offset?: number; duration?: number }) {
-  if (typeof window === 'undefined') return;
-
-  const lenis = (window as WindowWithLenis).__lenis;
-  if (lenis) {
-    lenis.scrollTo(target, options);
-  }
+// Hook to access Lenis instance
+export function useLenis(): LenisInstance | null {
+  if (typeof window === 'undefined') return null;
+  return (window as Window & { __LENIS__?: LenisInstance }).__LENIS__ ?? null;
 }
