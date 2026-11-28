@@ -8,7 +8,6 @@ import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon, ChevronDownIcon } from '@he
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
 import { EditorialText } from '@/components/ui/EditorialText';
 import { IndexListSkeleton } from '@/components/ui/IndexList';
 
@@ -687,19 +686,6 @@ export function ProjectsPage() {
           </section>
         </div>
       </main>
-
-      {/* Mobile Filters Button */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={() => setShowFilters(true)}
-          leftIcon={<FunnelIcon className="w-5 h-5" />}
-          className="shadow-xl border-white bg-white text-black hover:bg-white/90 min-h-[56px]"
-        >
-          Filters {hasActiveFilters && <Badge className="ml-2 border-white bg-white text-black">Active</Badge>}
-        </Button>
-      </div>
     </div>
   );
 }
