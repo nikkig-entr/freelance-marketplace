@@ -12,8 +12,9 @@ interface NumericPreloaderProps {
 const CURTAIN_COUNT = 5;
 const CURTAIN_DURATION = 850;
 const STAGGER_DELAY = 60;
-const COUNTER_DURATION = 950;
+const COUNTER_DURATION = 850;
 const LOGO_DRAW_DURATION = 0.75;
+const FAILSAFE_TIMEOUT = 1400;
 const CURTAIN_EASE = [0.76, 0, 0.24, 1] as const;
 const COUNTER_EASE = (t: number) => 1 - Math.pow(1 - t, 4);
 const LOGO_EASE = [0.16, 1, 0.3, 1] as const;
@@ -27,10 +28,13 @@ export function NumericPreloader({
   const [counter, setCounter] = useState(0);
   const [logoDrawProgress, setLogoDrawProgress] = useState(0);
   const [showCurtains, setShowCurtains] = useState(false);
+  const [isRetracting, setIsRetracting] = useState(false);
   const counterRef = useRef(0);
   const animationRef = useRef<number>();
   const startTimeRef = useRef<number>(0);
   const curtainAnimationRef = useRef<number>();
+  const failsafeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const unmountTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Exponential ease-out counter animation using requestAnimationFrame
   const animateCounter = useCallback(() => {
@@ -57,6 +61,11 @@ export function NumericPreloader({
 
   // Staggered curtain retraction animation
   const startCurtainAnimation = useCallback(() => {
+    setIsRetracting(true);
+    // Disable pointer events on body as soon as retraction begins
+    if (typeof document !== 'undefined') {
+      document.body.style.pointerEvents = 'none';
+    }
     const curtainStartTime = performance.now();
 
     const animateCurtains = () => {
@@ -72,8 +81,8 @@ export function NumericPreloader({
       });
 
       if (allComplete) {
-        // All curtains done - unmount preloader
-        setTimeout(() => {
+        // All curtains done - unmount preloader after brief delay
+        unmountTimerRef.current = setTimeout(() => {
           setIsUnmounted(true);
           setPreloaderComplete?.(true);
           onComplete?.();
@@ -85,7 +94,7 @@ export function NumericPreloader({
     };
 
     curtainAnimationRef.current = requestAnimationFrame(animateCurtains);
-  }, [setPreloaderComplete]);
+  }, [setPreloaderComplete, onComplete]);
 
   // Initialize on mount
   useEffect(() => {
@@ -114,13 +123,31 @@ export function NumericPreloader({
       setLogoDrawProgress(1);
     }, LOGO_DRAW_DURATION * 1000);
 
+    // Hard failsafe: force completion at 1400ms if animation hasn't finished
+    failsafeTimerRef.current = setTimeout(() => {
+      if (counterRef.current < 100) {
+        counterRef.current = 100;
+        setCounter(100);
+      }
+      setLogoDrawProgress(1);
+      if (!showCurtains) {
+        setShowCurtains(true);
+        startCurtainAnimation();
+      }
+    }, FAILSAFE_TIMEOUT);
+
     return () => {
-      cancelAnimationFrame(animationRef.current!);
-      cancelAnimationFrame(curtainAnimationRef.current!);
-      clearTimeout(logoDrawTimer);
-      document.body.style.pointerEvents = '';
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      if (curtainAnimationRef.current) cancelAnimationFrame(curtainAnimationRef.current);
+      if (logoDrawTimer) clearTimeout(logoDrawTimer);
+      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
+      if (unmountTimerRef.current) clearTimeout(unmountTimerRef.current);
+      // Restore pointer events on cleanup
+      if (typeof document !== 'undefined') {
+        document.body.style.pointerEvents = '';
+      }
     };
-  }, [animateCounter, setPreloaderComplete]);
+  }, [animateCounter, setPreloaderComplete, showCurtains, startCurtainAnimation]);
 
   if (isUnmounted) {
     return null;
@@ -135,7 +162,7 @@ export function NumericPreloader({
           opacity: 0,
           transition: { duration: 0.25, ease: LOGO_EASE }
         }}
-        className="fixed inset-0 z-[99999] pointer-events-none bg-[#050505]"
+        className={`fixed inset-0 z-[99999] bg-[#050505] ${isRetracting ? 'pointer-events-none' : ''}`}
         role="status"
         aria-label="Initializing archive"
         aria-busy="true"
