@@ -38,15 +38,15 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
   const lenisRef = useRef<LenisInstance | null>(null);
 
   useEffect(() => {
-    // Initialize Lenis with buttery smooth config per spec
+    // Initialize Lenis with crisp, lightweight responsiveness for 120fps feel
     const lenis = new Lenis({
-      // Core smoothing parameters
-      lerp: 0.072,           // Extremely smooth, museum-grade easing
-      duration: 1.35,        // Long, graceful deceleration
+      // Core smoothing parameters - tuned for instant response
+      lerp: 0.11,           // Crisp, responsive easing (was 0.072)
+      duration: 0.9,        // Faster deceleration (was 1.35)
 
       // Wheel behavior
       wheelMultiplier: 1.0,  // Natural wheel response
-      touchMultiplier: 2.0,  // Slightly more responsive on touch
+      touchMultiplier: 1.5,  // Balanced touch response (was 2.0)
 
       // Scroll boundaries
       infinite: false,       // No infinite scroll
@@ -54,9 +54,9 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
       // Performance
       smoothWheel: true,     // Smooth wheel scrolling
 
-      // Synchronization
-      syncTouch: false,      // Don't sync touch (causes issues)
-      syncTouchLerp: 0.072,
+      // Synchronization - native scroll on mobile touch
+      syncTouch: false,      // Don't sync touch (use native)
+      syncTouchLerp: 0.11,
 
       // Gesture direction
       gestureDirection: 'vertical',
@@ -64,10 +64,8 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
       // Prevent overscroll bounce
       overshoot: false,
 
-      // Easing function - custom for architectural feel
+      // Easing function - custom cubic-bezier(0.16, 1, 0.3, 1) equivalent
       easing: (t: number) => {
-        // Custom cubic-bezier(0.16, 1, 0.3, 1) equivalent
-        // This is the "material" easing used by Apple, Framer, etc.
         return 1 - Math.pow(1 - t, 3);
       },
     } as LenisOptions);
@@ -99,7 +97,7 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
             lenis.scrollTo(targetEl, {
               offset: 0,
               immediate: false,
-              duration: 1.35,
+              duration: 0.9,
               easing: (t: number) => 1 - Math.pow(1 - t, 3),
             });
           }

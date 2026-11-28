@@ -34,17 +34,17 @@ export function Hero3DMonolith({
   const timeRef = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Monolith configuration
+  // Monolith configuration - centered, larger, fewer blocks for clarity
   const config = useMemo(() => ({
-    blockCount: width < 768 ? 24 : 48,
-    cols: width < 768 ? 4 : 8,
-    rows: width < 768 ? 6 : 8,
-    layers: 1,
-    baseBlockSize: Math.min(width, height) * 0.045,
-    spacing: 1.9,
-    maxExplosion: 2.5,
-    pointerInfluence: width < 768 ? 280 : 380,
-    pointerForce: width < 768 ? 140 : 200,
+    blockCount: width < 768 ? 18 : 32,
+    cols: width < 768 ? 3 : 4,
+    rows: width < 768 ? 3 : 4,
+    layers: 2,
+    baseBlockSize: Math.min(width, height) * 0.052, // ~52% of viewport height distributed
+    spacing: 2.2,
+    maxExplosion: 2.0,
+    pointerInfluence: width < 768 ? 300 : 420,
+    pointerForce: width < 768 ? 160 : 240,
   }), [width, height]);
 
   // Initialize Three.js scene
@@ -69,47 +69,39 @@ export function Hero3DMonolith({
     renderer.setPixelRatio(newDpr);
     renderer.setClearColor(0x050505, 0); // Transparent, page background shows through
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 1.15;
     rendererRef.current = renderer;
 
     // Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // Camera - narrow FOV for architectural perspective
+    // Camera - narrow FOV for architectural perspective, positioned to center monolith
     const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 10000);
-    camera.position.set(0, 0, Math.max(w, h) * 1.6);
-    camera.lookAt(0, 0, 0);
+    camera.position.set(0, h * 0.15, Math.max(w, h) * 1.3);
+    camera.lookAt(0, h * 0.25, 0);
     cameraRef.current = camera;
 
-    // Monolith group
+    // Monolith group - CENTERED in viewport at (0, 0.25, 0)
     const monolith = new THREE.Group();
+    monolith.position.set(0, h * 0.25, 0);
     scene.add(monolith);
     monolithRef.current = monolith;
 
-    // Materials - Pure monochrome architectural materials
-    const wireframeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.85,
-      depthTest: true,
-      depthWrite: false,
-    });
-
+    // Materials - HIGH CONTRAST architectural materials for #050505 background
     const faceMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1a1a1a,
-      roughness: 0.95,
-      metalness: 0.02,
-      transparent: true,
-      opacity: 1.0,
+      color: 0x3a3a3a,
+      emissive: 0x111111,
+      roughness: 0.25,
+      metalness: 0.75,
       side: THREE.DoubleSide,
     });
 
+    // Bright white edge wireframes
     const edgeMaterial = new THREE.LineBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.92,
       linewidth: 2,
     });
 
@@ -120,26 +112,40 @@ export function Hero3DMonolith({
       linewidth: 3,
     });
 
-    // Lighting - Architectural, minimal
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    // LIGHTING - Strong, architectural lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    keyLight.position.set(200, 400, 300);
+    // Main key light - strong white directional
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.0);
+    keyLight.position.set(150, 400, 250);
+    keyLight.castShadow = false;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.15);
-    fillLight.position.set(-300, 100, -200);
+    // Fill light
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    fillLight.position.set(-250, 150, -200);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.25);
-    rimLight.position.set(0, -300, -400);
+    // Rim light for edge definition
+    const rimLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    rimLight.position.set(0, -300, -350);
     scene.add(rimLight);
+
+    // Point light for close-range brilliance
+    const pointLight = new THREE.PointLight(0xffffff, 3.5, 25);
+    pointLight.position.set(0, 80, 120);
+    scene.add(pointLight);
+
+    // Secondary point light for depth
+    const pointLight2 = new THREE.PointLight(0xffffff, 2.0, 30);
+    pointLight2.position.set(-100, 120, -80);
+    scene.add(pointLight2);
 
     // Geometry - BoxGeometry for sharp architectural blocks
     const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
 
-    // Generate blocks
+    // Generate blocks - fewer, larger, centered
     const blocks: THREE.Mesh[] = [];
     const { blockCount, cols, rows, layers, baseBlockSize, spacing } = config;
     const blockSize = baseBlockSize;
@@ -154,14 +160,14 @@ export function Hero3DMonolith({
         for (let col = 0; col < cols; col++) {
           if (blocks.length >= blockCount) break;
 
-          // Slight position jitter for organic feel
-          const x = startX + col * spacingDist + (Math.random() - 0.5) * spacingDist * 0.06;
-          const y = startY + row * spacingDist + (Math.random() - 0.5) * spacingDist * 0.06;
-          const z = layer * spacingDist * 1.6;
+          // Clean grid positions (no jitter for architectural precision)
+          const x = startX + col * spacingDist;
+          const y = startY + row * spacingDist;
+          const z = layer * spacingDist * 1.8;
 
-          const sizeVariation = 0.92 + Math.random() * 0.16;
+          const sizeVariation = 0.95 + Math.random() * 0.1; // Subtle variation
 
-          // Create mesh with wireframe
+          // Create mesh with high-contrast material
           const mesh = new THREE.Mesh(blockGeometry, faceMaterial.clone());
           mesh.scale.set(blockSize * sizeVariation, blockSize * sizeVariation, blockSize * sizeVariation);
           mesh.position.set(x, y, z);
@@ -175,16 +181,15 @@ export function Hero3DMonolith({
             telemetry: String(telemetryCounter++).padStart(2, '0'),
             velocity: new THREE.Vector3(),
             veinSeed: Math.random() * 1000,
-            wireframeMaterial: wireframeMaterial.clone(),
             edgeMaterial: edgeMaterial.clone(),
             hoverEdgeMaterial: hoverEdgeMaterial.clone(),
             isHovered: false,
-            originalOpacity: 0.85,
+            originalOpacity: 0.92,
           };
 
-          // Add wireframe as separate mesh for crisp edges
+          // Add crisp wireframe edges
           const edges = new THREE.EdgesGeometry(blockGeometry);
-          const wireframe = new THREE.LineSegments(edges, mesh.userData.wireframeMaterial);
+          const wireframe = new THREE.LineSegments(edges, mesh.userData.edgeMaterial);
           wireframe.scale.copy(mesh.scale);
           wireframe.position.copy(mesh.position);
           mesh.add(wireframe);
@@ -194,6 +199,44 @@ export function Hero3DMonolith({
         }
       }
     }
+
+    // Add two orbital rings around the monolith
+    const ringGeometry = new THREE.RingGeometry(
+      spacingDist * cols * 0.65,
+      spacingDist * cols * 0.72,
+      64
+    );
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.DoubleSide,
+    });
+
+    // Ring 1 - horizontal
+    const ring1 = new THREE.Mesh(ringGeometry, ringMaterial.clone());
+    ring1.rotation.x = -Math.PI / 2;
+    ring1.position.y = 0;
+    monolith.add(ring1);
+
+    // Ring 2 - tilted
+    const ring2 = new THREE.Mesh(ringGeometry, ringMaterial.clone());
+    ring2.rotation.x = -Math.PI / 2;
+    ring2.rotation.z = Math.PI / 6;
+    ring2.position.y = 20;
+    monolith.add(ring2);
+
+    // Ring 3 - opposite tilt
+    const ring3 = new THREE.Mesh(ringGeometry, ringMaterial.clone());
+    ring3.rotation.x = -Math.PI / 2;
+    ring3.rotation.z = -Math.PI / 6;
+    ring3.position.y = -20;
+    monolith.add(ring3);
+
+    // Store rings for animation
+    monolith.userData = {
+      rings: [ring1, ring2, ring3],
+    };
 
     blocksRef.current = blocks;
     setIsInitialized(true);
@@ -213,9 +256,17 @@ export function Hero3DMonolith({
     const newDpr = Math.min(window.devicePixelRatio || 1, 2);
 
     camera.aspect = w / h;
+    camera.position.set(0, h * 0.15, Math.max(w, h) * 1.3);
+    camera.lookAt(0, h * 0.25, 0);
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     renderer.setPixelRatio(newDpr);
+
+    // Update monolith vertical position
+    const monolith = monolithRef.current;
+    if (monolith) {
+      monolith.position.y = h * 0.25;
+    }
   };
 
   // Animation loop
@@ -231,42 +282,54 @@ export function Hero3DMonolith({
     timeRef.current += 1 / 60;
 
     // Scroll-driven explosion factor
-    const explosionFactor = Math.min(config.maxExplosion, scrollProgress * config.maxExplosion * 1.2);
+    const explosionFactor = Math.min(config.maxExplosion, scrollProgress * config.maxExplosion * 1.1);
 
     // Camera subtle rotation based on scroll
-    const scrollRotX = scrollProgress * 0.08;
-    const scrollRotY = scrollProgress * 0.04;
+    const scrollRotX = scrollProgress * 0.06;
+    const scrollRotY = scrollProgress * 0.03;
 
     // Pointer interaction
     let pointerRotX = 0;
     let pointerRotY = 0;
     if (pointer && !reduceMotion) {
-      pointerRotX = (pointer.y / (height * 0.5)) * 0.15;
-      pointerRotY = (pointer.x / (width * 0.5)) * -0.15;
+      pointerRotX = (pointer.y / (height * 0.5)) * 0.12;
+      pointerRotY = (pointer.x / (width * 0.5)) * -0.12;
     }
 
     // Smooth monolith rotation
     const targetRotX = scrollRotX + pointerRotX;
     const targetRotY = scrollRotY + pointerRotY;
-    monolith.rotation.x += (targetRotX - monolith.rotation.x) * 0.08;
-    monolith.rotation.y += (targetRotY - monolith.rotation.y) * 0.08;
+    monolith.rotation.x += (targetRotX - monolith.rotation.x) * 0.07;
+    monolith.rotation.y += (targetRotY - monolith.rotation.y) * 0.07;
 
     // Subtle continuous rotation when idle
     if (!pointer && reduceMotion === false) {
-      monolith.rotation.y += 0.00015;
-      monolith.rotation.x += 0.00008;
+      monolith.rotation.y += 0.00012;
+      monolith.rotation.x += 0.00006;
+    }
+
+    // Animate orbital rings
+    const rings = monolith.userData?.rings as THREE.Mesh[] | undefined;
+    if (rings && !reduceMotion) {
+      rings.forEach((ring, i) => {
+        const speed = 0.00008 * (i + 1) * (i === 0 ? 1 : i === 1 ? 0.7 : 0.5);
+        ring.rotation.z += speed * (i % 2 === 0 ? 1 : -1);
+        ring.rotation.x = -Math.PI / 2 + Math.sin(timeRef.current * 0.3 + i) * 0.05;
+        const ringMat = ring.material as THREE.MeshBasicMaterial;
+        ringMat.opacity = 0.12 + 0.05 * Math.sin(timeRef.current * 0.5 + i);
+      });
     }
 
     // Update each block with physics
     blocks.forEach((mesh) => {
       const data = mesh.userData;
 
-      // Explosion offset
+      // Explosion offset - radial from center
       const radialDist = Math.sqrt(data.baseX * data.baseX + data.baseY * data.baseY);
       const radialAngle = Math.atan2(data.baseY, data.baseX);
-      const explodeX = Math.cos(radialAngle) * radialDist * explosionFactor * 1.3;
-      const explodeY = Math.sin(radialAngle) * radialDist * explosionFactor * 1.3;
-      const explodeZ = Math.abs(data.baseZ) * explosionFactor * 0.9 + data.baseScale * explosionFactor * 4;
+      const explodeX = Math.cos(radialAngle) * radialDist * explosionFactor * 1.2;
+      const explodeY = Math.sin(radialAngle) * radialDist * explosionFactor * 1.2;
+      const explodeZ = Math.abs(data.baseZ) * explosionFactor * 0.8 + data.baseScale * explosionFactor * 3;
 
       // Pointer magnetic repulsion
       let repulseX = 0;
@@ -275,8 +338,8 @@ export function Hero3DMonolith({
       let isHovered = false;
 
       if (pointer && !reduceMotion) {
-        const dx = mesh.position.x - pointer.x * 0.5;
-        const dy = mesh.position.y - pointer.y * 0.5;
+        const dx = mesh.position.x - pointer.x * 0.4;
+        const dy = mesh.position.y - pointer.y * 0.4;
         const dist2D = Math.sqrt(dx * dx + dy * dy);
         const influenceRadius = config.pointerInfluence;
 
@@ -285,16 +348,16 @@ export function Hero3DMonolith({
           const angle = Math.atan2(dy, dx);
           repulseX = Math.cos(angle) * force;
           repulseY = Math.sin(angle) * force;
-          repulseZ = force * 0.8;
-          isHovered = dist2D < influenceRadius * 0.35;
+          repulseZ = force * 0.7;
+          isHovered = dist2D < influenceRadius * 0.3;
         }
       }
 
       data.isHovered = isHovered;
 
-      // Spring physics
-      const springK = 0.055;
-      const damping = 0.82;
+      // Spring physics - snappy response
+      const springK = 0.065;
+      const damping = 0.8;
 
       const targetX = data.baseX + explodeX;
       const targetY = data.baseY + explodeY;
@@ -312,35 +375,34 @@ export function Hero3DMonolith({
       mesh.position.y += data.velocity.y;
       mesh.position.z += data.velocity.z;
 
-      // Update wireframe position
+      // Update wireframe position and opacity
       mesh.children.forEach((child) => {
         if (child instanceof THREE.LineSegments) {
           child.position.copy(mesh.position);
           child.rotation.copy(mesh.rotation);
 
-          // Update wireframe opacity based on hover
-          const mat = child.material as THREE.MeshBasicMaterial;
+          const mat = child.material as THREE.LineBasicMaterial;
           if (isHovered) {
             mat.opacity = 1.0;
             mat.color.setHex(0xffffff);
           } else {
-            mat.opacity = 0.6 + 0.3 * Math.min(1, mesh.position.z / 1000);
+            mat.opacity = 0.75 + 0.2 * Math.min(1, mesh.position.z / 800);
             mat.color.setHex(0xffffff);
           }
         }
       });
 
       // Subtle block rotation from velocity
-      mesh.rotation.x += data.velocity.y * 0.0008;
-      mesh.rotation.y += -data.velocity.x * 0.0008;
+      mesh.rotation.x += data.velocity.y * 0.0006;
+      mesh.rotation.y += -data.velocity.x * 0.0006;
     });
 
-    // Sort blocks by depth for proper transparency (painter's algorithm)
+    // Sort blocks by depth for proper transparency
     blocks.sort((a, b) => b.position.z - a.position.z);
 
     // Subtle scene breathing
     if (!reduceMotion) {
-      monolith.position.y = Math.sin(timeRef.current * 0.15) * 2;
+      monolith.position.y = Math.sin(timeRef.current * 0.12) * 1.5 + (containerRef.current ? containerRef.current.getBoundingClientRect().height * 0.25 : 0);
     }
 
     renderer.render(scene, camera);
@@ -433,7 +495,14 @@ export function Hero3DMonolith({
       <noscript>
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-bg)]">
           <div className="text-center p-8">
-            <BrandLogo size={64} strokeWidth={1.5} className="mx-auto mb-6 opacity-50" />
+            <svg width="64" height="64" viewBox="0 0 48 48" fill="none" className="mx-auto mb-6 opacity-50" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="24" cy="24" r="20" />
+              <line x1="24" y1="8" x2="24" y2="40" />
+              <line x1="8" y1="24" x2="40" y2="24" />
+              <line x1="13" y1="13" x2="35" y2="35" />
+              <line x1="35" y1="13" x2="13" y2="35" />
+              <rect x="21" y="21" width="6" height="6" rx="1" />
+            </svg>
             <p className="font-mono text-xs text-[var(--color-text-muted)] tracking-wider uppercase">
               WebGL required for 3D monolith
             </p>
@@ -443,8 +512,5 @@ export function Hero3DMonolith({
     </div>
   );
 }
-
-// Import BrandLogo for fallback
-import { BrandLogo } from '@/components/ui/BrandLogo';
 
 export default Hero3DMonolith;

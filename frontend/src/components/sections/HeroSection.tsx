@@ -94,7 +94,7 @@ export function HeroSection() {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-[100dvh] flex flex-col justify-between pt-16 pb-8 px-4 md:px-8 overflow-hidden"
+      className="relative w-full min-h-[70vh] flex flex-col pt-16 pb-20 px-4 md:px-8"
       data-lenis-prevent
       style={{ willChange: 'transform' }}
     >

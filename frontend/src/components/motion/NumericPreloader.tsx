@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 
 interface NumericPreloaderProps {
   onComplete: () => void;
-  minDuration?: number; // Minimum time to show preloader (ms)
 }
 
 /**
@@ -12,36 +11,33 @@ interface NumericPreloaderProps {
  *
  * Sequence:
  * 1. 5 vertical columns (curtains) cover the #050505 stage
- * 2. BrandMark draws via SVG pathLength (0→1 over 800ms)
- * 3. Numeric counter: 000 → 100 in 950ms with exponential easing
- * 4. Columns retract upward sequentially (staggered 80ms)
- * 5. Content reveals, onComplete fires
+ * 2. BrandMark draws via SVG pathLength (0→1 over 300ms)
+ * 3. Numeric counter: 000 → 100 in 550ms with exponential easing
+ * 4. Columns retract upward in 450ms (staggered 60ms, ease: [0.76, 0, 0.24, 1])
+ * 5. Total ~1050ms, onComplete fires immediately
  */
-export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPreloaderProps) {
+export function NumericPreloader({ onComplete }: NumericPreloaderProps) {
   const [counter, setCounter] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'drawing' | 'counting' | 'retracting' | 'complete'>('idle');
   const [curtainStates, setCurtainStates] = useState<boolean[]>([true, true, true, true, true]);
   const [logoDrawProgress, setLogoDrawProgress] = useState(0);
+  const [retracting, setRetracting] = useState(false);
 
   const startTimeRef = useRef<number>(0);
   const animationRef = useRef<number>(0);
-  const countingRef = useRef<boolean>(false);
 
-  // Exponential easing: slow start, rapid acceleration, smooth settle
+  // Exponential easing for logo drawing
   const exponentialEase = useCallback((t: number): number => {
-    // Custom cubic-bezier(0.16, 1, 0.3, 1) approximation
-    // But with exponential character for the counter
     return 1 - Math.pow(1 - t, 4);
   }, []);
 
-  // Counter easing: exponential with overshoot suppression
+  // Counter easing: fast exponential to 100 in 550ms
   const counterEase = useCallback((t: number): number => {
-    // Exponential ease-out with slight anticipation
-    if (t < 0.15) return Math.pow(t / 0.15, 2) * 0.15;
-    return 1 - Math.pow(1 - t, 3.5);
+    if (t < 0.1) return Math.pow(t / 0.1, 2) * 0.1;
+    return 1 - Math.pow(1 - t, 3.2);
   }, []);
 
-  // Main animation loop
+  // Main animation loop - TOTAL: ~1050ms
   useEffect(() => {
     startTimeRef.current = performance.now();
     setPhase('drawing');
@@ -50,30 +46,30 @@ export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPrel
       const elapsed = now - startTimeRef.current;
 
       if (phase === 'drawing') {
-        // Logo SVG drawing: 0→1 over 800ms
-        const drawProgress = Math.min(elapsed / 800, 1);
+        // Logo SVG drawing: 0→1 over 300ms (faster)
+        const drawProgress = Math.min(elapsed / 300, 1);
         setLogoDrawProgress(exponentialEase(drawProgress));
 
-        if (elapsed >= 800) {
+        if (elapsed >= 300) {
           setPhase('counting');
           startTimeRef.current = now;
-          countingRef.current = true;
         }
       } else if (phase === 'counting') {
-        // Numeric counter: 000→100 over 950ms
-        const countProgress = Math.min(elapsed / 950, 1);
+        // Numeric counter: 000→100 over 550ms
+        const countProgress = Math.min(elapsed / 550, 1);
         const eased = counterEase(countProgress);
         setCounter(Math.round(eased * 100));
 
-        if (elapsed >= 950) {
+        if (elapsed >= 550) {
           setCounter(100);
           setPhase('retracting');
+          setRetracting(true); // pointer-events-none starts here
           startTimeRef.current = now;
         }
       } else if (phase === 'retracting') {
-        // 5 columns retract upward with 80ms stagger
-        const retractDuration = 600; // ms per column
-        const stagger = 80; // ms between columns
+        // 5 columns retract upward in 450ms with 60ms stagger, ease: [0.76, 0, 0.24, 1]
+        const retractDuration = 450;
+        const stagger = 60;
 
         setCurtainStates(prev => {
           const next = [...prev];
@@ -85,21 +81,18 @@ export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPrel
 
             if (columnElapsed > 0 && columnElapsed < retractDuration) {
               anyRetracting = true;
-              // Column is retracting - we track this via CSS transform
             } else if (columnElapsed >= retractDuration) {
-              next[i] = false; // Fully retracted
+              next[i] = false;
             }
           });
 
           if (!anyRetracting && next.every(s => !s)) {
             setPhase('complete');
-            // Ensure minimum duration
-            const totalElapsed = performance.now() - startTimeRef.current;
-            if (totalElapsed < minDuration) {
-              setTimeout(() => onComplete(), minDuration - totalElapsed);
-            } else {
-              onComplete();
-            }
+            setRetracting(false);
+            // Total should be ~300 + 550 + 450 = 1300ms but we overlap phases
+            // Actually: drawing(300) + counting(550) + retracting(450 + 4*60 stagger) = ~1090ms
+            // Fire onComplete immediately when all retracted
+            onComplete();
             return next;
           }
 
@@ -117,7 +110,7 @@ export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPrel
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [phase, exponentialEase, counterEase, minDuration, onComplete]);
+  }, [phase, exponentialEase, counterEase, onComplete]);
 
   // Accessibility: respect prefers-reduced-motion
   useEffect(() => {
@@ -143,16 +136,17 @@ export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPrel
       role="status"
       aria-label="Loading"
       aria-live="polite"
+      style={{ pointerEvents: retracting ? 'none' : 'auto' }}
     >
       {/* 5 Vertical Curtain Columns */}
       <div className="absolute inset-0 flex" aria-hidden="true">
         {curtainStates.map((isVisible, i) => (
           <div
             key={i}
-            className="relative flex-1 bg-[var(--color-bg)] transition-transform duration-600 ease-[cubic-bezier(0.7,0,0.3,1)]"
+            className="relative flex-1 bg-[var(--color-bg)] transition-transform duration-450 ease-[cubic-bezier(0.76,0,0.24,1)]"
             style={{
               transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
-              transitionDelay: `${i * 80}ms`,
+              transitionDelay: `${i * 60}ms`,
               willChange: 'transform',
             }}
           />
@@ -184,7 +178,7 @@ export function NumericPreloader({ onComplete, minDuration = 2800 }: NumericPrel
             strokeDasharray="600"
             strokeDashoffset={`${600 * (1 - logoDrawProgress)}`}
             vectorEffect="non-scaling-stroke"
-            style={{ transition: 'stroke-dashoffset 800ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+            style={{ transition: 'stroke-dashoffset 300ms cubic-bezier(0.16, 1, 0.3, 1)' }}
           />
         </svg>
 

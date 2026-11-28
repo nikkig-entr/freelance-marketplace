@@ -267,15 +267,7 @@ export function Header() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <Link
-                to="/register"
-                className="hidden sm:inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] border border-[var(--color-white)] bg-[var(--color-white)] text-[var(--color-bg)] hover:bg-[var(--color-gray-100)] transition-colors"
-                onClick={closeMobileMenu}
-              >
-                Get Started
-              </Link>
-            )}
+            ) : null}
 
             {/* Mobile Menu Button */}
             <button

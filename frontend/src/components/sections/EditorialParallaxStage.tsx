@@ -61,19 +61,16 @@ export function EditorialParallaxStage() {
   const translateX2 = reduceMotion ? 0 : scrollProgress * 40;  // 40%
   const photo1Y = reduceMotion ? 0 : (scrollProgress - 0.5) * 120; // 60% to -60%
   const photo2Y = reduceMotion ? 0 : (scrollProgress - 0.3) * 120; // -40% to 80%
-  const headlineOpacity = reduceMotion ? 1 :
-    scrollProgress < 0.3 ? scrollProgress / 0.3 :
-    scrollProgress > 0.7 ? (1 - scrollProgress) / 0.3 : 1;
 
   return (
     <section
       ref={containerRef}
-      className="relative border-t border-[var(--color-border)] overflow-hidden"
+      className="relative border-t border-[var(--color-border)] w-full"
       data-lenis-prevent
       style={{ willChange: 'transform' }}
     >
-      {/* Parallax Container - overflow hidden for clipping */}
-      <div className="relative overflow-hidden" style={{ willChange: 'transform' }}>
+      {/* Parallax Container */}
+      <div className="relative" style={{ willChange: 'transform' }}>
         {/* BACKGROUND LAYER: B&W Photography with vertical parallax */}
         <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true" style={{ willChange: 'transform' }}>
           {/* Photo 1: arch-01 - moves up */}
@@ -139,25 +136,6 @@ export function EditorialParallaxStage() {
             </h2>
           </motion.div>
         </div>
-
-        {/* FOREGROUND LAYER: mix-blend-difference headline - inverts over photos */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none mix-blend-difference"
-          style={{ opacity: headlineOpacity, willChange: 'opacity' }}
-          animate={{ opacity: headlineOpacity }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="text-center px-4">
-            <motion.h3
-              className="font-heading font-extrabold uppercase tracking-[-0.03em] leading-[0.88] text-[var(--color-white)] text-[clamp(2.5rem,6vw,5.5rem)] select-none"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            >
-              ARCHITECTURAL TALENT
-            </motion.h3>
-          </div>
-        </motion.div>
       </div>
 
       {/* EDITORIAL MANIFESTO - Clean 12-column grid with hairlines */}
