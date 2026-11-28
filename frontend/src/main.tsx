@@ -8,8 +8,6 @@ import { AuthProvider } from './contexts/AuthContext'
 import { WebSocketProvider } from './contexts/WebSocketContext'
 import { PreloaderProvider } from './contexts/PreloaderContext'
 import { useLenis } from './hooks/useLenis'
-import { IntroPreloader } from './components/ui/IntroPreloader'
-import { CustomCursorProvider } from './components/ui/CustomCursor'
 import './styles/index.css'
 
 const queryClient = new QueryClient({
@@ -28,41 +26,37 @@ function AppRoot() {
 
   return (
     <PreloaderProvider>
-      <CustomCursorProvider enabled={true}>
-        <IntroPreloader>
-          <AuthProvider>
-            <WebSocketProvider>
-              <RouterProvider router={router} />
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: 'var(--color-bg-elevated)',
-                    color: 'var(--color-text)',
-                    boxShadow: 'var(--shadow-xl)',
-                    borderRadius: '0',
-                    padding: '1rem',
-                    border: '1px solid var(--color-border)',
-                  },
-                  success: {
-                    iconTheme: {
-                      primary: 'var(--color-white)',
-                      secondary: 'var(--color-bg)',
-                    },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: 'var(--color-white)',
-                      secondary: 'var(--color-bg)',
-                    },
-                  },
-                }}
-              />
-            </WebSocketProvider>
-          </AuthProvider>
-        </IntroPreloader>
-      </CustomCursorProvider>
+      <AuthProvider>
+        <WebSocketProvider>
+          <RouterProvider router={router} />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'var(--color-bg-elevated)',
+                color: 'var(--color-text)',
+                boxShadow: 'var(--shadow-xl)',
+                borderRadius: '0',
+                padding: '1rem',
+                border: '1px solid var(--color-border)',
+              },
+              success: {
+                iconTheme: {
+                  primary: 'var(--color-white)',
+                  secondary: 'var(--color-bg)',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: 'var(--color-white)',
+                  secondary: 'var(--color-bg)',
+                },
+              },
+            }}
+          />
+        </WebSocketProvider>
+      </AuthProvider>
     </PreloaderProvider>
   )
 }

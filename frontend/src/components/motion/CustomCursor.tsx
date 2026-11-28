@@ -63,10 +63,10 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
           <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/80 bg-white/10 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                style="width: 36px; height: 36px;"></div>
           <!-- VIEW label for media targets -->
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-mono uppercase tracking-widest text-white opacity-0 scale-50 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none whitespace-nowrap"></div>
+          <div data-cursor-media-label class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-mono uppercase tracking-widest text-white opacity-0 scale-50 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none whitespace-nowrap"></div>
         </div>
         <!-- [ LABEL ] text on [data-cursor] targets -->
-        <div class="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-white bg-[#050505]/95 border border-white/30 whitespace-nowrap opacity-0 scale-90 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none"></div>
+        <div data-cursor-label class="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-white bg-[#050505]/95 border border-white/30 whitespace-nowrap opacity-0 scale-90 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none"></div>
       `;
       document.body.appendChild(cursor);
       cursorRef.current = cursor;
@@ -75,8 +75,8 @@ export function CustomCursorProvider({ children, enabled = true }: CustomCursorP
     const cursor = cursorRef.current;
     if (!cursor) return;
     const lens = cursor.querySelector('.rounded-full') as HTMLElement;
-    const mediaLabel = cursor.querySelector('.text-\[10px\]') as HTMLElement;
-    const labelEl = cursor.querySelector('.px-3') as HTMLDivElement;
+    const mediaLabel = cursor.querySelector('[data-cursor-media-label]') as HTMLElement;
+    const labelEl = cursor.querySelector('[data-cursor-label]') as HTMLDivElement;
     labelRef.current = labelEl;
 
     let lastX = 0;
