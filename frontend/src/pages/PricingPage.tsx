@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Link } from '@tanstack/react/router';
+import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';

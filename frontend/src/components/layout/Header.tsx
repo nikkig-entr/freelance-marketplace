@@ -186,14 +186,9 @@ export function Header() {
                 align="right"
               />
             ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/login" className="hidden sm:block">
-                  <Button variant="ghost" size="sm">Sign in</Button>
-                </Link>
-                <Link to="/register">
-                  <Button variant="primary" size="sm">Get Started</Button>
-                </Link>
-              </div>
+              <Link to="/register">
+                <Button variant="primary" size="sm">Get Started</Button>
+              </Link>
             )}
 
             {/* Mobile Menu Button */}

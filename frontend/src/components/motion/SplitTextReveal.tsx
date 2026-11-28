@@ -79,7 +79,8 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
         return text.split('');
       case 'words':
         // Split by words but preserve spaces as explicit segments for proper spacing
-        return text.split(/(\s+)/).filter((s) => s.length > 0);
+        // Also treat commas as separate segments to ensure proper trailing space
+        return text.split(/(\s+|,)/).filter((s) => s.length > 0);
       case 'lines':
         return text.split('\n');
       default:
@@ -114,7 +115,10 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
     >
       {segments.map((segment, index) => {
         const isSpace = /^\s+$/.test(segment);
+        const isComma = segment === ',';
         const isLastSegment = index === segments.length - 1;
+        const nextSegment = segments[index + 1];
+        const nextIsSpace = nextSegment ? /^\s+$/.test(nextSegment) : false;
         return (
           <span
             key={index}
@@ -125,7 +129,15 @@ const SplitTextReveal = forwardRef<SplitTextRevealRef<ElementType>, SplitTextRev
               transition: `opacity ${duration}s ${ease} ${delay + index * stagger}s, transform ${duration}s ${ease} ${delay + index * stagger}s`,
               willChange: 'opacity, transform',
               whiteSpace: isSpace ? 'pre' : 'normal',
-              marginRight: splitBy === 'words' && !isSpace && !isLastSegment ? '0.28em' : 0,
+              // Word spacing: 0.28em between words, comma gets trailing space, last segment gets no margin
+              marginRight:
+                splitBy === 'words' && !isSpace && !isLastSegment
+                  ? isComma
+                    ? '0.28em' // comma gets same spacing as word
+                    : nextIsSpace
+                    ? 0 // space follows, no extra margin
+                    : '0.28em'
+                  : 0,
             }}
           >
             {isSpace ? ' ' : segment}
