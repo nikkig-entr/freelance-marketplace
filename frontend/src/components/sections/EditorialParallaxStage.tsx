@@ -16,13 +16,13 @@ export function EditorialParallaxStage() {
     offset: ['start end', 'end start'],
   });
 
-  // Horizontal transform for opposing typography bands
-  const translateX1 = useTransform(scrollY, [0, 1], ['0%', '-30%']);
-  const translateX2 = useTransform(scrollY, [0, 1], ['0%', '30%']);
+  // Horizontal transform for opposing typography bands (wider range for more dramatic effect)
+  const translateX1 = useTransform(scrollY, [0, 1], ['0%', '-40%']);
+  const translateX2 = useTransform(scrollY, [0, 1], ['0%', '40%']);
 
-  // Vertical parallax for photographs
-  const photo1Y = useTransform(scrollY, [0, 1], ['0%', '-25%']);
-  const photo2Y = useTransform(scrollY, [0, 1], ['0%', '20%']);
+  // Vertical parallax for photographs (opposing speeds)
+  const photo1Y = useTransform(scrollY, [0, 1], ['60%', '-60%']);
+  const photo2Y = useTransform(scrollY, [0, 1], ['-40%', '80%']);
 
   // Opacity fade for mix-blend-difference headline
   const headlineOpacity = useTransform(scrollY, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
@@ -55,7 +55,7 @@ export function EditorialParallaxStage() {
       <div className="relative overflow-hidden">
         {/* BACKGROUND LAYER: B&W Photography with vertical parallax */}
         <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
-          {/* Photo 1: arch-01 - moves up slower */}
+          {/* Photo 1: arch-01 - moves up */}
           <motion.div
             className="absolute left-0 top-0 w-full h-full"
             style={{ y: photo1Y }}
@@ -87,7 +87,7 @@ export function EditorialParallaxStage() {
             className="absolute left-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
             style={{ x: translateX1 }}
           >
-            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.35) select-none">
+            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none">
               SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE
             </h2>
           </motion.div>
@@ -97,7 +97,7 @@ export function EditorialParallaxStage() {
             className="absolute right-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
             style={{ x: translateX2 }}
           >
-            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.35) select-none text-right">
+            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none text-right">
               INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE
             </h2>
           </motion.div>

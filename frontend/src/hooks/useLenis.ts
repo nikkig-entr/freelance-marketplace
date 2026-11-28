@@ -15,9 +15,11 @@ export function useLenis() {
     if (prefersReducedMotion) return;
 
     const lenis = new Lenis({
-      duration: 1.4,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 2,
+      lerp: 0.072,
+      duration: 1.35,
+      smoothWheel: true,
+      syncTouch: false,
+      wheelMultiplier: 0.95,
       infinite: false,
     });
 

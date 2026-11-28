@@ -31,6 +31,7 @@ import { AIToolsPage } from './pages/AIToolsPage';
 import { ContactPage } from './pages/ContactPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
+import { PricingPage } from './pages/PricingPage';
 
 const rootRoute = createRootRoute({
   component: () => <Layout />,
@@ -208,6 +209,12 @@ const billingRoute = createRoute({
 });
 
 // Public pages
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pricing',
+  component: PricingPage,
+});
+
 const categoriesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/categories',
@@ -302,6 +309,7 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
   profileRoute,
   billingRoute,
+  pricingRoute,
   categoriesRoute,
   talentRoute,
   aiToolsRoute,

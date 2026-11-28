@@ -3,6 +3,7 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { clsx } from 'clsx';
 import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 const footerNav = [
   { name: 'PROJECTS', href: '/projects' },
@@ -31,11 +32,12 @@ export function Footer() {
           </Link>
         </div>
 
-        {/* Edge-to-edge monumental wordmark - responsive SVG with zero clipping */}
-        <div className="px-4 md:px-8 border-b border-white/15 pb-6">
+        {/* Edge-to-edge monumental wordmark with BrandLogo - responsive SVG with zero clipping */}
+        <div className="px-4 md:px-8 border-b border-white/15 pb-6 flex items-center justify-center gap-4">
+          <BrandLogo size={48} showWordmark={false} className="flex-shrink-0" />
           <svg
             viewBox="0 0 1400 150"
-            className="w-full h-auto block select-none"
+            className="w-full h-auto block select-none flex-1"
             aria-label="FREELANCEHUB"
             role="img"
           >

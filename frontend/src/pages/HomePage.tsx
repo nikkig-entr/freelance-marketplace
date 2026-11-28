@@ -5,8 +5,9 @@ import { EditorialParallaxStage } from '@/components/sections/EditorialParallaxS
 import { GeometricCompassSection } from '@/components/sections/GeometricCompassSection';
 import { SliceStripGallery } from '@/components/motion/SliceStripGallery';
 import { InteractiveIndexSection } from '@/components/sections/InteractiveIndexSection';
+import { ScrollArchitectureRail } from '@/components/motion/ScrollArchitectureRail';
 import { usePreloader } from '@/contexts/PreloaderContext';
-import { NumericPreloader } from '@/components/motion/NumericPreloader';
+import { NumericPreloader } from '@/components/ui/NumericPreloader';
 import { SmoothScrollProvider } from '@/components/motion/SmoothScrollProvider';
 
 export function HomePage() {
@@ -16,6 +17,7 @@ export function HomePage() {
   return (
     <SmoothScrollProvider>
       <NumericPreloader onComplete={() => setPreloaderComplete(true)} />
+      <ScrollArchitectureRail />
       <div className="relative min-h-screen bg-[var(--color-bg)]" data-lenis-prevent>
         {/* Section 1 — Interactive 3D Monolith Hero */}
         <HeroSection />

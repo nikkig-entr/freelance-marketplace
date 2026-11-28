@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 
 interface CompassState {
   rotation: number;
@@ -50,6 +50,11 @@ export function GeometricCompassSection() {
   const scrollDashOffset = useTransform(scrollY, [0, 1], [0, 1000]);
   const scrollScale = useTransform(scrollY, [0, 0.5, 1], [1, 1.05, 1]);
 
+  // Spring-smoothed scroll values
+  const smoothRotation = useSpring(scrollRotation, { stiffness: 80, damping: 20 });
+  const smoothDashOffset = useSpring(scrollDashOffset, { stiffness: 60, damping: 18 });
+  const smoothScale = useSpring(scrollScale, { stiffness: 100, damping: 25 });
+
   // Intersection observer
   useEffect(() => {
     const element = containerRef.current;
@@ -96,12 +101,17 @@ export function GeometricCompassSection() {
         autoRotation = timeRef.current * 0.00005;
       }
 
-      // Quadrant animation
+      // Quadrant animation - smooth orbital motion with scroll-driven separation
+      const scrollFactor = smoothRotation.get() / (Math.PI * 2); // 0 to 1
+      const quadrantSeparation = scrollFactor * 0.25; // Quadrants split apart as you scroll
+
       const newQuadrantAngles = prev.quadrantAngles.map((_angle, i) => {
         const baseAngle = (i * Math.PI) / 2;
         const orbitSpeed = 0.00008 + i * 0.00002;
-        const orbitRadius = prev.isHovered ? 0.15 : 0.08;
-        return baseAngle + Math.sin(timeRef.current * orbitSpeed) * orbitRadius;
+        const orbitRadius = prev.isHovered ? 0.18 : 0.1;
+        // Add separation offset based on scroll
+        const separationOffset = quadrantSeparation * Math.sin(baseAngle + timeRef.current * 0.0001);
+        return baseAngle + Math.sin(timeRef.current * orbitSpeed) * orbitRadius + separationOffset;
       });
 
       return {
@@ -114,7 +124,7 @@ export function GeometricCompassSection() {
     });
 
     animationRef.current = requestAnimationFrame(animate);
-  }, []);
+  }, [smoothRotation]);
 
   useEffect(() => {
     animate();
@@ -125,15 +135,15 @@ export function GeometricCompassSection() {
     };
   }, [animate]);
 
-  // Sync scroll-driven values
+  // Sync scroll-driven values (spring-smoothed)
   useEffect(() => {
     setCompassState(prev => ({
       ...prev,
-      targetRotation: scrollRotation.get(),
-      targetDashOffset: scrollDashOffset.get(),
-      targetScale: scrollScale.get(),
+      targetRotation: smoothRotation.get(),
+      targetDashOffset: smoothDashOffset.get(),
+      targetScale: smoothScale.get(),
     }));
-  }, [scrollRotation, scrollDashOffset, scrollScale]);
+  }, [smoothRotation, smoothDashOffset, smoothScale]);
 
   // Event handlers
   const handleMouseEnter = useCallback(() => {
@@ -275,7 +285,7 @@ export function GeometricCompassSection() {
                 }}
               />
 
-              {/* Outer circle - 1px stroke */}
+              {/* Outer circle - 1px stroke, scroll-driven rotation */}
               <circle
                 cx="250"
                 cy="250"
@@ -286,13 +296,12 @@ export function GeometricCompassSection() {
                 style={{
                   transform: `rotate(${compassState.rotation}rad) scale(${compassState.scale})`,
                   transformOrigin: '250px 250px',
-                  transition: 'stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
                 strokeDasharray="1476"
                 strokeDashoffset={compassState.dashOffset}
               />
 
-              {/* 4 Tangent inner circles - morphing quadrants */}
+              {/* 4 Tangent inner circles - morphing quadrants with scroll-driven separation */}
               {compassState.quadrantAngles.map((angle, i) => {
                 const radius = 180;
                 const cx = 250 + Math.cos(angle) * radius;
@@ -348,9 +357,9 @@ export function GeometricCompassSection() {
                 );
               })}
 
-              {/* Center crosshair */}
+              {/* Center crosshair - rotates opposite to outer ring */}
               <g style={{
-                transform: `rotate(${compassState.rotation}rad) scale(${compassState.scale})`,
+                transform: `rotate(${compassState.rotation * -1}rad) scale(${compassState.scale})`,
                 transformOrigin: '250px 250px',
               }}>
                 <line
@@ -403,7 +412,7 @@ export function GeometricCompassSection() {
                 />
               </g>
 
-              {/* Cardinal markers */}
+              {/* Cardinal markers - counter-rotate */}
               {['N', 'E', 'S', 'W'].map((dir, i) => {
                 const angle = (i * Math.PI) / 2 - Math.PI / 2;
                 const r = 260;
@@ -427,52 +436,45 @@ export function GeometricCompassSection() {
                 );
               })}
             </svg>
-
-            {/* Telemetry Display - 4 quadrants around compass */}
-            <div className="absolute inset-0 pointer-events-none" style={{ transform: `scale(${compassState.scale})`, transformOrigin: 'center center' }}>
-              {TELEMETRY.map((item, i) => {
-                const angle = (i * Math.PI) / 2 - Math.PI / 2;
-                const r = 340;
-                const x = 250 + Math.cos(angle) * r;
-                const y = 250 + Math.sin(angle) * r;
-
-                return (
-                  <motion.div
-                    key={item.label}
-                    className="absolute text-center pointer-events-none"
-                    style={{
-                      left: `${x}px`,
-                      top: `${y}px`,
-                      transform: `translate(-50%, -50%) rotate(${compassState.rotation * -1}rad)`,
-                      transformOrigin: 'center center',
-                    }}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 + i * 0.1 }}
-                  >
-                    <div className="font-heading font-extrabold text-white text-[clamp(1.5rem,3vw,2.5rem)] leading-[0.9] tracking-[-0.02em]">
-                      {item.label}
-                    </div>
-                    <div className="font-mono text-xs text-white/40 tracking-widest uppercase mt-1">
-                      {item.value}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
           </motion.div>
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-16 md:mt-20 text-center"
+        {/* Telemetry Display - Clean 4-column hairline grid BELOW the compass */}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-b border-white/15"
           style={{
             opacity: isVisible ? 1 : 0,
             transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
           }}
         >
-          <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1rem,1.5vw,1.25rem)] mb-6 max-w-2xl mx-auto">
-            Precision geometry guides every match. Zero friction. Zero compromise.
+          {TELEMETRY.map((item, i) => (
+            <motion.div
+              key={item.label}
+              className="relative flex flex-col items-center py-8 px-4 border-r border-white/15 last:border-0"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.3 + i * 0.08 }}
+            >
+              <div className="font-heading font-extrabold text-white text-[clamp(1.5rem,3vw,2.5rem)] leading-[0.9] tracking-[-0.02em]">
+                {item.label}
+              </div>
+              <div className="font-mono text-xs text-white/40 tracking-widest uppercase mt-2">
+                {item.value}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Precision statement - dedicated row underneath */}
+        <div className="mt-10 text-center"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s',
+          }}
+        >
+          <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1rem,1.5vw,1.25rem)] max-w-2xl mx-auto">
+            Precision geometry guides every match. Zero friction. Zero compromises.
           </p>
         </div>
       </div>

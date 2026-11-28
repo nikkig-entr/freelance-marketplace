@@ -13,8 +13,8 @@ interface Block {
   // 3D face colors for directional lighting
   faceColors: {
     top: string;
+    left: string;
     right: string;
-    front: string;
   };
   wireframeColor: string;
   telemetry: string;
@@ -55,16 +55,16 @@ export function IglooMonolithCanvas() {
   const [containerHeight, setContainerHeight] = useState(0);
   const timeRef = useRef(0);
 
-  // Generate monolith blocks - 12 distinct architectural blocks
+  // Generate monolith blocks - 52 desktop / 28 mobile architectural blocks
   const generateBlocks = useCallback((w: number, h: number, mobile: boolean) => {
     const blocks: Block[] = [];
-    const blockCount = 12; // Fixed 12 blocks for telemetry 01-12
-    const cols = 4;
-    const rows = 3;
+    const blockCount = mobile ? 28 : 52;
+    const cols = mobile ? 4 : 8;
+    const rows = mobile ? 7 : 7;
     const layers = 1;
 
-    const blockSize = Math.min(w, h) * (mobile ? 0.1 : 0.085);
-    const spacing = blockSize * 1.6;
+    const blockSize = Math.min(w, h) * (mobile ? 0.055 : 0.045);
+    const spacing = blockSize * 1.85;
     const startX = -(cols - 1) * spacing * 0.5;
     const startY = -(rows - 1) * spacing * 0.5;
     const startZ = 0;
@@ -76,8 +76,8 @@ export function IglooMonolithCanvas() {
         for (let col = 0; col < cols; col++) {
           if (blocks.length >= blockCount) break;
 
-          const x = startX + col * spacing + (Math.random() - 0.5) * spacing * 0.15;
-          const y = startY + row * spacing + (Math.random() - 0.5) * spacing * 0.15;
+          const x = startX + col * spacing + (Math.random() - 0.5) * spacing * 0.08;
+          const y = startY + row * spacing + (Math.random() - 0.5) * spacing * 0.08;
           const z = startZ + layer * spacing * 1.5;
 
           blocks.push({
@@ -87,13 +87,13 @@ export function IglooMonolithCanvas() {
             baseX: x,
             baseY: y,
             baseZ: z,
-            size: blockSize * (0.9 + Math.random() * 0.2),
+            size: blockSize * (0.92 + Math.random() * 0.16),
             faceColors: {
-              top: `rgba(42,42,42,0.95)`,     // Lit top face
-              right: `rgba(15,15,15,0.9)`,     // Shadow right face
-              front: `rgba(10,10,10,0.88)`,    // Shadow front face
+              top: '#2A2A2A',      // Lit top facet
+              left: '#171717',     // Shadow left facet
+              right: '#0B0B0B',    // Shadow right facet
             },
-            wireframeColor: 'rgba(255,255,255,0.85)',
+            wireframeColor: 'rgba(255, 255, 255, 0.88)',
             telemetry: String(telemetryCounter++).padStart(2, '0'),
             velocityX: 0,
             velocityY: 0,
@@ -136,16 +136,16 @@ export function IglooMonolithCanvas() {
     blocksRef.current = generateBlocks(newWidth, newHeight, newIsMobile);
   }, [generateBlocks]);
 
-  // Scroll handler for fragmentation
+  // Scroll handler for fragmentation (0 to window.innerHeight)
   const handleScroll = useCallback(() => {
     const camera = cameraRef.current;
     camera.scrollY = window.scrollY;
-    // Explosion factor based on scroll (0 to ~1.5)
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    camera.explosionFactor = Math.min(1.5, (camera.scrollY / maxScroll) * 3);
+    // Explosion factor based on scroll (0 to 1.5 over first viewport height)
+    const maxScroll = window.innerHeight;
+    camera.explosionFactor = Math.min(1.5, (camera.scrollY / maxScroll) * 1.5);
   }, []);
 
-  // Mouse move handler for pointer tilt
+  // Mouse move handler for pointer tilt (±16°)
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const container = containerRef.current;
     if (!container) return;
@@ -160,9 +160,9 @@ export function IglooMonolithCanvas() {
       y: e.clientY - cy,
     };
 
-    // Target rotation based on pointer position (max ±15°)
-    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.26; // ~15° in radians
-    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.26;
+    // Target rotation based on pointer position (max ±16° = ~0.279 rad)
+    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.279;
+    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.279;
   }, []);
 
   // Touch handlers - passive so scrolling is NEVER blocked
@@ -180,8 +180,8 @@ export function IglooMonolithCanvas() {
       x: touch.clientX - cx,
       y: touch.clientY - cy,
     };
-    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.26;
-    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.26;
+    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.279;
+    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.279;
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
@@ -198,8 +198,8 @@ export function IglooMonolithCanvas() {
       x: touch.clientX - cx,
       y: touch.clientY - cy,
     };
-    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.26;
-    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.26;
+    camera.targetRotX = (camera.pointer.y / (rect.height * 0.5)) * 0.279;
+    camera.targetRotY = (camera.pointer.x / (rect.width * 0.5)) * -0.279;
   }, []);
 
   const handleTouchEnd = useCallback(() => {
@@ -288,7 +288,7 @@ export function IglooMonolithCanvas() {
     ctx.scale(scale, scale);
 
     const veinCount = 3 + Math.floor(seed * 2) % 3;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
     ctx.lineWidth = 0.5 / scale;
 
     for (let i = 0; i < veinCount; i++) {
@@ -348,15 +348,17 @@ export function IglooMonolithCanvas() {
     const faceOffset = size * 0.18;
     const topY = y - half - faceOffset;
     const rightX = x + half + faceOffset;
+    const leftX = x - half - faceOffset;
 
     // Depth-based opacity
-    const depthOpacity = Math.max(0.2, Math.min(1, 1 - depth / 4000));
+    const depthOpacity = Math.max(0.15, Math.min(1, 1 - depth / 5000));
 
     // Calculate face visibility based on camera rotation
-    const showTop = camRotX > -0.3; // Show top unless looking steeply down
-    const showRight = camRotY < 0.3; // Show right unless looking from right
+    const showTop = camRotX > -0.35;
+    const showRight = camRotY < 0.35;
+    const showLeft = camRotY > -0.35;
 
-    // Draw faces (right, top, front) - back to front
+    // Draw faces (right, top, left, front) - back to front
     // Right face
     if (showRight) {
       ctx.beginPath();
@@ -365,11 +367,26 @@ export function IglooMonolithCanvas() {
       ctx.lineTo(rightX, y + half - faceOffset);
       ctx.lineTo(x + half, y + half);
       ctx.closePath();
-      ctx.fillStyle = block.faceColors.right.replace('0.9', String(0.9 * depthOpacity));
+      ctx.fillStyle = block.faceColors.right.replace('17', String(Math.round(23 * depthOpacity)));
       ctx.fill();
 
       // Veins on right face
       drawVeins(ctx, rightX - faceOffset * 0.5, y - faceOffset * 0.5, size, block.veinSeed + 1, scale);
+    }
+
+    // Left face
+    if (showLeft) {
+      ctx.beginPath();
+      ctx.moveTo(x - half, y - half);
+      ctx.lineTo(leftX, topY);
+      ctx.lineTo(leftX, y + half - faceOffset);
+      ctx.lineTo(x - half, y + half);
+      ctx.closePath();
+      ctx.fillStyle = block.faceColors.left.replace('17', String(Math.round(23 * depthOpacity)));
+      ctx.fill();
+
+      // Veins on left face
+      drawVeins(ctx, leftX + faceOffset * 0.5, y - faceOffset * 0.5, size, block.veinSeed + 2, scale);
     }
 
     // Top face
@@ -378,9 +395,9 @@ export function IglooMonolithCanvas() {
       ctx.moveTo(x - half, y - half);
       ctx.lineTo(x + half, y - half);
       ctx.lineTo(rightX, topY);
-      ctx.lineTo(x - half + faceOffset, topY);
+      ctx.lineTo(leftX, topY);
       ctx.closePath();
-      ctx.fillStyle = block.faceColors.top.replace('0.95', String(0.95 * depthOpacity));
+      ctx.fillStyle = block.faceColors.top.replace('2A', String(Math.round(42 * depthOpacity)));
       ctx.fill();
 
       // Veins on top face (more prominent)
@@ -390,15 +407,20 @@ export function IglooMonolithCanvas() {
     // Front face
     ctx.beginPath();
     ctx.rect(x - half, y - half, size, size);
-    ctx.fillStyle = block.faceColors.front.replace('0.88', String(0.88 * depthOpacity));
+    ctx.fillStyle = block.faceColors.right.replace('0B', String(Math.round(11 * depthOpacity)));
     ctx.fill();
 
-    // Wireframe edges - CRISP WHITE STROKES
+    // Wireframe edges - CRISP WHITE STROKES (1.35px base)
     const isLit = isHovered || (scale > 0.4 && depth < 2000);
     if (isLit) {
       ctx.strokeStyle = block.wireframeColor;
-      ctx.lineWidth = Math.max(1.5, 2.2 * scale);
-      ctx.globalAlpha = isHovered ? 1 : 0.7;
+      ctx.lineWidth = Math.max(1.35, 1.8 * scale);
+      ctx.globalAlpha = isHovered ? 1 : 0.85;
+      // Glowing edges for hovered blocks
+      if (isHovered) {
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 14;
+      }
     } else {
       ctx.strokeStyle = 'rgba(255,255,255,0.35)';
       ctx.lineWidth = Math.max(0.8, 1.2 * scale);
@@ -420,17 +442,28 @@ export function IglooMonolithCanvas() {
       ctx.stroke();
     }
 
+    // Left face edges
+    if (showLeft) {
+      ctx.beginPath();
+      ctx.moveTo(x - half, y - half);
+      ctx.lineTo(leftX, topY);
+      ctx.lineTo(leftX, y + half - faceOffset);
+      ctx.lineTo(x - half, y + half);
+      ctx.stroke();
+    }
+
     // Top face edges
     if (showTop) {
       ctx.beginPath();
       ctx.moveTo(x - half, y - half);
       ctx.lineTo(rightX, topY);
-      ctx.lineTo(x - half + faceOffset, topY);
+      ctx.lineTo(leftX, topY);
       ctx.lineTo(x - half, y - half);
       ctx.stroke();
     }
 
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
 
     // Volumetric light beams for hovered blocks
     if (isHovered) {
@@ -463,16 +496,16 @@ export function IglooMonolithCanvas() {
 
     timeRef.current += 16.67;
 
-    // Clear with dark background
+    // Clear with dark background - blends with #050505 page
     ctx.fillStyle = '#050505';
     ctx.fillRect(0, 0, w * dpr, h * dpr);
     ctx.scale(dpr, dpr);
 
     const camera = cameraRef.current;
 
-    // Smooth camera rotation interpolation
-    const currentRotX = camera.targetRotX * 0.1; // Dampened for subtle effect
-    const currentRotY = camera.targetRotY * 0.1;
+    // Smooth camera rotation interpolation (lerp toward target)
+    const currentRotX = camera.targetRotX * 0.15; // Dampened for subtle effect
+    const currentRotY = camera.targetRotY * 0.15;
 
     // Apply scroll-driven explosion to blocks
     const explosionFactor = camera.explosionFactor;
@@ -484,11 +517,11 @@ export function IglooMonolithCanvas() {
         const radialDist = Math.sqrt(block.baseX * block.baseX + block.baseY * block.baseY);
         const radialAngle = Math.atan2(block.baseY, block.baseX);
 
-        const explodeX = Math.cos(radialAngle) * radialDist * explosionFactor * 0.8;
-        const explodeY = Math.sin(radialAngle) * radialDist * explosionFactor * 0.8;
-        const explodeZ = Math.abs(block.baseZ) * explosionFactor * 0.5 + block.size * explosionFactor * 2;
+        const explodeX = Math.cos(radialAngle) * radialDist * explosionFactor * 1.2;
+        const explodeY = Math.sin(radialAngle) * radialDist * explosionFactor * 1.2;
+        const explodeZ = Math.abs(block.baseZ) * explosionFactor * 0.8 + block.size * explosionFactor * 3;
 
-        // Pointer repulsion
+        // Pointer repulsion with magnetic effect
         let repulseX = 0;
         let repulseY = 0;
         let repulseZ = 0;
@@ -498,21 +531,21 @@ export function IglooMonolithCanvas() {
           const dx = block.x - camera.pointer.x;
           const dy = block.y - camera.pointer.y;
           const dist2D = Math.sqrt(dx * dx + dy * dy);
-          const influenceRadius = isMobile ? 220 : 320;
+          const influenceRadius = isMobile ? 280 : 380;
 
           if (dist2D < influenceRadius) {
-            const force = (1 - dist2D / influenceRadius) * (isMobile ? 100 : 150);
+            const force = (1 - dist2D / influenceRadius) * (isMobile ? 140 : 200);
             const angle = Math.atan2(dy, dx);
             repulseX = Math.cos(angle) * force;
             repulseY = Math.sin(angle) * force;
-            repulseZ = force * 0.6;
-            isHovered = dist2D < influenceRadius * 0.35;
+            repulseZ = force * 0.8;
+            isHovered = dist2D < influenceRadius * 0.4;
           }
         }
 
         // Spring physics back to base position (with explosion offset)
-        const springK = 0.07;
-        const damping = 0.82;
+        const springK = 0.065;
+        const damping = 0.8;
 
         const targetX = block.baseX + explodeX;
         const targetY = block.baseY + explodeY;
@@ -550,14 +583,14 @@ export function IglooMonolithCanvas() {
     }
 
     // Subtle architectural grid on floor plane
-    ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.012)';
     ctx.lineWidth = 0.5;
     const gridSize = 80;
     const gridOffset = (timeRef.current * 0.008) % gridSize;
 
     for (let x = -gridOffset; x < w + gridSize; x += gridSize) {
       const perspective = 1 - Math.abs(x - cx) / (w * 0.7);
-      ctx.globalAlpha = 0.015 * Math.max(0.1, perspective);
+      ctx.globalAlpha = 0.012 * Math.max(0.1, perspective);
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x + (cx - x) * 0.15 * Math.sin(timeRef.current * 0.0004), h);
@@ -566,7 +599,7 @@ export function IglooMonolithCanvas() {
 
     for (let y = -gridOffset; y < h + gridSize; y += gridSize) {
       const perspective = 1 - Math.abs(y - cy) / (h * 0.7);
-      ctx.globalAlpha = 0.012 * Math.max(0.1, perspective);
+      ctx.globalAlpha = 0.01 * Math.max(0.1, perspective);
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(w, y + (cy - y) * 0.1 * Math.cos(timeRef.current * 0.0003));

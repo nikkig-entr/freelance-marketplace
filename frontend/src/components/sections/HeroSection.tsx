@@ -16,11 +16,9 @@ export function HeroSection() {
          4. Bottom hairline bar with copy + CTA (z-20)
        */}
 
-      {/* Layer 1: 3D Monolith Canvas - centered, ~60% viewport height */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <div className="w-full max-w-[900px] h-[60vh] min-h-[400px] max-h-[600px]">
-          <IglooMonolithCanvas />
-        </div>
+      {/* Layer 1: 3D Monolith Canvas - full bleed, blends seamlessly into #050505 */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <IglooMonolithCanvas />
       </div>
 
       {/* Layer 2: Monumental Display Typography with mix-blend-difference */}
@@ -28,7 +26,7 @@ export function HeroSection() {
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 pointer-events-none" style={{ perspective: '1000px' }}>
         <div className="text-center w-full px-4">
           {/* Line 1: ARCHITECTURAL TALENT - Bold Syne uppercase */}
-          <h1 className="font-heading font-extrabold uppercase leading-[0.88] tracking-[-0.03em] text-white text-[clamp(2.8rem,6.5vw,7.5rem)] mb-3 mix-blend-difference select-none" style={{ transform: 'translateZ(40px)' }}>
+          <h1 className="font-heading font-extrabold uppercase leading-[0.92] tracking-[-0.03em] whitespace-nowrap text-white text-[clamp(1.65rem,4.3vw,5rem)] mb-3 mix-blend-difference select-none" style={{ transform: 'translateZ(40px)' }}>
             <SplitTextReveal
               splitBy="words"
               delay={0}
@@ -43,7 +41,7 @@ export function HeroSection() {
           </h1>
 
           {/* Line 2: Curated for Excellence - Tall italic Instrument Serif */}
-          <h2 className="font-[Instrument_Serif] italic font-light leading-[0.94] tracking-[-0.015em] text-white text-[clamp(2.4rem,6vw,7rem)] mb-2 mix-blend-difference select-none" style={{ transform: 'translateZ(80px)' }}>
+          <h2 className="font-[Instrument_Serif] italic font-light leading-[0.95] text-white text-[clamp(1.85rem,4.8vw,5.6rem)] mb-2 mix-blend-difference select-none" style={{ transform: 'translateZ(80px)' }}>
             <SplitTextReveal
               splitBy="words"
               delay={0.1}
@@ -69,7 +67,7 @@ export function HeroSection() {
       <div className="relative z-20 w-full pointer-events-auto">
         <div className="border-t border-white/15 pt-6 mt-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <p className="max-w-md text-sm text-neutral-300 leading-relaxed">
-            Every professional vetted. Every project matched with precision.
+            Every professional vetted. Every project curated with precision.
           </p>
           <Link
             to="/projects"

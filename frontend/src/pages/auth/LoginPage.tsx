@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
@@ -101,7 +103,7 @@ export function LoginPage() {
               <br />
               <span>in</span>
             </h1>
-            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-body">
+            <p className="font-[Instrument_Serif] italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-body mt-6">
               Enter your credentials to access the archive
             </p>
           </div>
@@ -139,7 +141,7 @@ export function LoginPage() {
               />
             </div>
 
-            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors min-h-[56px]">
+            <Button type="submit" fullWidth size="lg" loading={isLoading} className="mt-4 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.2em] bg-white text-black hover:bg-white/90 hover:text-black transition-colors min-h-[56px]">
               Sign In
             </Button>
           </form>

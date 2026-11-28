@@ -7,6 +7,7 @@ import { Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { DualLayerTextRoll } from '@/components/motion/DualLayerTextRoll';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 const navigation = [
   { index: '01', name: 'PROJECTS', href: '/projects', roles: ['client', 'freelancer', 'admin'] },
@@ -63,11 +64,9 @@ export function Header() {
     <header className="h-16 border-b border-white/15 bg-[#050505]/90 backdrop-blur-md fixed top-0 left-0 right-0 z-40">
       <div className="container h-full">
         <div className="flex items-center justify-between h-full">
-          {/* Left: uppercase FREELANCEHUB */}
-          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="FREELANCEHUB Home">
-            <div className="w-8 h-8 bg-white rounded-none flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-black" aria-hidden="true" />
-            </div>
+          {/* Left: BrandLogo + FREELANCEHUB wordmark */}
+          <Link to="/" className="flex items-center gap-3 shrink-0" aria-label="FREELANCEHUB Home">
+            <BrandLogo size={32} />
             <span className="font-mono text-xs font-bold tracking-[0.28em] uppercase text-white">
               FREELANCEHUB
             </span>
@@ -221,10 +220,8 @@ export function Header() {
           <div className="flex flex-col h-full">
             {/* Drawer Header */}
             <div className="flex items-center justify-between h-16 px-6 border-b border-white/15">
-              <Link to="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="w-8 h-8 bg-white rounded-none flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-black" aria-hidden="true" />
-                </div>
+              <Link to="/" className="flex items-center gap-3" onClick={() => setIsMobileMenuOpen(false)}>
+                <BrandLogo size={28} />
                 <span className="font-mono text-xs font-bold tracking-[0.28em] uppercase text-white">FREELANCEHUB</span>
               </Link>
               <button

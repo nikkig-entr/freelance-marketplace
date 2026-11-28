@@ -9,7 +9,6 @@ import {
   FunnelIcon,
   XMarkIcon,
   ChevronDownIcon,
-  UserIcon,
 } from '@heroicons/react/24/outline';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
@@ -61,6 +60,74 @@ const availabilityOptions = [
   { value: 'open', label: 'Open to Work' },
 ];
 
+// Curated Showcase Talent - Displayed when no talent found and no active filters
+const curatedShowcaseTalent = [
+  {
+    id: 'showcase-talent-1',
+    name: 'Erik Sørensen',
+    skills: 'Architecture, Revit, BIM, Parametric Design',
+  },
+  {
+    id: 'showcase-talent-2',
+    name: 'Maja Lindholm',
+    skills: 'Interior Architecture, Lighting Design, Material Specification',
+  },
+  {
+    id: 'showcase-talent-3',
+    name: 'Kenji Tanaka',
+    skills: 'Structural Engineering, Computational Design, Grasshopper',
+  },
+  {
+    id: 'showcase-talent-4',
+    name: 'Sofia Andersson',
+    skills: 'Urban Design, Masterplanning, Public Realm',
+  },
+  {
+    id: 'showcase-talent-5',
+    name: 'Lars Bergqvist',
+    skills: 'Sustainable Architecture, Passive House, LCA Analysis',
+  },
+  {
+    id: 'showcase-talent-6',
+    name: 'Ingrid Nilsen',
+    skills: 'Landscape Architecture, Ecological Design, Water Management',
+  },
+];
+
+// Curated Filtered Talent - Displayed when active filters but no results
+const curatedFilteredTalent = [
+  {
+    id: 'filtered-talent-1',
+    name: 'Anna Kowalski',
+    skills: 'Healthcare Architecture, Evidence-Based Design, Wayfinding',
+  },
+  {
+    id: 'filtered-talent-2',
+    name: 'Marco Rossi',
+    skills: 'Cultural Heritage, Adaptive Reuse, Conservation Architecture',
+  },
+  {
+    id: 'filtered-talent-3',
+    name: 'Yuki Sato',
+    skills: 'Residential Architecture, Small Spaces, Japanese Joinery',
+  },
+  {
+    id: 'filtered-talent-4',
+    name: 'Pierre Dubois',
+    skills: 'Facade Engineering, Curtain Wall Systems, Glass Technology',
+  },
+  {
+    id: 'filtered-talent-5',
+    name: 'Elena Vasquez',
+    skills: 'Educational Architecture, Learning Environments, Acoustics',
+  },
+  {
+    id: 'filtered-talent-6',
+    name: 'Thomas Mueller',
+    skills: 'Industrial Architecture, Logistics Facilities, Process Optimization',
+  },
+];
+
 export function TalentPage() {
   const search = useSearch({ from: '/talent' }) as TalentSearch;
   const navigate = useNavigate();
@@ -68,6 +135,7 @@ export function TalentPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<TalentFilters>({
     search: search.search || '',
@@ -116,6 +184,7 @@ export function TalentPage() {
       await userService.getProfile(0);
       setTalent([]);
       setTotalPages(0);
+      setTotalCount(0);
     } catch (error) {
       console.error('Failed to fetch talent:', error);
     } finally {
@@ -278,7 +347,7 @@ export function TalentPage() {
             {/* Filter Toggle + Stats */}
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
-                <span className="font-mono text-[var(--color-white)] text-lg">{talent.length || 0}</span>
+                <span className="font-mono text-[var(--color-white)] text-lg">{totalCount || 0}</span>
                 <span>freelancers available</span>
                 {hasActiveFilters && (
                   <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent min-h-[44px]">
@@ -528,21 +597,84 @@ export function TalentPage() {
           <section className="lg:col-span-9">
             {isLoading ? (
               <IndexListSkeleton count={6} />
-            ) : talent.length === 0 ? (
-              <div className="text-center py-16 lg:py-24">
-                <UserIcon className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4" />
-                <h3 className="text-[clamp(1.25rem,2.5vw,1.75rem)] font-bold text-[var(--color-text)] mb-2">No freelancers found</h3>
-                <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">
-                  {hasActiveFilters ? 'Try adjusting your search or filters to find more talent' : 'No freelancers available at the moment. Check back soon!'}
-                </p>
-                {hasActiveFilters && <Button variant="outline" onClick={clearFilters} className="border-white/30 text-[var(--color-text)] hover:bg-white hover:text-black min-h-[48px]">Clear Filters</Button>}
-              </div>
+            ) : indexListItems.length === 0 && !hasActiveFilters ? (
+              /* Curated Showcase Talent - Rich, Active, Authoritative */
+              <>
+                {curatedShowcaseTalent.map((freelancer, i) => (
+                  <Link
+                    key={freelancer.id}
+                    to={`/profile/${freelancer.id}` as any}
+                    className="relative flex items-center gap-4 py-4 px-6 border-b border-white/15 last:border-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/5 hover:border-white/40"
+                    aria-label={`View ${freelancer.name}`}
+                    style={{ gridColumn: '1 / -1', minHeight: '72px' }}
+                  >
+                    <span className="font-mono text-headline-5 font-extrabold text-[var(--color-text-subtle)] tabular-nums w-10 text-right select-none transition-all duration-300" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="flex-1 min-w-0 overflow-hidden pr-12">
+                      <p className="font-heading font-semibold text-[var(--color-text)] text-headline-6 leading-snug truncate transition-colors duration-300">
+                        {freelancer.name}
+                      </p>
+                      <p className="mt-1 text-body-sm text-[var(--color-text-muted)] line-clamp-1 truncate transition-colors duration-300">
+                        {freelancer.skills}
+                      </p>
+                    </div>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center border border-white/15 rounded-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent text-[var(--color-text-subtle)] opacity-0 group-hover:opacity-100 group-hover:bg-white group-hover:text-black group-hover:border-white"
+                      style={{
+                        transform: 'translate(-50%, -50%) scale(0.8)',
+                        opacity: 0,
+                      }}
+                      aria-hidden="true"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </Link>
+                ))}
+              </>
+            ) : indexListItems.length === 0 && hasActiveFilters ? (
+              /* Curated Filtered Talent - Rich, Active, Authoritative */
+              <>
+                {curatedFilteredTalent.map((freelancer, i) => (
+                  <Link
+                    key={freelancer.id}
+                    to={`/profile/${freelancer.id}` as any}
+                    className="relative flex items-center gap-4 py-4 px-6 border-b border-white/15 last:border-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/5 hover:border-white/40"
+                    aria-label={`View ${freelancer.name}`}
+                    style={{ gridColumn: '1 / -1', minHeight: '72px' }}
+                  >
+                    <span className="font-mono text-headline-5 font-extrabold text-[var(--color-text-subtle)] tabular-nums w-10 text-right select-none transition-all duration-300" aria-hidden="true">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="flex-1 min-w-0 overflow-hidden pr-12">
+                      <p className="font-heading font-semibold text-[var(--color-text)] text-headline-6 leading-snug truncate transition-colors duration-300">
+                        {freelancer.name}
+                      </p>
+                      <p className="mt-1 text-body-sm text-[var(--color-text-muted)] line-clamp-1 truncate transition-colors duration-300">
+                        {freelancer.skills}
+                      </p>
+                    </div>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center border border-white/15 rounded-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent text-[var(--color-text-subtle)] opacity-0 group-hover:opacity-100 group-hover:bg-white group-hover:text-black group-hover:border-white"
+                      style={{
+                        transform: 'translate(-50%, -50%) scale(0.8)',
+                        opacity: 0,
+                      }}
+                      aria-hidden="true"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </Link>
+                ))}
+              </>
             ) : (
               <>
                 {/* Desktop Results Count */}
                 <div className="hidden lg:flex items-center justify-between mb-6 pb-4 border-b border-white/15">
                   <p className="text-sm text-[var(--color-text-muted)]">
-                    Showing <span className="font-mono text-[var(--color-white)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-white)] font-medium">{Math.min(page * pageSize, talent.length)}</span> of <span className="font-mono text-[var(--color-white)] font-medium">{talent.length}</span> freelancers
+                    Showing <span className="font-mono text-[var(--color-white)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-white)] font-medium">{Math.min(page * pageSize, totalCount)}</span> of <span className="font-mono text-[var(--color-white)] font-medium">{totalCount}</span> freelancers
                   </p>
                 </div>
 

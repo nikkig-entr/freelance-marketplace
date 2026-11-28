@@ -16,11 +16,11 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
 
     // Initialize Lenis with exact parameters for Awwwards-grade smooth scroll
     const lenis = new Lenis({
-      lerp: 0.08,
-      duration: 1.3,
+      lerp: 0.072,
+      duration: 1.35,
       smoothWheel: true,
       syncTouch: false, // CRITICAL: Keep native iOS/Android touch momentum 100% glitch-free
-      touchMultiplier: 2,
+      wheelMultiplier: 0.95,
       infinite: false,
     });
 

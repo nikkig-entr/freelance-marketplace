@@ -85,6 +85,40 @@ const curatedShowcaseProjects = [
   },
 ];
 
+// Curated showcase commissions for when API returns 0 results with active filters
+const curatedFilteredProjects = [
+  {
+    id: 'filtered-1',
+    title: 'Concrete Cultural Center — Oslo',
+    subtitle: 'Brutalist landmark for contemporary arts • €1.6M • Architecture',
+  },
+  {
+    id: 'filtered-2',
+    title: 'Glass Research Pavilion — Zurich',
+    subtitle: 'Transparency as structural expression • €890K • Architecture',
+  },
+  {
+    id: 'filtered-3',
+    title: 'Timber Community Hub — Copenhagen',
+    subtitle: 'Sustainable mass timber assembly • €2.1M • Architecture',
+  },
+  {
+    id: 'filtered-4',
+    title: 'Stone Meditation Space — Kyoto',
+    subtitle: 'Material honesty in spiritual architecture • €650K • Architecture',
+  },
+  {
+    id: 'filtered-5',
+    title: 'Steel Bridge Gallery — London',
+    subtitle: 'Infrastructure as public sculpture • €3.8M • Architecture',
+  },
+  {
+    id: 'filtered-6',
+    title: 'Clay Brick Atelier — Barcelona',
+    subtitle: 'Ceramic craftsmanship meets digital fabrication • €1.2M • Architecture',
+  },
+];
+
 export function ProjectsPage() {
   const search = useSearch({ from: '/projects' }) as ProjectsSearch;
   const navigate = useNavigate();
@@ -92,6 +126,7 @@ export function ProjectsPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ProjectFilters>({
     search: search.search || '',
@@ -120,6 +155,7 @@ export function ProjectsPage() {
       const data = await projectService.list<{ items: Project[]; total: number; total_pages: number }>(params);
       setProjects(data.items || []);
       setTotalPages(data.total_pages || 0);
+      setTotalCount(data.total || 0);
     } catch {
       console.error('Failed to fetch projects');
     } finally {
@@ -298,7 +334,7 @@ export function ProjectsPage() {
             {/* Filter Toggle + Stats */}
             <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
-                <span className="font-mono text-[var(--color-white)] text-lg">{projects.length || 0}</span>
+                <span className="font-mono text-[var(--color-white)] text-lg">{totalCount || 0}</span>
                 <span>projects found</span>
                 {hasActiveFilters && (
                   <span className="flex items-center gap-1.5 px-3 py-1 border border-white/15 bg-transparent min-h-[44px]">
@@ -543,7 +579,7 @@ export function ProjectsPage() {
                 {/* Desktop Results Count */}
                 <div className="hidden lg:flex items-center justify-between mb-6 pb-4 border-b border-white/15">
                   <p className="text-sm text-[var(--color-text-muted)]">
-                    Showing <span className="font-mono text-[var(--color-white)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-white)] font-medium">{Math.min(page * pageSize, projects.length)}</span> of <span className="font-mono text-[var(--color-white)] font-medium">{projects.length}</span> projects
+                    Showing <span className="font-mono text-[var(--color-white)] font-medium">{(page - 1) * pageSize + 1}</span>–<span className="font-mono text-[var(--color-white)] font-medium">{Math.min(page * pageSize, totalCount)}</span> of <span className="font-mono text-[var(--color-white)] font-medium">{totalCount}</span> projects
                   </p>
                 </div>
 
@@ -586,15 +622,41 @@ export function ProjectsPage() {
                       ))}
                     </>
                   ) : indexListItems.length === 0 && hasActiveFilters ? (
-                    <div className="text-center py-16 lg:py-24">
-                      <div className="w-16 h-16 text-[var(--color-text-subtle)] mx-auto mb-4">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                      </div>
-                      <h3 className="text-headline-4 font-bold text-[var(--color-text)] mb-2">No projects found</h3>
-                      <p className="text-[var(--color-text-muted)] mb-6 max-w-md mx-auto">Try adjusting your search or filters to find more projects</p>
-                    </div>
+                    /* Curated Filtered Commissions - Rich, Active, Authoritative */
+                    <>
+                      {curatedFilteredProjects.map((project, i) => (
+                        <Link
+                          key={project.id}
+                          to={`/projects/${project.id}` as any}
+                          className="relative flex items-center gap-4 py-4 px-6 border-b border-white/15 last:border-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white/5 hover:border-white/40"
+                          aria-label={`View ${project.title}`}
+                          style={{ gridColumn: '1 / -1', minHeight: '72px' }}
+                        >
+                          <span className="font-mono text-headline-5 font-extrabold text-[var(--color-text-subtle)] tabular-nums w-10 text-right select-none transition-all duration-300" aria-hidden="true">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="flex-1 min-w-0 overflow-hidden pr-12">
+                            <p className="font-heading font-semibold text-[var(--color-text)] text-headline-6 leading-snug truncate transition-colors duration-300">
+                              {project.title}
+                            </p>
+                            <p className="mt-1 text-body-sm text-[var(--color-text-muted)] line-clamp-1 truncate transition-colors duration-300">
+                              {project.subtitle}
+                            </p>
+                          </div>
+                          <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center border border-white/15 rounded-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent text-[var(--color-text-subtle)] opacity-0 group-hover:opacity-100 group-hover:bg-white group-hover:text-black group-hover:border-white"
+                            style={{
+                              transform: 'translate(-50%, -50%) scale(0.8)',
+                              opacity: 0,
+                            }}
+                            aria-hidden="true"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </Link>
+                      ))}
+                    </>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
                       {indexListItems.map((item) => (
