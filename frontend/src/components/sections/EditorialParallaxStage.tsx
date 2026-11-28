@@ -1,33 +1,34 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Link } from '@tanstack/react-router';
 import { CinemaMedia } from '@/components/ui/CinemaMedia';
-import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
-import { useLenis } from '@/hooks/useLenis';
 
 export function EditorialParallaxStage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis();
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [reduceMotion, setReduceMotion] = useState(false);
 
-  // Scroll progress from Lenis
-  useEffect(() => {
-    if (!lenis) return;
+  // Framer Motion scroll for hollow display bands
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
 
-    const handleScroll = () => {
-      const progress = lenis.limit > 0 ? lenis.scroll / lenis.limit : 0;
-      setScrollProgress(Math.max(0, Math.min(1, progress)));
-    };
+  // Spring-smoothed scroll progress for anti-jitter
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 140,
+    damping: 28,
+    mass: 0.25,
+  });
 
-    lenis.on('scroll', handleScroll);
-    handleScroll();
+  // Horizontal transform for hollow display bands
+  const band1X = useTransform(smoothProgress, [0, 1], ['0%', '-100%']);
+  const band2X = useTransform(smoothProgress, [0, 1], ['100%', '0%']);
 
-    return () => lenis.off('scroll', handleScroll);
-  }, [lenis]);
+  // Vertical parallax for photography (opposing directions)
+  const photo1Y = useTransform(smoothProgress, [0, 1], [-45, 45]);
+  const photo2Y = useTransform(smoothProgress, [0, 1], [55, -55]);
 
   // Intersection observer for entrance animation
   useEffect(() => {
@@ -47,197 +48,128 @@ export function EditorialParallaxStage() {
     return () => observer.disconnect();
   }, []);
 
-  // Reduced motion
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduceMotion(mediaQuery.matches);
-    const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  // Calculate transforms based on scroll progress
-  const translateX1 = reduceMotion ? 0 : scrollProgress * -40; // -40%
-  const translateX2 = reduceMotion ? 0 : scrollProgress * 40;  // 40%
-  const photo1Y = reduceMotion ? 0 : (scrollProgress - 0.5) * 120; // 60% to -60%
-  const photo2Y = reduceMotion ? 0 : (scrollProgress - 0.3) * 120; // -40% to 80%
+  
+  const hollowStyle = {
+    fontFamily: "'Syne', 'Unbounded', sans-serif",
+    fontWeight: 800,
+    textTransform: 'uppercase' as const,
+    fontSize: 'clamp(2.2rem, 6vw, 6.2rem)',
+    lineHeight: 1,
+    whiteSpace: 'nowrap' as const,
+    WebkitTextStroke: '1px rgba(255,255,255,0.45)',
+    color: 'transparent',
+  };
 
   return (
     <section
       ref={containerRef}
-      className="relative border-t border-[var(--color-border)] w-full"
+      className="relative w-full bg-[#050505] border-t border-b border-white/15 overflow-hidden"
       data-lenis-prevent
       style={{ willChange: 'transform' }}
     >
-      {/* Parallax Container */}
-      <div className="relative" style={{ willChange: 'transform' }}>
-        {/* BACKGROUND LAYER: B&W Photography with vertical parallax */}
-        <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true" style={{ willChange: 'transform' }}>
-          {/* Photo 1: arch-01 - moves up */}
-          <motion.div
-            className="absolute left-0 top-0 w-full h-full"
-            style={{
-              y: `${photo1Y}%`,
-              transform: `translateY(${photo1Y}%)`,
-              willChange: 'transform',
-            }}
-          >
-            <CinemaMedia
-              src="/media/arch-01.jpg"
-              aspectRatio={16 / 9}
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
+      {/* OPPOSING HORIZONTAL HOLLOW DISPLAY BANDS */}
+      <div className="py-8 md:py-12 border-b border-white/15 overflow-hidden select-none" aria-hidden="true">
+        {/* Band 1: Left to Right */}
+        <motion.div
+          className="flex items-center gap-4 whitespace-nowrap will-change-transform"
+          style={{ x: band1X }}
+          aria-hidden="true"
+        >
+          <span style={hollowStyle}>SELECTED ARCHIVE • INDEPENDENT PRACTICE • SELECTED ARCHIVE •</span>
+          <span style={hollowStyle}>SELECTED ARCHIVE • INDEPENDENT PRACTICE • SELECTED ARCHIVE •</span>
+        </motion.div>
 
-          {/* Photo 2: arch-02 - moves down */}
-          <motion.div
-            className="absolute left-0 top-0 w-full h-full"
-            style={{
-              y: `${photo2Y}%`,
-              transform: `translateY(${photo2Y}%)`,
-              willChange: 'transform',
-            }}
-          >
-            <CinemaMedia
-              src="/media/arch-02.jpg"
-              aspectRatio={16 / 9}
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-        </div>
-
-        {/* MIDDLE LAYER: Hollow display typography bands - opposing horizontal scroll */}
-        <div className="relative h-[60vh] min-h-[400px] max-h-[550px] flex items-center justify-center overflow-hidden pointer-events-none" style={{ willChange: 'transform' }}>
-          {/* Band 1: SELECTED ARCHIVE - hollow, moves left */}
-          <motion.div
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
-            style={{
-              x: `${translateX1}%`,
-              transform: `translateX(${translateX1}%)`,
-              willChange: 'transform',
-            }}
-          >
-            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none">
-              SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE&nbsp;&nbsp;SELECTED ARCHIVE
-            </h2>
-          </motion.div>
-
-          {/* Band 2: INDEPENDENT PRACTICE - hollow, moves right */}
-          <motion.div
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-max whitespace-nowrap"
-            style={{
-              x: `${translateX2}%`,
-              transform: `translateX(${translateX2}%)`,
-              willChange: 'transform',
-            }}
-          >
-            <h2 className="font-heading font-extrabold uppercase tracking-[-0.02em] leading-[0.85] text-[clamp(4rem,12vw,14rem)] text-transparent -webkit-text-stroke-[1px]_rgba(255,255,255,0.45) select-none text-right">
-              INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE&nbsp;&nbsp;INDEPENDENT PRACTICE
-            </h2>
-          </motion.div>
-        </div>
+        {/* Band 2: Right to Left (opposing) */}
+        <motion.div
+          className="flex items-center gap-4 whitespace-nowrap will-change-transform mt-2"
+          style={{ x: band2X }}
+          aria-hidden="true"
+        >
+          <span style={hollowStyle}>SYSTEMS • SPATIAL • WEBGL • DIRECTION • SYSTEMS • SPATIAL •</span>
+          <span style={hollowStyle}>SYSTEMS • SPATIAL • WEBGL • DIRECTION • SYSTEMS • SPATIAL •</span>
+        </motion.div>
       </div>
 
-      {/* EDITORIAL MANIFESTO - Clean 12-column grid with hairlines */}
-      <div className="container relative z-10 border-b border-[var(--color-border)]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 py-16 md:py-20">
-          {/* Left Column - Editorial Manifesto (span 5) */}
-          <div className="lg:col-span-5 pt-4 lg:pt-8">
-            <div
-              className="mb-8 lg:mb-12"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-              }}
-            >
-              <span className="font-mono text-xs text-[var(--color-text-subtle)] tracking-wider uppercase block mb-4">
-                [ 01 / PRACTICE ]
-              </span>
-              <SplitTextReveal
-                splitBy="lines"
-                delay={0.2}
-                stagger={0.1}
-                duration={1}
-                ease={[0.16, 1, 0.3, 1] as const}
-                as="h3"
-                className="font-editorial italic font-light text-[var(--color-text-muted)] leading-[0.95] text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
-              >
-                We believe the future
-                <br />
-                of architectural practice
-                <br />
-                is a partnership
-              </SplitTextReveal>
-            </div>
-
-            <p
-              className="font-editorial italic font-light text-[var(--color-text-muted)] leading-relaxed tracking-[0.01em] text-[clamp(1.125rem,2vw,1.5rem)] mb-12 max-w-none"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s',
-              }}
-            >
-              Every project posted, every proposal sent, every milestone reached is a step toward a world where talent finds its match without friction, where clients find craft without compromise, and where the best work rises on merit alone.
+      {/* ASYMMETRICAL 12-COLUMN SWISS GRID WITH mix-blend-difference */}
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        {/* LEFT EDITORIAL MANIFESTO COLUMN */}
+        <div className="lg:col-span-5 p-6 md:p-12 lg:border-r border-white/15 flex flex-col justify-between">
+          <div
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+          >
+            <span className="font-mono text-xs text-white/40 tracking-wider uppercase block mb-6">
+              [ 01 / PRACTICE ]
+            </span>
+            <p className="font-sans text-white/70 leading-relaxed tracking-[0.01em] text-[clamp(1rem,1.5vw,1.25rem)] max-w-none">
+              We connect visionary founders and architectural studios with vetted independent directors, spatial designers, and creative technologists.
             </p>
-
-            {/* Architectural hairline divider */}
-            <div
-              className="w-16 h-px bg-[var(--color-text-subtle)] mb-6"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
-              }}
-            />
-            <Link
-              to="/projects"
-              className="inline-flex items-center justify-center gap-2 border border-[var(--color-white)] px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-[var(--color-text)] hover:bg-[var(--color-white)] hover:text-[var(--color-bg)] transition-all duration-300 min-h-[48px] w-full sm:w-auto"
-              style={{
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s',
-              }}
-            >
-              VIEW ROSTER
-            </Link>
           </div>
 
-          {/* Right Column - Cinema Frame (span 7) */}
-          <div
-            className="lg:col-span-7 relative"
-            data-cursor="PLAY REEL"
+          <Link
+            to="/talent"
+            className="inline-flex items-center justify-center gap-2 border border-white px-5 py-3 font-mono text-xs uppercase tracking-[0.2em] text-white hover:bg-white hover:text-black transition-all duration-300 min-h-[48px] w-full sm:w-auto"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
+            }}
+          >
+            VIEW ROSTER →
+          </Link>
+        </div>
+
+        {/* RIGHT VISUAL PARALLAX STAGE */}
+        <div className="lg:col-span-7 relative min-h-[480px] md:min-h-[620px] p-6 md:p-12 overflow-hidden flex items-center justify-center">
+          {/* Photo 1: Top-left, moves up then down */}
+          <div className="absolute top-6 left-6 md:top-12 md:left-12 w-[45%] md:w-[40%] aspect-[4/3] overflow-hidden" aria-hidden="true">
+            <motion.div
+              className="w-full h-full"
+              style={{
+                y: photo1Y,
+                willChange: 'transform',
+              }}
+            >
+              <CinemaMedia
+                src="/media/arch-01.jpg"
+                aspectRatio={4 / 3}
+                className="w-full h-full object-cover"
+                              />
+            </motion.div>
+          </div>
+
+          {/* Photo 2: Bottom-right, moves down then up */}
+          <div className="absolute bottom-6 right-6 md:bottom-12 md:right-12 w-[45%] md:w-[40%] aspect-[4/3] overflow-hidden" aria-hidden="true">
+            <motion.div
+              className="w-full h-full"
+              style={{
+                y: photo2Y,
+                willChange: 'transform',
+              }}
+            >
+              <CinemaMedia
+                src="/media/arch-02.jpg"
+                aspectRatio={4 / 3}
+                className="w-full h-full object-cover"
+                              />
+            </motion.div>
+          </div>
+
+          {/* mix-blend-difference Oversized Display Serif Statement */}
+          <motion.p
+            className="mix-blend-difference text-white pointer-events-none z-10 font-editorial italic font-light leading-[0.85] text-[clamp(3rem,8vw,7rem)] whitespace-nowrap"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-              transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s',
+              transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s',
             }}
+            aria-hidden="true"
           >
-            <div className="aspect-[16/10] w-full overflow-hidden">
-              <CinemaMedia
-                src="/media/arch-03.jpg"
-                aspectRatio={16 / 10}
-                className="w-full h-full object-cover rounded-none"
-              />
-            </div>
-
-            {/* Precision grid hairlines overlay */}
-            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-              {/* Vertical hairlines */}
-              <div className="absolute inset-0 flex justify-between px-4">
-                {[...Array(11)].map((_, i) => (
-                  <div key={i} className="w-px h-full bg-white/5" style={{ left: `${(i + 1) / 12 * 100}%` }} />
-                ))}
-              </div>
-              {/* Horizontal hairlines */}
-              <div className="absolute inset-0 flex flex-col justify-between py-4">
-                {[...Array(7)].map((_, i) => (
-                  <div key={i} className="h-px w-full bg-white/5" style={{ top: `${(i + 1) / 8 * 100}%` }} />
-                ))}
-              </div>
-            </div>
-          </div>
+            Form follows precision.
+          </motion.p>
         </div>
       </div>
     </section>
